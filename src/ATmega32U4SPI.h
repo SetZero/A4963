@@ -5,7 +5,7 @@
 #pragma once
 #include <cassert>
 #include <iostream>
-#include "libusb.h"
+#include <libusb.h>
 #include "SPIBridge.h"
 
 class ATmega32u4SPI : public spi::SPIBridge {
