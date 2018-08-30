@@ -3,10 +3,10 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "SPIBridge.h"
-#include "inc/mcp2210_api.h"
-#include "mcp2210_hal.h"
-#include "25LC256.h"
+#include "src/SPIBridge.h"
+#include "mcp2210_api.h"
+#include "src/mcp2210_hal.h"
+#include "src/25LC256.h"
 
 int main(int argc, char **argv) {
     int ictr;

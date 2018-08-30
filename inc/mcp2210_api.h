@@ -18,6 +18,12 @@ LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN ANY WAY RELATED TO THIS
 SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY 
 TO MICROCHIP FOR THIS SOFTWARE. 
 */
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
@@ -161,3 +167,7 @@ void print_report_buffer(unsigned char *bufdata, int len, int rowlen);
 #define cDEV_PIN_GPIO                 			0x00
 #define cDEV_PIN_ALTFUNC_1            			0x01 /* chip select */
 #define cDEV_PIN_ALTFUNC_2            			0x02 /* leds, other */
+
+#ifdef __cplusplus
+}
+#endif

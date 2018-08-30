@@ -1,4 +1,3 @@
-#include "inc/mcp2210_api.h"
 #include "mcp2210_hal.h"
 
 MCP2210::MCP2210(std::string device) {
@@ -25,6 +24,12 @@ unsigned char MCP2210::transfer(unsigned char input) {
 }
 
 std::vector<unsigned char> MCP2210::transfer(std::vector<unsigned char>& input) {
+    if(input.size() > sizeof(txdata) / sizeof(int)) {
+        std::cout   << "Can't transfer this much data, maximum allowed: " << sizeof(txdata) / sizeof(int)
+                    << ", sent: " << input.size() << std::endl;
+        return std::vector<unsigned char>();
+    }
+
     std::copy(input.begin(), input.end(), txdata);
 
     int out = spi_data_xfer(fd, txdata, rxdata, input.size(),

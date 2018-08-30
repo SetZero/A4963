@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "mcp2210_api.h"
 #include "SPIBridge.h"
 
 class MCP2210 : public spi::SPIBridge{
