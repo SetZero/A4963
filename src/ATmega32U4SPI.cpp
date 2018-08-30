@@ -5,8 +5,8 @@
 #include "ATmega32U4SPI.h"
 
 ATmega32u4SPI::ATmega32u4SPI() {
-    libusb_context *context = NULL;
-    libusb_device **list = NULL;
+    libusb_context *context = nullptr;
+    libusb_device **list = nullptr;
     int rc = 0;
     ssize_t count = 0;
 
@@ -26,7 +26,7 @@ ATmega32u4SPI::ATmega32u4SPI() {
         std::cout << "Vendor:Device = " << std::hex << desc.idVendor << ":" << std::hex << desc.idProduct << std::endl;
     }
 
-    libusb_free_device_list(list, count);
+    libusb_free_device_list(list, static_cast<int>(count));
     libusb_exit(context);
 }
 

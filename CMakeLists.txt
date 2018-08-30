@@ -11,6 +11,10 @@ find_path(LIBUSB_INCLUDE_DIR
         NAMES libusb.h
         PATH_SUFFIXES "include" "libusb" "libusb-1.0")
 
+if(NOT LIBUSB_LIBRARY AND LIBUSB_INCLUDE_DIR)
+    message(FATAL_ERROR  "LibUSB Libary not found!")
+endif(NOT LIBUSB_LIBRARY AND LIBUSB_INCLUDE_DIR)
+
 add_executable(hid main.cpp)
 
 ## Include Directories
