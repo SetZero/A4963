@@ -26,11 +26,11 @@ namespace spi {
 
     class SPIBridge {
     public:
-        virtual ~SPIBridge() {}
+        virtual ~SPIBridge() = default;
         virtual unsigned char transfer(unsigned char input) = 0;
         virtual std::vector<unsigned char> transfer(std::vector<unsigned char>& input) = 0;
-        virtual void setGPIODirection(const gpioDirection& direction, const GPIOPins pin) = 0;
-        virtual void writeGPIO(const gpioState& state, const GPIOPins pin) = 0;
+        virtual void setGPIODirection(const gpioDirection& direction, GPIOPins pin) = 0;
+        virtual void writeGPIO(const gpioState& state, GPIOPins pin) = 0;
         virtual void slaveSelect() = 0;
         virtual void slaveDeselect() = 0;
     };

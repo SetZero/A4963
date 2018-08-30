@@ -18,7 +18,7 @@ private:
     
     std::unique_ptr<spi::SPIBridge> mBridge;
 public:
-    EEPROM(std::unique_ptr<spi::SPIBridge>& bridge);
+    explicit EEPROM(std::unique_ptr<spi::SPIBridge>& bridge);
     void send16BitAddress(uint16_t address);
     uint8_t readStatus();
 };

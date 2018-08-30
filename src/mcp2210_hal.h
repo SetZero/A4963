@@ -22,12 +22,12 @@ private:
         static const int data2csdly		    = 0;
     };
 public:
-    MCP2210(std::string device);
-    ~MCP2210();
-    virtual unsigned char transfer(unsigned char input);
-    virtual std::vector<unsigned char> transfer(std::vector<unsigned char>& input);
-    virtual void setGPIODirection(const spi::gpioDirection& direction, const spi::GPIOPins pin);
-    virtual void writeGPIO(const spi::gpioState& state, const spi::GPIOPins pin);
-    virtual void slaveSelect();
-    virtual void slaveDeselect();
+    explicit MCP2210(std::string device);
+    ~MCP2210() override;
+    unsigned char transfer(unsigned char input) override;
+    std::vector<unsigned char> transfer(std::vector<unsigned char>& input) override;
+    void setGPIODirection(const spi::gpioDirection& direction, spi::GPIOPins pin) override;
+    void writeGPIO(const spi::gpioState& state, spi::GPIOPins pin) override;
+    void slaveSelect() override;
+    void slaveDeselect() override;
 };

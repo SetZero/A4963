@@ -7,6 +7,7 @@
 #include "mcp2210_api.h"
 #include "src/mcp2210_hal.h"
 #include "src/25LC256.h"
+#include "ATmega32U4SPI.h"
 
 int main(int argc, char **argv) {
     int ictr;
@@ -30,6 +31,8 @@ int main(int argc, char **argv) {
 
         //std::vector<unsigned char> txVector = {0x01, 0x02, 0x03};
         //std::vector<unsigned char> rxVector = (*bridge).transfer(txVector);
+    } else {
+        ATmega32u4SPI spi;
     }
 }
 
