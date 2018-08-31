@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <memory>
 #include "mcp2210_api.h"
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
@@ -9,7 +10,8 @@
 class MCP2210 final : public spi::SPIBridge, public gpio::GPIOBridge{
 private:
     static constexpr int SPI_BUF_LEN = 1024;
-    unsigned char txdata[SPI_BUF_LEN], rxdata[SPI_BUF_LEN];
+    inline static auto txdata = std::unique_ptr<unsigned char[]>(new unsigned char[SPI_BUF_LEN]);
+    inline static auto rxdata = std::unique_ptr<unsigned char[]>(new unsigned char[SPI_BUF_LEN]);
     int fd;
 
     enum class spiMode : uint16_t{
@@ -20,7 +22,7 @@ private:
     };
 
     enum class spiSettings : uint16_t {
-        mode                = static_cast<uint16_t >(spiMode::mode0),
+        mode                = static_cast<uint16_t>(spiMode::mode0),
         speed			    = 20000,  //bits per second
         actcsval		    = 0xFFEF, //active chip select value
         idlecsval		    = 0xFFFF, //idle chip select value
@@ -32,7 +34,7 @@ private:
 
 public:
 
-    gpio::GPIOPin
+    static constexpr gpio::GPIOPin
     pin0 = gpio::GPIOPin(1<<0), pin1 = gpio::GPIOPin(1<<1), pin2 = gpio::GPIOPin(1<<2), pin3 = gpio::GPIOPin(1<<3),
     pin4 = gpio::GPIOPin(1<<4), pin5 = gpio::GPIOPin(1<<6), pin6 = gpio::GPIOPin(1<<6), pin7 = gpio::GPIOPin(1<<7);
 

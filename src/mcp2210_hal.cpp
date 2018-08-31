@@ -13,14 +13,12 @@ MCP2210::MCP2210(std::string device) {
 }
 
 MCP2210::~MCP2210() {
-    close_device(fd);    
-    //delete[] txdata; 
-    //delete[] rxdata;
+    close_device(fd);
 }
 
 unsigned char MCP2210::transfer(unsigned char input) {
     txdata[0] = input;
-    int out = spi_data_xfer(fd, txdata, rxdata, 1,
+    int out = spi_data_xfer(fd, txdata.get(), rxdata.get(), 1,
             static_cast<uint16_t >(spiSettings::mode), static_cast<uint16_t >(spiSettings::speed), static_cast<uint16_t >(spiSettings::actcsval),
             static_cast<uint16_t >(spiSettings::idlecsval), static_cast<uint16_t >(spiSettings::gpcsmask), static_cast<uint16_t >(spiSettings::cs2datadly),
             static_cast<uint16_t >(spiSettings::data2datadly), static_cast<uint16_t >(spiSettings::data2csdly));
@@ -47,17 +45,17 @@ std::vector<unsigned char> MCP2210::transfer(unsigned char f, values... val) {
 
 void MCP2210::writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin pin) {
     if(state == gpio::gpioState::off) {
-        gpio_write(fd, ~((int)pin), (int)pin);
+        gpio_write(fd, ~pin, pin);
     } else {
-        gpio_write(fd, (int)pin, (int)pin);
+        gpio_write(fd, pin, pin);
     }
 }
 
 void MCP2210::setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin pin) {
     if(direction == gpio::gpioDirection::in) {
-        gpio_direction(fd, 0x01FF, (int)pin);
+        gpio_direction(fd, 0x01FF, pin);
     } else if(direction == gpio::gpioDirection::out) {
-        gpio_direction(fd, 0x0000, (int)pin);
+        gpio_direction(fd, 0x0000, pin);
     }
 }
 

@@ -22,7 +22,7 @@ namespace gpio {
 
         constexpr explicit GPIOPin(int value) : value{value} {}
 
-        constexpr explicit operator int() const { return value; }
+        constexpr operator int() const { return value; }
     };
 
     class GPIOBridge {
