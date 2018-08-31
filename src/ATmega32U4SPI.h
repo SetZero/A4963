@@ -15,8 +15,8 @@ public:
 private:
     unsigned char transfer(unsigned char input) override;
     std::vector<unsigned char> transfer(std::vector<unsigned char>& input) override;
-    void setGPIODirection(const spi::gpioDirection& direction, spi::GPIOPins pin) override;
-    void writeGPIO(const spi::gpioState& state, spi::GPIOPins pin) override;
+    void setGPIODirection(const spi::gpioDirection& direction, spi::GPIOPin pin) override;
+    void writeGPIO(const spi::gpioState& state, spi::GPIOPin pin) override;
     void slaveSelect() override;
     void slaveDeselect() override;
 };

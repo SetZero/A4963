@@ -1,10 +1,20 @@
 #include "mcp2210_hal.h"
 
+
 MCP2210::MCP2210(std::string device) {
-    fd = open_device(device.c_str());  
+    gpiopins = std::vector<spi::GPIOPin>(8);
+    gpiopins.push_back(spi::GPIOPin(1<<0));
+    gpiopins.push_back(spi::GPIOPin(1<<1));
+    gpiopins.push_back(spi::GPIOPin(1<<2));
+    gpiopins.push_back(spi::GPIOPin(1<<3));
+    gpiopins.push_back(spi::GPIOPin(1<<4));
+    gpiopins.push_back(spi::GPIOPin(1<<5));
+    gpiopins.push_back(spi::GPIOPin(1<<6));
+    gpiopins.push_back(spi::GPIOPin(1<<7));
+    fd = open_device(device.c_str());
     if(fd <= 0)
-        std::cout << "Error with device: " << fd << std::endl;  
-    else 
+        std::cout << "Error with device: " << fd << std::endl;
+    else
         std::cout << "Device successfully opened" << std::endl;
 }
 
@@ -44,7 +54,7 @@ std::vector<unsigned char> MCP2210::transfer(std::vector<unsigned char>& input) 
     }
 }
 
-void MCP2210::writeGPIO(const spi::gpioState& state, const spi::GPIOPins pin) {
+void MCP2210::writeGPIO(const spi::gpioState& state, const spi::GPIOPin pin) {
     if(state == spi::gpioState::off) {
         gpio_write(fd, ~pin, pin);
     } else {
@@ -52,7 +62,7 @@ void MCP2210::writeGPIO(const spi::gpioState& state, const spi::GPIOPins pin) {
     }
 }
 
-void MCP2210::setGPIODirection(const spi::gpioDirection& direction, const spi::GPIOPins pin) {
+void MCP2210::setGPIODirection(const spi::gpioDirection& direction, const spi::GPIOPin pin) {
     if(direction == spi::gpioDirection::in) {
         gpio_direction(fd, 0x01FF, pin);
     } else if(direction == spi::gpioDirection::out) {
@@ -67,4 +77,8 @@ void MCP2210::slaveSelect() {
 
 void MCP2210::slaveDeselect() {
     writeGPIO(spi::gpioState::on, spi::pin0);
+}
+
+std::vector<spi::GPIOPin> MCP2210::pins() const {
+    return std::vector<spi::GPIOPin>(8);
 }

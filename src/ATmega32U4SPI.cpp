@@ -38,11 +38,11 @@ std::vector<unsigned char> ATmega32u4SPI::transfer(std::vector<unsigned char> &i
     return std::vector<unsigned char>();
 }
 
-void ATmega32u4SPI::setGPIODirection(const spi::gpioDirection &direction, const spi::GPIOPins pin) {
+void ATmega32u4SPI::setGPIODirection(const spi::gpioDirection &direction, const spi::GPIOPin pin) {
 
 }
 
-void ATmega32u4SPI::writeGPIO(const spi::gpioState &state, const spi::GPIOPins pin) {
+void ATmega32u4SPI::writeGPIO(const spi::gpioState &state, const spi::GPIOPin pin) {
 
 }
 
