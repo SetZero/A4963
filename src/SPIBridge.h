@@ -34,7 +34,7 @@ namespace spi {
     class SPIBridge {
     public:
         virtual ~SPIBridge() = default;
-        virtual SPIData& transfer(const SPIData& spiData) const = 0;
+        virtual SPIData transfer(const SPIData& spiData) const = 0;
         virtual void slaveRegister(const SPIDevice& device, const gpio::GPIOPin& pin) = 0;
         virtual void slaveSelect(const SPIDevice& slave) = 0;
         virtual void slaveDeselect(const SPIDevice& slave) = 0;

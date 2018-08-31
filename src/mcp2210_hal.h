@@ -40,10 +40,7 @@ public:
 
     explicit MCP2210(std::string device);
     ~MCP2210() override;
-    unsigned char transfer(unsigned char input) override;
-    std::vector<unsigned char> transfer(const std::vector<unsigned char>& input) override;
-    template<unsigned char first, typename... values>
-    std::vector<unsigned char> transfer(unsigned char f, values...);
+    spi::SPIData transfer(const spi::SPIData& input) const override;
     void setGPIODirection(const gpio::gpioDirection& direction, gpio::GPIOPin pin) override;
     void writeGPIO(const gpio::gpioState& state, gpio::GPIOPin pin) override;
     void slaveSelect(const gpio::GPIOPin& slave) override;
