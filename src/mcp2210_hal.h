@@ -4,8 +4,9 @@
 #include <iostream>
 #include "mcp2210_api.h"
 #include "SPIBridge.h"
+#include "GPIOBridge.h"
 
-class MCP2210 final : public spi::SPIBridge{
+class MCP2210 final : public spi::SPIBridge, public gpio::GPIOBridge{
 private:
     static constexpr int SPI_BUF_LEN = 1024;
     unsigned char txdata[SPI_BUF_LEN], rxdata[SPI_BUF_LEN];
@@ -30,15 +31,19 @@ private:
     };
 
 public:
+
+    gpio::GPIOPin
+    pin0 = gpio::GPIOPin(1<<0), pin1 = gpio::GPIOPin(1<<1), pin2 = gpio::GPIOPin(1<<2), pin3 = gpio::GPIOPin(1<<3),
+    pin4 = gpio::GPIOPin(1<<4), pin5 = gpio::GPIOPin(1<<6), pin6 = gpio::GPIOPin(1<<6), pin7 = gpio::GPIOPin(1<<7);
+
     explicit MCP2210(std::string device);
     ~MCP2210() override;
     unsigned char transfer(unsigned char input) override;
     std::vector<unsigned char> transfer(const std::vector<unsigned char>& input) override;
     template<unsigned char first, typename... values>
     std::vector<unsigned char> transfer(unsigned char f, values...);
-    std::vector<spi::GPIOPin> pins() const;
-    void setGPIODirection(const spi::gpioDirection& direction, spi::GPIOPin pin) override;
-    void writeGPIO(const spi::gpioState& state, spi::GPIOPin pin) override;
-    void slaveSelect(const spi::GPIOPin& slave) override;
-    void slaveDeselect(const spi::GPIOPin& slave) override;
+    void setGPIODirection(const gpio::gpioDirection& direction, gpio::GPIOPin pin) override;
+    void writeGPIO(const gpio::gpioState& state, gpio::GPIOPin pin) override;
+    void slaveSelect(const gpio::GPIOPin& slave) override;
+    void slaveDeselect(const gpio::GPIOPin& slave) override;
 };
