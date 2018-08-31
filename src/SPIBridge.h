@@ -11,7 +11,7 @@ namespace spi {
     public:
         SPIData(std::vector<unsigned char> data) : mData(std::move(data)) {}
 
-        explicit SPIData(std::initializer_list<int> data) {
+        SPIData(std::initializer_list<int> data) {
             mData.insert(mData.end(), data.begin(), data.end());
         }
 
