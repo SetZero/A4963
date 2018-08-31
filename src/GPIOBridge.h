@@ -7,10 +7,10 @@
 namespace gpio {
 
 
-    enum gpioState {
+    enum class gpioState {
         on, off
     };
-    enum gpioDirection {
+    enum class gpioDirection {
         in, out
     };
 
@@ -28,6 +28,7 @@ namespace gpio {
     class GPIOBridge {
         virtual void setGPIODirection(const gpioDirection& direction, GPIOPin pin) = 0;
         virtual void writeGPIO(const gpioState& state, GPIOPin pin) = 0;
+        virtual gpioState& readGPIO(GPIOPin pin) const = 0;
     };
 
 }
