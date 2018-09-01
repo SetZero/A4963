@@ -7,16 +7,19 @@
 #include <iostream>
 #include <libusb.h>
 #include "SPIBridge.h"
+#include "GPIOBridge.h"
+#include "LibUSBDevices.h"
 
-class ATmega32u4SPI : public spi::SPIBridge {
+class ATmega32u4SPI : public spi::SPIBridge, public gpio::GPIOBridge {
 public:
     ATmega32u4SPI();
 
 private:
-    unsigned char transfer(unsigned char input) override;
-    std::vector<unsigned char> transfer(std::vector<unsigned char>& input) override;
-    void setGPIODirection(const spi::gpioDirection& direction, spi::GPIOPin pin) override;
-    void writeGPIO(const spi::gpioState& state, spi::GPIOPin pin) override;
-    void slaveSelect() override;
-    void slaveDeselect() override;
+    void setGPIODirection(const gpio::gpioDirection& direction, gpio::GPIOPin pin) override;
+    void writeGPIO(const gpio::gpioState& state, gpio::GPIOPin pin) override;
+    gpio::gpioState readGPIO(gpio::GPIOPin pin) const override;
+    spi::SPIData transfer(const spi::SPIData& spiData) const override;
+    void slaveRegister(const SPIDevice& device, const gpio::GPIOPin& pin) override;
+    void slaveSelect(const SPIDevice& slave) override;
+    void slaveDeselect(const SPIDevice& slave) override;
 };

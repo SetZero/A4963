@@ -1,6 +1,5 @@
-#include <utility>
-
 #pragma once
+#include <utility>
 #include <vector>
 #include <map>
 #include "GPIOBridge.h"
@@ -27,9 +26,7 @@ namespace spi {
         std::vector<unsigned char> mData;
     };
 
-    SPIData operator ""_spi(unsigned long long element) {
-        return SPIData(static_cast<int>(element));
-    };
+    SPIData operator ""_spi(unsigned long long element);
 
     class SPIBridge {
     public:

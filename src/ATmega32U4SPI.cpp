@@ -5,51 +5,39 @@
 #include "ATmega32U4SPI.h"
 
 ATmega32u4SPI::ATmega32u4SPI() {
-    libusb_context *context = nullptr;
-    libusb_device **list = nullptr;
-    int rc = 0;
-    ssize_t count = 0;
-
-    rc = libusb_init(&context);
-    assert(rc == 0);
-
-    count = libusb_get_device_list(context, &list);
-    assert(count > 0);
-
-    for (size_t idx = 0; idx < count; ++idx) {
-        libusb_device *device = list[idx];
-        libusb_device_descriptor desc = {0};
-
-        rc = libusb_get_device_descriptor(device, &desc);
-        assert(rc == 0);
-
-        std::cout << "Vendor:Device = " << std::hex << desc.idVendor << ":" << std::hex << desc.idProduct << std::endl;
+    std::cout << "Starting Atmega32u4..." << std::endl;
+    LibUSBDeviceList deviceList;
+    std::cout << "Found " << deviceList.getDevices().size() << " devices" << std::endl;
+    for(LibUSBDevice device : deviceList.getDevices()) {
+        std::cout << device.getVendorID() << " : " << device.getDeviceID() << std::endl;
     }
-
-    libusb_free_device_list(list, static_cast<int>(count));
-    libusb_exit(context);
 }
 
-unsigned char ATmega32u4SPI::transfer(unsigned char input) {
-    return 0;
-}
-
-std::vector<unsigned char> ATmega32u4SPI::transfer(std::vector<unsigned char> &input) {
-    return std::vector<unsigned char>();
-}
-
-void ATmega32u4SPI::setGPIODirection(const spi::gpioDirection &direction, const spi::GPIOPin pin) {
+void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction, gpio::GPIOPin pin) {
 
 }
 
-void ATmega32u4SPI::writeGPIO(const spi::gpioState &state, const spi::GPIOPin pin) {
+void ATmega32u4SPI::writeGPIO(const gpio::gpioState &state, gpio::GPIOPin pin) {
 
 }
 
-void ATmega32u4SPI::slaveSelect() {
+gpio::gpioState ATmega32u4SPI::readGPIO(gpio::GPIOPin pin) const {
+    gpio::gpioState state = gpio::gpioState::off;
+    return state;
+}
+
+spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
+    return spi::SPIData(std::vector<unsigned char>());
+}
+
+void ATmega32u4SPI::slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) {
 
 }
 
-void ATmega32u4SPI::slaveDeselect() {
+void ATmega32u4SPI::slaveSelect(const SPIDevice &slave) {
+
+}
+
+void ATmega32u4SPI::slaveDeselect(const SPIDevice &slave) {
 
 }

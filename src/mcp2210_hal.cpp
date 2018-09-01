@@ -53,6 +53,11 @@ void MCP2210::writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin pin) {
     }
 }
 
+gpio::gpioState MCP2210::readGPIO(gpio::GPIOPin pin) const {
+    gpio::gpioState state = gpio::gpioState::off;
+    return state;
+}
+
 void MCP2210::setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin pin) {
     if(direction == gpio::gpioDirection::in) {
         gpio_direction(fd, 0x01FF, pin);
@@ -61,10 +66,22 @@ void MCP2210::setGPIODirection(const gpio::gpioDirection& direction, const gpio:
     }
 }
 
-void MCP2210::slaveSelect(const gpio::GPIOPin& slave) {
+void MCP2210::slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) {
+
+}
+
+void MCP2210::slaveSelect(const SPIDevice &slave) {
+
+}
+
+void MCP2210::slaveDeselect(const SPIDevice &slave) {
+
+}
+
+/*void MCP2210::slaveSelect(const gpio::GPIOPin& slave) {
     writeGPIO(gpio::gpioState::off, slave);
 }
 
 void MCP2210::slaveDeselect(const gpio::GPIOPin& slave) {
     writeGPIO(gpio::gpioState::on, slave);
-}
+}*/

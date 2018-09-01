@@ -43,6 +43,8 @@ public:
     spi::SPIData transfer(const spi::SPIData& input) const override;
     void setGPIODirection(const gpio::gpioDirection& direction, gpio::GPIOPin pin) override;
     void writeGPIO(const gpio::gpioState& state, gpio::GPIOPin pin) override;
-    void slaveSelect(const gpio::GPIOPin& slave) override;
-    void slaveDeselect(const gpio::GPIOPin& slave) override;
+    gpio::gpioState readGPIO(gpio::GPIOPin pin) const override;
+    void slaveRegister(const SPIDevice& device, const gpio::GPIOPin& pin) override;
+    void slaveSelect(const SPIDevice& slave) override;
+    void slaveDeselect(const SPIDevice& slave) override;
 };
