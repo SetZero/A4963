@@ -9,7 +9,7 @@
 #include "src/25LC256.h"
 #include "ATmega32U4SPI.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) {/*
     int ictr;
 
     std::cout << "\nMCP2210 Evaluation Board Tests" << std::endl;
@@ -33,7 +33,12 @@ int main(int argc, char **argv) {
         //std::vector<unsigned char> rxVector = (*bridge).transfer(txVector);
     } else {
         ATmega32u4SPI spi;
-    }
+    }*/
+    ////////////////////////////////////test
+    std::string devicePath = "/dev/hidraw1";
+    MCP2210 spiDevice = MCP2210(devicePath);
+    spi::SPIData data({1,2,3,4});
+    spiDevice.transfer(data);
 }
 
 

@@ -26,9 +26,9 @@ namespace gpio {
     };
 
     class GPIOBridge {
-        virtual void setGPIODirection(const gpioDirection& direction, GPIOPin pin) = 0;
-        virtual void writeGPIO(const gpioState& state, GPIOPin pin) = 0;
-        virtual gpioState& readGPIO(GPIOPin pin) const = 0;
+        virtual void setGPIODirection(const gpioDirection& direction,const GPIOPin& pin) = 0;
+        virtual void writeGPIO(const gpioState& state,const GPIOPin& pin) = 0;
+        virtual gpioState readGPIO(const GPIOPin& pin) const = 0;
     };
 
 }

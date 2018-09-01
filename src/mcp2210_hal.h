@@ -41,8 +41,10 @@ public:
     explicit MCP2210(std::string device);
     ~MCP2210() override;
     spi::SPIData transfer(const spi::SPIData& input) const override;
-    void setGPIODirection(const gpio::gpioDirection& direction, gpio::GPIOPin pin) override;
-    void writeGPIO(const gpio::gpioState& state, gpio::GPIOPin pin) override;
-    void slaveSelect(const gpio::GPIOPin& slave) override;
-    void slaveDeselect(const gpio::GPIOPin& slave) override;
+    void setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin& pin) override;
+    void writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin& pin) override;
+    gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;
+    void slaveSelect(const SPIDevice& slave) override;
+    void slaveDeselect(const SPIDevice& slave) override;
+    void slaveRegister(const SPIDevice& device, const gpio::GPIOPin& pin) override;
 };
