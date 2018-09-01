@@ -15,33 +15,35 @@ MCP2210::MCP2210(std::string device) {
 MCP2210::~MCP2210() {
     close_device(fd);
 }
+/*    spi::SPIData transfer(const spi::SPIData& input) const override;
+    std::vector<spi::SPIData> transfer(const std::vector<spi::SPIData>& input) const;
+    template<typename first, typename... values>
+    std::vector<spi::SPIData> transfer(spi::SPIData f, values...) const;*/
 
-unsigned char MCP2210::transfer(unsigned char input) {
-    txdata[0] = input;
-    int out = spi_data_xfer(fd, txdata.get(), rxdata.get(), 1,
+spi::SPIData MCP2210::transfer(const spi::SPIData& input) const {
+    //txdata[0] = input;
+    int err = 0;
+    auto temp = input.getData();
+    int i = 0;
+    for(auto elem: temp){
+        if(i >= SPI_BUF_LEN){
+            err = 42;
+            break;
+        };
+        txdata[i] = elem;
+        i++;
+    }
+    if(err == 0)
+            err = spi_data_xfer(fd, txdata.get(), rxdata.get(), 1,
             static_cast<uint16_t >(spiSettings::mode), static_cast<uint16_t >(spiSettings::speed), static_cast<uint16_t >(spiSettings::actcsval),
             static_cast<uint16_t >(spiSettings::idlecsval), static_cast<uint16_t >(spiSettings::gpcsmask), static_cast<uint16_t >(spiSettings::cs2datadly),
             static_cast<uint16_t >(spiSettings::data2datadly), static_cast<uint16_t >(spiSettings::data2csdly));
-    return rxdata[0];
+    if(err != 0) std::cout << " error: " << err << std::endl;
+    temp.clear();
+    for(i = 0; i < SPI_BUF_LEN ; i++)
+        temp.push_back(rxdata[i]);
+    return spi::SPIData( temp );
 }
-
-std::vector<unsigned char> MCP2210::transfer(const std::vector<unsigned char>& input) {
-    std::vector<unsigned char> out(input.size());
-
-    for(auto elem: input){
-        out.emplace_back(transfer(elem));
-    }
-
-    return out;
-}
-
-template<unsigned char first, typename... values>
-std::vector<unsigned char> MCP2210::transfer(unsigned char f, values... val) {
-    static_assert(utils::sameTypes<unsigned char,values...>(),"mismatch of types in parameter list, they all have to be from type unsigned char");
-    std::vector<unsigned char> in({f,val...});
-    return transfer(in);
-}
-
 
 void MCP2210::writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin pin) {
     if(state == gpio::gpioState::off) {
