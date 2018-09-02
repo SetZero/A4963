@@ -42,3 +42,12 @@ LibUSBDeviceList::LibUSBDeviceList() {
 const std::vector<LibUSBDevice> &LibUSBDeviceList::getDevices() const {
     return mDevices;
 }
+
+const std::optional<LibUSBDevice> LibUSBDeviceList::findDevice(uint16_t vendorID, uint16_t deviceID) {
+    for(LibUSBDevice device : mDevices) {
+        if(device.getDeviceID() == deviceID && device.getVendorID() == vendorID) {
+            return device;
+        }
+    }
+    return std::nullopt;
+}

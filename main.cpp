@@ -26,13 +26,19 @@ int main(int argc, char **argv) {
         std::unique_ptr<spi::SPIBridge> bridge = std::make_unique<MCP2210>(str);
         EEPROM eeprom{bridge};
         std::cout << "Status: " << std::hex << eeprom.readStatus() << std::endl;
-        //(*bridge).setGPIODirection(spi::gpioDirection::out, spi::pin0);
-        //(*bridge).writeGPIO(spi::gpioState::on, spi::pin0);
-
-        //std::vector<unsigned char> txVector = {0x01, 0x02, 0x03};
-        //std::vector<unsigned char> rxVector = (*bridge).transfer(txVector);
     } else {
-        ATmega32u4SPI spi;
+        using namespace spi::literals;
+
+        std::cout << "Starting Atmega32u4..." << std::endl;
+        LibUSBDeviceList deviceList;
+        std::cout << "Found " << deviceList.getDevices().size() << " devices" << std::endl;
+        if(auto atmega = deviceList.findDevice(ATmega32u4SPI::vendorID, ATmega32u4SPI::deviceID)) {
+            std::cout << "One of them was the Atmega!" << std::endl;
+            ATmega32u4SPI spi{*atmega};
+            spi::SPIData data1 = spi.transfer(0x82_spi);
+            spi::SPIData data2 = spi.transfer(0x83_spi);
+            spi::SPIData data3 = spi.transfer(0x84_spi);
+        }
     }
 }
 

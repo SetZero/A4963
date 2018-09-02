@@ -6,15 +6,17 @@
 #include <cassert>
 #include <iostream>
 #include <libusb.h>
+#include <memory>
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
 #include "LibUSBDevices.h"
 
 class ATmega32u4SPI : public spi::SPIBridge, public gpio::GPIOBridge {
 public:
-    ATmega32u4SPI();
+    static const uint16_t deviceID = 0x00;
+    static const uint16_t vendorID = 0x00;
 
-private:
+    explicit ATmega32u4SPI(const LibUSBDevice& device);
     void setGPIODirection(const gpio::gpioDirection& direction, gpio::GPIOPin pin) override;
     void writeGPIO(const gpio::gpioState& state, gpio::GPIOPin pin) override;
     gpio::gpioState readGPIO(gpio::GPIOPin pin) const override;
@@ -22,4 +24,6 @@ private:
     void slaveRegister(const SPIDevice& device, const gpio::GPIOPin& pin) override;
     void slaveSelect(const SPIDevice& slave) override;
     void slaveDeselect(const SPIDevice& slave) override;
+private:
+    LibUSBDevice mDevice;
 };

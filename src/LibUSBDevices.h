@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstdint>
 #include <libusb.h>
+#include <optional>
 
 class LibUSBDevice {
 public:
@@ -24,6 +25,7 @@ class LibUSBDeviceList {
 public:
     LibUSBDeviceList();
     const std::vector<LibUSBDevice> &getDevices() const;
+    const std::optional<LibUSBDevice> findDevice(uint16_t vendorID, uint16_t deviceID);
 
 private:
     std::vector<LibUSBDevice> mDevices;

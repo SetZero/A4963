@@ -25,8 +25,9 @@ namespace spi {
     private:
         std::vector<unsigned char> mData;
     };
-
-    SPIData operator ""_spi(unsigned long long element);
+    inline namespace literals {
+        SPIData operator ""_spi(unsigned long long element);
+    }
 
     class SPIBridge {
     public:

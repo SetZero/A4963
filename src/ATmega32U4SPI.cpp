@@ -4,13 +4,8 @@
 
 #include "ATmega32U4SPI.h"
 
-ATmega32u4SPI::ATmega32u4SPI() {
-    std::cout << "Starting Atmega32u4..." << std::endl;
-    LibUSBDeviceList deviceList;
-    std::cout << "Found " << deviceList.getDevices().size() << " devices" << std::endl;
-    for(LibUSBDevice device : deviceList.getDevices()) {
-        std::cout << device.getVendorID() << " : " << device.getDeviceID() << std::endl;
-    }
+ATmega32u4SPI::ATmega32u4SPI(const LibUSBDevice &device) : mDevice{device} {
+
 }
 
 void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction, gpio::GPIOPin pin) {
@@ -41,3 +36,5 @@ void ATmega32u4SPI::slaveSelect(const SPIDevice &slave) {
 void ATmega32u4SPI::slaveDeselect(const SPIDevice &slave) {
 
 }
+
+
