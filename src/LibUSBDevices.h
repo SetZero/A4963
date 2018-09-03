@@ -10,21 +10,22 @@
 #include <optional>
 #include "LibUsbDevice.h"
 
-class LibUSBDeviceList {
-public:
-    LibUSBDeviceList();
+namespace usb {
+    class LibUSBDeviceList {
+    public:
+        LibUSBDeviceList();
+        virtual ~LibUSBDeviceList();
 
-    virtual ~LibUSBDeviceList();
+        const std::vector<std::shared_ptr<LibUSBDevice>> &getDevices() const;
+        const std::optional<std::shared_ptr<LibUSBDevice>> findDevice(const VendorID& vendorID, const DeviceID& deviceID);
 
-    const std::vector<std::shared_ptr<LibUSBDevice>> &getDevices() const;
-    const std::optional<std::shared_ptr<LibUSBDevice>> findDevice(uint16_t vendorID, uint16_t deviceID);
+    private:
+        libusb_context *context = nullptr;
+        libusb_device **list = nullptr;
+        ssize_t device_count = 0;
 
-private:
-    libusb_context *context = nullptr;
-    libusb_device **list = nullptr;
-    ssize_t device_count = 0;
+        std::vector<std::shared_ptr<LibUSBDevice>> mDevices;
 
-    std::vector<std::shared_ptr<LibUSBDevice>> mDevices;
-
-};
+    };
+}
 

@@ -4,7 +4,10 @@
 
 #include "ATmega32U4SPI.h"
 
-ATmega32u4SPI::ATmega32u4SPI(const std::shared_ptr<LibUSBDevice>& device) : mDevice{device} {
+const usb::DeviceID ATmega32u4SPI::deviceID{0x204f};
+const usb::VendorID ATmega32u4SPI::vendorID{0x03eb};
+
+ATmega32u4SPI::ATmega32u4SPI(const std::shared_ptr<usb::LibUSBDevice>& device) : mDevice{device} {
     device.get()->openDevice();
 }
 
