@@ -13,9 +13,6 @@
 #include "DevicesList.h"
 
 namespace usb {
-    enum class DeviceTypes {
-        Generic, HID
-    };
 
     class LibUSBDeviceList {
     public:
@@ -29,7 +26,6 @@ namespace usb {
         libusb_context *context = nullptr;
         libusb_device **list = nullptr;
         ssize_t device_count = 0;
-        //DeviceID did = spi::ATmega32u4SPI::deviceID;
 
         std::vector<std::shared_ptr<LibUSBDevice>> mDevices;
 

@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include "LibUSBDevices.h"
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
 #include "mcp2210_api.h"

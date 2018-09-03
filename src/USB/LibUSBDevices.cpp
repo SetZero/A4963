@@ -20,11 +20,10 @@ namespace usb {
             DeviceID deviceID{desc.idProduct};
             mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
 
-            //using namespace device_list;
-            //DeviceListType::const_iterator = deviceTypeMap.find({vendorID, deviceID});
-            //std::unordered_map<int, int>::const_iterator value = deviceTypeMap.find(1);
-                                                                            //= deviceTypeMap.find({vendorID, deviceID});
-            /*if(value == deviceTypeMap.end())
+            using namespace device_list;
+
+            auto value = DeviceList::deviceTypeMap.find({vendorID, deviceID});
+            if(value == DeviceList::deviceTypeMap.end())
                 mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
             else {
                 switch(value->second) {
@@ -33,7 +32,7 @@ namespace usb {
                     case DeviceTypes::Generic:
                         mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
                 }
-            }*/
+            }
         }
     }
 

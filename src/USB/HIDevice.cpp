@@ -34,3 +34,8 @@ bool usb::HIDevice::sendData(const spi::SPIData &data) {
     }
     return true;
 }
+
+usb::HIDevice::HIDevice(const usb::VendorID &vendorID, const usb::DeviceID &deviceID, libusb_device *device)
+        : LibUSBDevice(vendorID, deviceID, device) {
+
+}

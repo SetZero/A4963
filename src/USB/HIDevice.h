@@ -9,6 +9,7 @@
 namespace usb {
     class HIDevice : public LibUSBDevice {
     public:
+        HIDevice(const VendorID& vendorID, const DeviceID& deviceID, libusb_device *device);
         bool sendData(const spi::SPIData &data) override;
 
     private:

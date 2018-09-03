@@ -10,7 +10,7 @@
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
 #include "src/USB/LibUsbDevice.h"
-#include "src/USB/LibUSBDevices.h"
+//#include "src/USB/LibUSBDevices.h"
 
 namespace spi {
     class ATmega32u4SPI : public spi::SPIBridge, public gpio::GPIOBridge {
