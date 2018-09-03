@@ -3,7 +3,7 @@
 
 /*use udev or other similar mechanisms to get the system path "/dev/hidraw1" */
 MCP2210::MCP2210(std::string device) {
-    //TODO: find out witch hid number is the right for the device
+    //TODO: find out which hid number is the right for the device
 
     fd = open_device(device.c_str());
     if(fd <= 0)

@@ -10,6 +10,7 @@
 #include "src/SPI/SPIBridge.h"
 
 namespace usb {
+    //TODO: Move this in own class, create HID device if detected from map
     class DeviceID {
     public:
         explicit DeviceID(uint16_t deviceID);
