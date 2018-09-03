@@ -18,7 +18,7 @@ namespace usb {
             rc = libusb_get_device_descriptor(device, &desc);
             VendorID vendorID{desc.idVendor};
             DeviceID deviceID{desc.idProduct};
-            mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
+            //mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
 
             using namespace device_list;
 

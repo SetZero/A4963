@@ -13,11 +13,23 @@ namespace spi {
     }
 
     void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction, gpio::GPIOPin pin) {
-
+        auto pinInt = static_cast<uint8_t>(pin);
+        if(direction == gpio::gpioDirection::in) {
+            mDevice.get()->sendData({2, pinInt, 0});
+        } else {
+            mDevice.get()->sendData({2, pinInt, 1});
+        }
     }
 
     void ATmega32u4SPI::writeGPIO(const gpio::gpioState &state, gpio::GPIOPin pin) {
-
+        auto pinInt = static_cast<uint8_t>(pin);
+        if(state == gpio::gpioState::on) {
+            std::cout << "on" << std::endl;
+            mDevice.get()->sendData({3, pinInt, 1});
+        } else {
+            std::cout << "off" << std::endl;
+            mDevice.get()->sendData({3, pinInt, 0});
+        }
     }
 
     gpio::gpioState ATmega32u4SPI::readGPIO(gpio::GPIOPin pin) const {
@@ -26,7 +38,7 @@ namespace spi {
     }
 
     spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
-        mDevice.get()->sendData(spiData);
+        mDevice.get()->sendData(spiData.getData());
         return spi::SPIData(std::vector<unsigned char>());
     }
 

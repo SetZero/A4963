@@ -27,9 +27,7 @@ namespace usb {
         DeviceID getDeviceID() const;
         void openDevice();
         void closeDevice();
-
-        //TODO: change this to something else, not spi::SPIData... (This is not yet a spi device, but more generic)
-        virtual bool sendData(const spi::SPIData &data);
+        virtual bool sendData(const std::vector<uint8_t>& data);
 
     protected:
         void _closeDevice();

@@ -27,6 +27,9 @@ namespace spi {
         void slaveSelect(const SPIDevice &slave) override;
         void slaveDeselect(const SPIDevice &slave) override;
 
+        static constexpr gpio::GPIOPin
+                pin0 = gpio::GPIOPin(0), pin1 = gpio::GPIOPin(1<<0), pin2 = gpio::GPIOPin(1<<1), pin3 = gpio::GPIOPin(1<<2),
+                pin4 = gpio::GPIOPin(1<<3);
     private:
         std::shared_ptr<usb::LibUSBDevice> mDevice;
     };

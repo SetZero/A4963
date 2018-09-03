@@ -4,32 +4,53 @@
 
 #include "HIDevice.h"
 
-bool usb::HIDevice::sendData(const spi::SPIData &data) {
+bool usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
+    std::cout << "Transfer...";
     if (!isOpen)
         return false;
+    std::cout << "fine..." << std::endl;
 
     int bytes_received;
     int bytes_sent;
-    char data_in[MAX_CONTROL_IN_TRANSFER_SIZE];
-    unsigned char data_out[MAX_CONTROL_OUT_TRANSFER_SIZE] = {2, 0, 1, 0, 0, 0, 0, 0};
-    int i = 0;
+    unsigned char data_in[MAX_CONTROL_IN_TRANSFER_SIZE];
+    unsigned char data_out[MAX_CONTROL_OUT_TRANSFER_SIZE]; //= {2, 0, 1, 0, 0, 0, 0, 0};
     int result = 0;
 
+    std::cout << "Splitting into " << (data.size() / MAX_CONTROL_OUT_TRANSFER_SIZE) + 1 << " packages" << std::endl;
+    for(size_t i=0; i < (data.size() / MAX_CONTROL_OUT_TRANSFER_SIZE) + 1; i++) {
 
-    bytes_sent = libusb_control_transfer(
-            handle,
-            CONTROL_REQUEST_TYPE_OUT,
-            HID_SET_REPORT,
-            (HID_REPORT_TYPE_OUTPUT << 8) | 0x00,
-            INTERFACE_NUMBER,
-            data_out,
-            sizeof(data_out),
-            TIMEOUT_MS);
+        size_t end = ((i+1)*MAX_CONTROL_OUT_TRANSFER_SIZE < data.size() ? MAX_CONTROL_OUT_TRANSFER_SIZE :
+                      data.size() - i*MAX_CONTROL_OUT_TRANSFER_SIZE);
 
-    if (bytes_sent >= 0) {
-        std::cout << "Feature report data sent:" << std::endl;
-        for (i = 0; i < bytes_sent; i++) {
-            std::cout << std::hex << data_out[i] << std::endl;
+        std::fill(std::begin(data_out), std::end(data_out), 0);
+        std::copy_n(std::begin(data) + i*MAX_CONTROL_OUT_TRANSFER_SIZE,
+                    end, std::begin(data_out));
+
+        bytes_sent = libusb_control_transfer(
+                handle,
+                CONTROL_REQUEST_TYPE_OUT,
+                HID_SET_REPORT,
+                (HID_REPORT_TYPE_OUTPUT << 8) | 0x00,
+                INTERFACE_NUMBER,
+                data_out,
+                sizeof(data_out),
+                TIMEOUT_MS);
+
+        if (bytes_sent >= 0) {
+            std::cout << "Feature report data sent:" << std::endl;
+            for (size_t d = 0; d < bytes_sent; d++) {
+                std::cout << std::hex << data_out[d] << std::endl;
+            }
+
+            bytes_received = libusb_control_transfer(
+                    handle,
+                    CONTROL_REQUEST_TYPE_IN ,
+                    HID_GET_REPORT,
+                    (HID_REPORT_TYPE_INPUT<<8)|0x00,
+                    INTERFACE_NUMBER,
+                    data_in,
+                    MAX_CONTROL_IN_TRANSFER_SIZE,
+                    TIMEOUT_MS);
         }
     }
     return true;

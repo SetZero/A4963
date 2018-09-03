@@ -3,6 +3,8 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <chrono>
+#include <thread>
 #include "LibUSBDevices.h"
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
@@ -12,6 +14,7 @@
 
 int main(int argc, char **argv) {
     int ictr;
+    bool blink = false;
 
     std::cout << "\nMCP2210 Evaluation Board Tests" << std::endl;
     std::cout << "\nParameters: " << argc << std::endl;
@@ -36,9 +39,23 @@ int main(int argc, char **argv) {
         if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
             std::cout << "One of them was the Atmega!" << std::endl;
             spi::ATmega32u4SPI spi{*atmega};
-            spi::SPIData data1 = spi.transfer(0x82_spi);
-            spi::SPIData data2 = spi.transfer(0x83_spi);
-            spi::SPIData data3 = spi.transfer(0x84_spi);
+            spi.setGPIODirection(gpio::gpioDirection::out, spi::ATmega32u4SPI::pin0);
+            while(true) {
+                if (blink) {
+                    spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
+                    blink = false;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                } else {
+                    spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
+                    blink = true;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
+            }
+            /*spi::SPIData data1 = spi.transfer(0x41_spi);
+            spi::SPIData data2 = spi.transfer(0x42_spi);
+            spi::SPIData data3 = spi.transfer(0x43_spi);
+            spi::SPIData data4 = spi.transfer(0x44_spi);
+            spi::SPIData data5 = spi.transfer(0x45_spi);*/
         }
     }
 }

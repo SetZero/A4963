@@ -68,10 +68,10 @@ namespace usb {
         }
     }
 
-    bool LibUSBDevice::sendData(const spi::SPIData &data) {
+    bool LibUSBDevice::sendData(const std::vector<uint8_t>& data) {
         if (!isOpen)
             return false;
-
+        std::cout << "This shouldn't happen..." << std::endl;
         /*unsigned char spiData[data.getData().size()];
         std::copy(data.getData().begin(), data.getData().end(), spiData);
 

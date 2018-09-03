@@ -4,13 +4,14 @@
 
 #pragma once
 
+#include <algorithm>
 #include "LibUsbDevice.h"
 
 namespace usb {
     class HIDevice : public LibUSBDevice {
     public:
         HIDevice(const VendorID& vendorID, const DeviceID& deviceID, libusb_device *device);
-        bool sendData(const spi::SPIData &data) override;
+        bool sendData(const std::vector<uint8_t>& data) override;
 
     private:
         //TODO: move to own class (source: http://janaxelson.com/code/generic_hid.c)
