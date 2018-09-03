@@ -16,8 +16,24 @@ namespace usb {
             libusb_device_descriptor desc = {0};
 
             rc = libusb_get_device_descriptor(device, &desc);
+            VendorID vendorID{desc.idVendor};
+            DeviceID deviceID{desc.idProduct};
+            mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
 
-            mDevices.push_back(std::make_shared<LibUSBDevice>(VendorID{desc.idVendor}, DeviceID{desc.idProduct}, device));
+            //using namespace device_list;
+            //DeviceListType::const_iterator = deviceTypeMap.find({vendorID, deviceID});
+            //std::unordered_map<int, int>::const_iterator value = deviceTypeMap.find(1);
+                                                                            //= deviceTypeMap.find({vendorID, deviceID});
+            /*if(value == deviceTypeMap.end())
+                mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
+            else {
+                switch(value->second) {
+                    case DeviceTypes::HID:
+                        mDevices.push_back(std::make_shared<HIDevice>(vendorID, deviceID, device));
+                    case DeviceTypes::Generic:
+                        mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
+                }
+            }*/
         }
     }
 

@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <memory>
-#include "mcp2210_hal.h"
+#include "src/SPI/mcp2210_hal.h"
 
 class EEPROM {
 private:

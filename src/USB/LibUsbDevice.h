@@ -7,7 +7,7 @@
 #include <memory>
 #include <libusb.h>
 #include <iostream>
-#include "SPIBridge.h"
+#include "src/SPI/SPIBridge.h"
 
 namespace usb {
     class DeviceID {
@@ -45,10 +45,11 @@ namespace usb {
         DeviceID getDeviceID() const;
         void openDevice();
         void closeDevice();
-        //TODO: change this to something else, not spi::SPIData... (This is not yet a spi device, but more generic)
-        bool sendData(const spi::SPIData &data);
 
-    private:
+        //TODO: change this to something else, not spi::SPIData... (This is not yet a spi device, but more generic)
+        virtual bool sendData(const spi::SPIData &data);
+
+    protected:
         void _closeDevice();
 
         VendorID vendorID;
@@ -62,5 +63,42 @@ namespace usb {
         DeviceID operator ""_did(unsigned long long element);
         VendorID operator ""_vid(unsigned long long element);
     }
+
+    struct pair_hash {
+        template <class T1, class T2>
+        std::size_t operator () (const std::pair<T1,T2> &p) const {
+            using std::hash;
+
+            auto h1 = hash<T1>{}(p.first);
+            auto h2 = hash<T2>{}(p.second);
+
+            return h1 ^(h2 << 1);
+        }
+    };
 }
 
+namespace std {
+
+    template <>
+    struct hash<usb::VendorID>
+    {
+        std::size_t operator()(const usb::VendorID& v) const {
+            using std::size_t;
+            using std::hash;
+
+
+            return (hash<uint16_t >()(v.getVendorID()));
+        }
+    };
+
+    template <>
+    struct hash<usb::DeviceID>
+    {
+        std::size_t operator()(const usb::DeviceID& d) const {
+            using std::size_t;
+            using std::hash;
+
+            return (hash<uint16_t >()(d.getDeviceID()));
+        }
+    };
+}

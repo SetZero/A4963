@@ -3,11 +3,11 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "src/SPIBridge.h"
+#include "src/SPI/ATmega32U4SPI.h"
+#include "src/SPI/SPIBridge.h"
 #include "mcp2210_api.h"
-#include "src/mcp2210_hal.h"
+#include "src/SPI/mcp2210_hal.h"
 #include "src/25LC256.h"
-#include "ATmega32U4SPI.h"
 
 int main(int argc, char **argv) {
     int ictr;
@@ -32,9 +32,9 @@ int main(int argc, char **argv) {
         std::cout << "Starting Atmega32u4..." << std::endl;
         usb::LibUSBDeviceList deviceList;
         std::cout << "Found " << deviceList.getDevices().size() << " devices" << std::endl;
-        if(auto atmega = deviceList.findDevice(ATmega32u4SPI::vendorID, ATmega32u4SPI::deviceID)) {
+        if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
             std::cout << "One of them was the Atmega!" << std::endl;
-            ATmega32u4SPI spi{*atmega};
+            spi::ATmega32u4SPI spi{*atmega};
             spi::SPIData data1 = spi.transfer(0x82_spi);
             spi::SPIData data2 = spi.transfer(0x83_spi);
             spi::SPIData data3 = spi.transfer(0x84_spi);

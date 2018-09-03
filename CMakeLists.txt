@@ -22,13 +22,17 @@ add_executable(hid main.cpp)
 
 ## Include Directories
 
-target_link_libraries(hid ${LIBUSB_LIBRARY} src inc)
+target_link_libraries(hid ${LIBUSB_LIBRARY} src spi usb inc)
 include_directories(SYSTEM ${LIBUSB_INCLUDE_DIR})
 
 include_directories(inc)
 add_subdirectory(inc)
 include_directories(src)
 add_subdirectory(src)
+include_directories(src/SPI)
+add_subdirectory(src/SPI)
+include_directories(src/USB)
+add_subdirectory(src/USB)
 #add_executable(SPI
 #        inc/mcp2210_api.c
 #        inc/mcp2210_api.h
