@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 		std::cout << "\nParameter(" << ictr << ") -> " << argv[ictr] << std::endl;
 	}
 
-    if(argc > 1) {
+    if(argc > 2) {
         std::string str = argv[1];
         std::cout << "Trying to open: " << argv[1] << std::endl;
 

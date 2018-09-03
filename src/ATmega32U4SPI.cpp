@@ -4,8 +4,8 @@
 
 #include "ATmega32U4SPI.h"
 
-ATmega32u4SPI::ATmega32u4SPI(const LibUSBDevice &device) : mDevice{device} {
-
+ATmega32u4SPI::ATmega32u4SPI(const std::shared_ptr<LibUSBDevice>& device) : mDevice{device} {
+    device.get()->openDevice();
 }
 
 void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction, gpio::GPIOPin pin) {
@@ -22,6 +22,7 @@ gpio::gpioState ATmega32u4SPI::readGPIO(gpio::GPIOPin pin) const {
 }
 
 spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
+    mDevice.get()->sendData(spiData);
     return spi::SPIData(std::vector<unsigned char>());
 }
 

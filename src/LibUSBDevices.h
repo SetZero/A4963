@@ -8,26 +8,23 @@
 #include <cstdint>
 #include <libusb.h>
 #include <optional>
-
-class LibUSBDevice {
-public:
-    LibUSBDevice(uint16_t vendorID, uint16_t deviceID);
-
-    uint16_t getVendorID() const;
-    uint16_t getDeviceID() const;
-
-private:
-    uint16_t vendorID;
-    uint16_t deviceID;
-};
+#include "LibUsbDevice.h"
 
 class LibUSBDeviceList {
 public:
     LibUSBDeviceList();
-    const std::vector<LibUSBDevice> &getDevices() const;
-    const std::optional<LibUSBDevice> findDevice(uint16_t vendorID, uint16_t deviceID);
+
+    virtual ~LibUSBDeviceList();
+
+    const std::vector<std::shared_ptr<LibUSBDevice>> &getDevices() const;
+    const std::optional<std::shared_ptr<LibUSBDevice>> findDevice(uint16_t vendorID, uint16_t deviceID);
 
 private:
-    std::vector<LibUSBDevice> mDevices;
+    libusb_context *context = nullptr;
+    libusb_device **list = nullptr;
+    ssize_t device_count = 0;
+
+    std::vector<std::shared_ptr<LibUSBDevice>> mDevices;
+
 };
 
