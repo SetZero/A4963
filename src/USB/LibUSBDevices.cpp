@@ -6,14 +6,13 @@
 
 namespace usb {
     LibUSBDeviceList::LibUSBDeviceList() {
-        int rc = 0;
-        rc = libusb_init(&context);
+        int rc = libusb_init(&context);
 
         device_count = libusb_get_device_list(context, &list);
 
-        for (size_t idx = 0; idx < device_count; ++idx) {
+        for (ssize_t idx = 0; idx < device_count; ++idx) {
             libusb_device *device = list[idx];
-            libusb_device_descriptor desc = {0};
+            libusb_device_descriptor desc{};
 
             rc = libusb_get_device_descriptor(device, &desc);
             VendorID vendorID{desc.idVendor};
@@ -29,8 +28,11 @@ namespace usb {
                 switch(value->second) {
                     case DeviceTypes::HID:
                         mDevices.push_back(std::make_shared<HIDevice>(vendorID, deviceID, device));
+                        break;
                     case DeviceTypes::Generic:
+                    default:
                         mDevices.push_back(std::make_shared<LibUSBDevice>(vendorID, deviceID, device));
+                        break;
                 }
             }
         }

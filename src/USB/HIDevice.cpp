@@ -5,15 +5,14 @@
 #include "HIDevice.h"
 
 std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
-    std::cout << "Transfer...";
     if (!isOpen)
         return {};
-    std::cout << "fine..." << std::endl;
+    std::cout << "Transfer...";
 
     int bytes_received = 0;
     int bytes_sent = 0;
     unsigned char data_in[MAX_CONTROL_IN_TRANSFER_SIZE];
-    unsigned char data_out[MAX_CONTROL_OUT_TRANSFER_SIZE]; //= {2, 0, 1, 0, 0, 0, 0, 0};
+    unsigned char data_out[MAX_CONTROL_OUT_TRANSFER_SIZE];
     int result = 0;
 
     std::cout << "Splitting into " << (data.size() / MAX_CONTROL_OUT_TRANSFER_SIZE) + 1 << " packages" << std::endl;
