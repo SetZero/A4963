@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
             std::cout << "One of them was the Atmega!" << std::endl;
             spi::ATmega32u4SPI spi{*atmega};
             spi.setGPIODirection(gpio::gpioDirection::out, spi::ATmega32u4SPI::pin0);
-            while(true) {
+            /*while(true) {
                 if (blink) {
                     spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
                     blink = false;
@@ -50,12 +50,15 @@ int main(int argc, char **argv) {
                     blink = true;
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
-            }
-            /*spi::SPIData data1 = spi.transfer(0x41_spi);
+            }*/
+            spi::SPIData data1 = spi.transfer(0x41_spi);
             spi::SPIData data2 = spi.transfer(0x42_spi);
             spi::SPIData data3 = spi.transfer(0x43_spi);
             spi::SPIData data4 = spi.transfer(0x44_spi);
-            spi::SPIData data5 = spi.transfer(0x45_spi);*/
+            spi::SPIData data5 = spi.transfer(0x45_spi);
+            for(auto data : data1.getData()) {
+                std::cout << data << ", ";
+            }
         }
     }
 }

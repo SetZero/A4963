@@ -11,9 +11,6 @@
 #include "USBUtils.h"
 
 namespace usb {
-    //TODO: Move this in own class, create HID device if detected from map
-
-
     class LibUSBDevice {
     public:
         LibUSBDevice(const VendorID& vendorID, const DeviceID& deviceID, libusb_device *device);
@@ -27,7 +24,7 @@ namespace usb {
         DeviceID getDeviceID() const;
         void openDevice();
         void closeDevice();
-        virtual bool sendData(const std::vector<uint8_t>& data);
+        virtual std::vector<uint8_t> sendData(const std::vector<uint8_t>& data);
 
     protected:
         void _closeDevice();

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <libusb.h>
 #include <memory>
+#include <vector>
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
 #include "src/USB/LibUsbDevice.h"
@@ -32,5 +33,11 @@ namespace spi {
                 pin4 = gpio::GPIOPin(1<<3);
     private:
         std::shared_ptr<usb::LibUSBDevice> mDevice;
+
+        enum class SPIRequestTypes {
+            SendSPIData = 1,
+            SetPortDirection = 2,
+            SetPinActive = 3
+        };
     };
 };

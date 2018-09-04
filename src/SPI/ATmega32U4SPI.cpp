@@ -13,22 +13,40 @@ namespace spi {
     }
 
     void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction, gpio::GPIOPin pin) {
-        auto pinInt = static_cast<uint8_t>(pin);
         if(direction == gpio::gpioDirection::in) {
-            mDevice.get()->sendData({2, pinInt, 0});
+            mDevice.get()->sendData(
+                    {
+                        static_cast<uint8_t >(SPIRequestTypes::SetPortDirection),
+                        static_cast<uint8_t>(pin),
+                        0
+                    });
         } else {
-            mDevice.get()->sendData({2, pinInt, 1});
+            mDevice.get()->sendData(
+                    {
+                        static_cast<uint8_t >(SPIRequestTypes::SetPortDirection),
+                        static_cast<uint8_t>(pin),
+                        1
+                    });
         }
     }
 
     void ATmega32u4SPI::writeGPIO(const gpio::gpioState &state, gpio::GPIOPin pin) {
-        auto pinInt = static_cast<uint8_t>(pin);
         if(state == gpio::gpioState::on) {
             std::cout << "on" << std::endl;
-            mDevice.get()->sendData({3, pinInt, 1});
+            mDevice.get()->sendData(
+                    {
+                        static_cast<uint8_t >(SPIRequestTypes::SetPinActive),
+                        static_cast<uint8_t>(pin),
+                        1
+                    });
         } else {
             std::cout << "off" << std::endl;
-            mDevice.get()->sendData({3, pinInt, 0});
+            mDevice.get()->sendData(
+                    {
+                        static_cast<uint8_t >(SPIRequestTypes::SetPinActive),
+                        static_cast<uint8_t>(pin),
+                        0
+                    });
         }
     }
 
@@ -38,8 +56,16 @@ namespace spi {
     }
 
     spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
-        mDevice.get()->sendData(spiData.getData());
-        return spi::SPIData(std::vector<unsigned char>());
+        //TODO: Check if SPI data is less than 255 single data
+        auto size = static_cast<uint8_t >(spiData.getData().size());
+        std::vector<uint8_t> dataVector;
+
+        dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
+        dataVector.push_back(size);
+        dataVector.insert(std::end(dataVector), std::begin(spiData.getData()), std::end(spiData.getData()));
+
+        auto data = mDevice.get()->sendData(dataVector);
+        return data;
     }
 
     void ATmega32u4SPI::slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) {

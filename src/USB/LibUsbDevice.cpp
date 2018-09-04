@@ -68,9 +68,9 @@ namespace usb {
         }
     }
 
-    bool LibUSBDevice::sendData(const std::vector<uint8_t>& data) {
+    std::vector<uint8_t> LibUSBDevice::sendData(const std::vector<uint8_t>& data) {
         if (!isOpen)
-            return false;
+            return {};
         std::cout << "This shouldn't happen..." << std::endl;
         /*unsigned char spiData[data.getData().size()];
         std::copy(data.getData().begin(), data.getData().end(), spiData);
@@ -79,7 +79,7 @@ namespace usb {
         int r = libusb_bulk_transfer(handle, (1 | LIBUSB_ENDPOINT_OUT), spiData, sizeof(spiData), &actual_length, 0);
         std::cout << "Sending Data Code: " << r << std::endl;
         return false;*/
-        return true;
+        return {};
     }
 
 /*LibUSBDevice &LibUSBDevice::operator=(LibUSBDevice &&other) noexcept  {
