@@ -39,5 +39,10 @@ namespace spi {
             SetPortDirection = 2,
             SetPinActive = 3
         };
+
+        enum class SPIAnswerypes {
+            SPIAnswerWaiting = 0,
+            SPIAnswerOK = 1
+        };
     };
 };

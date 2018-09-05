@@ -32,7 +32,6 @@ namespace spi {
 
     void ATmega32u4SPI::writeGPIO(const gpio::gpioState &state, gpio::GPIOPin pin) {
         if(state == gpio::gpioState::on) {
-            std::cout << "on" << std::endl;
             mDevice.get()->sendData(
                     {
                         static_cast<uint8_t >(SPIRequestTypes::SetPinActive),
@@ -40,7 +39,6 @@ namespace spi {
                         1
                     });
         } else {
-            std::cout << "off" << std::endl;
             mDevice.get()->sendData(
                     {
                         static_cast<uint8_t >(SPIRequestTypes::SetPinActive),
@@ -65,6 +63,18 @@ namespace spi {
         dataVector.insert(std::end(dataVector), std::begin(spiData.getData()), std::end(spiData.getData()));
 
         auto data = mDevice.get()->sendData(dataVector);
+        if(data.empty()) {
+            std::cout << "There was an error with the spi data!" << std::endl;
+        } else {
+            if (data[0] == static_cast<unsigned char>(SPIAnswerypes::SPIAnswerWaiting)) {
+                std::cout << "Failed to send data: device not ready yet..." << std::endl;
+            } else {
+                data.erase(std::begin(data));
+                for(auto dat : data) {
+                    std::cout << static_cast<int>(dat) << std::endl;
+                }
+            }
+        }
         return data;
     }
 

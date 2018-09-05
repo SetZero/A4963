@@ -20,6 +20,12 @@ namespace usb {
         static const int CONTROL_REQUEST_TYPE_OUT =
                 LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE;
 
+        static const int INTERRUPT_IN_ENDPOINT = 0x81;
+        static const int INTERRUPT_OUT_ENDPOINT = 0x01;
+
+        static const int MAX_INTERRUPT_IN_TRANSFER_SIZE = 8;
+        static const int MAX_INTERRUPT_OUT_TRANSFER_SIZE = 8;
+
         // From the HID spec:
 
         static const int HID_GET_REPORT = 0x01;

@@ -2,12 +2,12 @@
 // Created by sebastian on 03.09.18.
 //
 
+#include <thread>
 #include "HIDevice.h"
 
 std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
     if (!isOpen)
         return {};
-    std::cout << "Transfer...";
 
     int bytes_received = 0;
     int bytes_sent = 0;
@@ -15,7 +15,7 @@ std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
     unsigned char data_out[MAX_CONTROL_OUT_TRANSFER_SIZE];
     int result = 0;
 
-    std::cout << "Splitting into " << (data.size() / MAX_CONTROL_OUT_TRANSFER_SIZE) + 1 << " packages" << std::endl;
+    //std::cout << "Splitting into " << (data.size() / MAX_CONTROL_OUT_TRANSFER_SIZE) + 1 << " packages" << std::endl;
     std::vector<uint8_t> dataOutVektor;
     for(size_t i=0; i < (data.size() / MAX_CONTROL_OUT_TRANSFER_SIZE) + 1; i++) {
 
@@ -37,6 +37,7 @@ std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
                 TIMEOUT_MS);
 
         if (bytes_sent >= 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
             /*std::cout << "Feature report data sent:" << std::endl;
             for (size_t d = 0; d < bytes_sent; d++) {
                 std::cout << std::hex << data_out[d] << std::endl;
@@ -54,7 +55,7 @@ std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
                         sizeof(data_in),
                         TIMEOUT_MS);
             }
-            if (bytes_received >= 0) {
+            if (bytes_received > 0) {
                 dataOutVektor.insert(std::end(dataOutVektor), std::begin(data_in), std::begin(data_in) + bytes_received);
             }
         }
