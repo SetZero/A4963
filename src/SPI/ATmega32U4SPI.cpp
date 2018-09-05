@@ -54,6 +54,9 @@ namespace spi {
     }
 
     spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
+        for(auto data : spiData.getData()) {
+            std::cout << "sent: " << static_cast<int >(data) << std::endl;
+        }
         //TODO: Check if SPI data is less than 255 single data
         auto size = static_cast<uint8_t >(spiData.getData().size());
         std::vector<uint8_t> dataVector;

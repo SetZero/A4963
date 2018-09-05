@@ -19,6 +19,16 @@ void EEPROM_send16bitAddress(spi::ATmega32u4SPI& spi, uint16_t address) {
     spi.transfer({second});
 }
 
+spi::SPIData EEPROM_readStatus(spi::ATmega32u4SPI& spi) {
+    using namespace spi::literals;
+    spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
+    spi.transfer(0x05_spi);
+    auto data = spi.transfer(0x00_spi);
+    spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
+    return data;
+}
+
+
 uint8_t EEPROM_writeEnable(spi::ATmega32u4SPI& spi) {
     using namespace spi::literals;
     spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
@@ -44,6 +54,7 @@ void EEPROM_writeByte(spi::ATmega32u4SPI& spi, uint16_t address, uint8_t byte) {
     EEPROM_send16bitAddress(spi, address);
     spi.transfer({byte});
     spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
+    //while(EEPROM_readStatus(spi).getData()[0] & (1 << 0)){;}
 }
 
 int main(int argc, char **argv) {
@@ -104,12 +115,16 @@ int main(int argc, char **argv) {
                     std::cout << "Data: " << j << std::endl;
                 }
             }*/
-            EEPROM_writeByte(spi, 1, 'B');
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            auto back = EEPROM_readByte(spi, 1);
-            for (auto j : back.getData()) {
-                std::cout << "Data: " << j << std::endl;
-            }
+            //std::string str = "Guten Morgen";
+            //for(std::string::size_type i = 0; i < str.size(); i++) {
+                EEPROM_writeByte(spi, 1, 'z');
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                auto back = EEPROM_readByte(spi, 1);
+                for (auto j : back.getData()) {
+                    std::cout << "Data: " << j << std::endl;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            //}
         }
     }
 }
