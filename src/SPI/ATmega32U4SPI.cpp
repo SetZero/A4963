@@ -54,9 +54,9 @@ namespace spi {
     }
 
     spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
-        for(auto data : spiData.getData()) {
+        /*for(auto data : spiData.getData()) {
             std::cout << "sent: " << static_cast<int >(data) << std::endl;
-        }
+        }*/
         //TODO: Check if SPI data is less than 255 single data
         auto size = static_cast<uint8_t >(spiData.getData().size());
         std::vector<uint8_t> dataVector;
@@ -82,15 +82,25 @@ namespace spi {
     }
 
     void ATmega32u4SPI::slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) {
-
+        mSlaves[device] = pin;
     }
 
     void ATmega32u4SPI::slaveSelect(const SPIDevice &slave) {
-
+        auto value = mSlaves.find(slave);
+        if(value != std::end(mSlaves)) {
+            writeGPIO(gpio::gpioState::off, value->second);
+        } else {
+            std::cout << "Error: No such slave found!" << std::endl;
+        }
     }
 
     void ATmega32u4SPI::slaveDeselect(const SPIDevice &slave) {
-
+        auto value = mSlaves.find(slave);
+        if(value != std::end(mSlaves)) {
+            writeGPIO(gpio::gpioState::on, value->second);
+        } else {
+            std::cout << "Error: No such slave found!" << std::endl;
+        }
     }
 }
 

@@ -6,6 +6,15 @@
 
 
 class SPIDevice {
+public:
+    bool operator<(const SPIDevice &rhs) const;
 
+    bool operator>(const SPIDevice &rhs) const;
 
+    bool operator<=(const SPIDevice &rhs) const;
+
+    bool operator>=(const SPIDevice &rhs) const;
+
+private:
+    bool someValue;
 };

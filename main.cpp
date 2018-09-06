@@ -12,49 +12,49 @@
 #include "src/SPI/mcp2210_hal.h"
 #include "src/25LC256.h"
 
-void EEPROM_send16bitAddress(spi::ATmega32u4SPI& spi, uint16_t address) {
+void EEPROM_send16bitAddress(spi::SPIBridge& spi, uint16_t address) {
     auto first = static_cast<uint8_t>(address >> 8);
     auto second = static_cast<uint8_t>(address);
     spi.transfer({first});
     spi.transfer({second});
 }
 
-spi::SPIData EEPROM_readStatus(spi::ATmega32u4SPI& spi) {
+spi::SPIData EEPROM_readStatus(SPIDevice& device, spi::SPIBridge& spi) {
     using namespace spi::literals;
-    spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
+    spi.slaveSelect(device);
     spi.transfer(0x05_spi);
     auto data = spi.transfer(0x00_spi);
-    spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
+    spi.slaveDeselect(device);
     return data;
 }
 
 
-uint8_t EEPROM_writeEnable(spi::ATmega32u4SPI& spi) {
+void EEPROM_writeEnable(SPIDevice& device, spi::SPIBridge& spi) {
     using namespace spi::literals;
-    spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
+    spi.slaveSelect(device);
     spi.transfer(0x06_spi);
-    spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
+    spi.slaveDeselect(device);
 }
 
-spi::SPIData EEPROM_readByte(spi::ATmega32u4SPI& spi, uint16_t address) {
+spi::SPIData EEPROM_readByte(SPIDevice& device, spi::SPIBridge& spi, uint16_t address) {
     using namespace spi::literals;
-    spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
+    spi.slaveSelect(device);
     spi.transfer(0x03_spi);
     EEPROM_send16bitAddress(spi, address);
     auto data = spi.transfer(0x00_spi);
-    spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
+    spi.slaveDeselect(device);
     return data;
 }
 
-void EEPROM_writeByte(spi::ATmega32u4SPI& spi, uint16_t address, uint8_t byte) {
+void EEPROM_writeByte(SPIDevice& device, spi::SPIBridge& spi, uint16_t address, uint8_t byte) {
     using namespace spi::literals;
-    EEPROM_writeEnable(spi);
-    spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
+    EEPROM_writeEnable(device, spi);
+    spi.slaveSelect(device);
     spi.transfer(0x02_spi);
     EEPROM_send16bitAddress(spi, address);
     spi.transfer({byte});
-    spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
-    //while(EEPROM_readStatus(spi).getData()[0] & (1 << 0)){;}
+    spi.slaveDeselect(device);
+    while(EEPROM_readStatus(device, spi).getData()[0] & (1 << 0)){;}
 }
 
 int main(int argc, char **argv) {
@@ -68,13 +68,15 @@ int main(int argc, char **argv) {
 		std::cout << "\nParameter(" << ictr << ") -> " << argv[ictr] << std::endl;
 	}
 
-    if(argc > 2) {
+    if(argc > 1) {
+        using namespace spi::literals;
         std::string str = argv[1];
         std::cout << "Trying to open: " << argv[1] << std::endl;
 
         std::unique_ptr<spi::SPIBridge> bridge = std::make_unique<MCP2210>(str);
-        EEPROM eeprom{bridge};
-        std::cout << "Status: " << std::hex << eeprom.readStatus() << std::endl;
+        bridge->transfer(0x23_spi);
+        //EEPROM eeprom{bridge};
+        //std::cout << "Status: " << std::hex << eeprom.readStatus() << std::endl;
     } else {
         using namespace spi::literals;
 
@@ -84,6 +86,8 @@ int main(int argc, char **argv) {
         if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
             std::cout << "One of them was the Atmega!" << std::endl;
             spi::ATmega32u4SPI spi{*atmega};
+            SPIDevice device{};
+            spi.slaveRegister(device, spi::ATmega32u4SPI::pin0);
             spi.setGPIODirection(gpio::gpioDirection::out, spi::ATmega32u4SPI::pin0);
             /*while(true) {
                 if (blink) {
@@ -104,25 +108,27 @@ int main(int argc, char **argv) {
             spi::SPIData data3 = spi.transfer(0x01_spi);
             spi::SPIData data4 = spi.transfer(0x02_spi);
             spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);*/
-            /*std::string str = "H";
+            std::string str = "golem";
             for(std::string::size_type i = 0; i < str.size(); i++) {
-                EEPROM_writeByte(spi, static_cast<uint16_t>(i), static_cast<uint8_t>(str[i]));
+                EEPROM_writeByte(device, spi, static_cast<uint16_t>(i), static_cast<uint8_t>(str[i]));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             for(std::string::size_type i = 0; i < str.size(); i++) {
-                auto back = EEPROM_readByte(spi, i);
+                auto back = EEPROM_readByte(device, spi, i);
                 for (auto j : back.getData()) {
                     std::cout << "Data: " << j << std::endl;
                 }
-            }*/
+            }
             //std::string str = "Guten Morgen";
             //for(std::string::size_type i = 0; i < str.size(); i++) {
-                EEPROM_writeByte(spi, 1, 'z');
-                std::this_thread::sleep_for(std::chrono::milliseconds(200));
-                auto back = EEPROM_readByte(spi, 1);
-                for (auto j : back.getData()) {
-                    std::cout << "Data: " << j << std::endl;
-                }
+                /*for(size_t i=0;i<4;i++) {
+                    EEPROM_writeByte(device, spi, i, 'k');
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                    auto back = EEPROM_readByte(device, spi, i);
+                    for (auto j : back.getData()) {
+                        std::cout << "Data: " << j << std::endl;
+                    }
+                }*/
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             //}
         }

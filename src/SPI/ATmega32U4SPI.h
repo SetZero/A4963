@@ -8,6 +8,7 @@
 #include <libusb.h>
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
 #include "src/USB/LibUsbDevice.h"
@@ -33,6 +34,7 @@ namespace spi {
                 pin4 = gpio::GPIOPin(1<<3);
     private:
         std::shared_ptr<usb::LibUSBDevice> mDevice;
+        std::map<SPIDevice, gpio::GPIOPin> mSlaves;
 
         enum class SPIRequestTypes {
             SendSPIData = 1,
