@@ -23,7 +23,7 @@ private:
 
     enum class spiSettings : uint16_t {
         mode                = static_cast<uint16_t>(spiMode::mode0),
-        speed			    = 20000,  //bits per second
+        speed			    = 65535,  //bits per second
         actcsval		    = 0xFFEF, //active chip select value
         idlecsval		    = 0xFFFF, //idle chip select value
         gpcsmask		    = 0x0010, //general purpose chip select?
@@ -31,6 +31,7 @@ private:
         data2datadly	    = 0,       // delay between subsequent data bytes
         data2csdly		    = 0       // last data byte to chip select delay
     };
+    std::map<SPIDevice, gpio::GPIOPin> mSlaves;
 
 public:
 

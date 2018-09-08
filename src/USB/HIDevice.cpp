@@ -37,7 +37,7 @@ std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
                 TIMEOUT_MS);
 
         if (bytes_sent >= 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(10));
             /*std::cout << "Feature report data sent:" << std::endl;
             for (size_t d = 0; d < bytes_sent; d++) {
                 std::cout << std::hex << data_out[d] << std::endl;

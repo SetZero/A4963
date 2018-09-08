@@ -114,7 +114,7 @@ int gpio_getdir(int filedesc, uint16_t *pgpdir);
 /* Helper functions */
 void print_report_buffer(unsigned char *bufdata, int len, int rowlen);
 /*==========================================================*/
-#define DEBUG_INFO                                              1
+//#define DEBUG_INFO                                              1
 /* Macros */
 #define MCP2210_HID_REPORT_LEN					64
 #define MCP2210_MAX_SPI_DATA_LEN				60

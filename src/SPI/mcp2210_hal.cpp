@@ -67,15 +67,26 @@ void MCP2210::setGPIODirection(const gpio::gpioDirection& direction, const gpio:
 }
 
 void MCP2210::slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) {
-
+    mSlaves[device] = pin;
+    setGPIODirection(gpio::gpioDirection::out, pin);
 }
 
 void MCP2210::slaveSelect(const SPIDevice &slave) {
-
+    auto value = mSlaves.find(slave);
+    if(value != std::end(mSlaves)) {
+        writeGPIO(gpio::gpioState::off, value->second);
+    } else {
+        std::cout << "Error: No such slave found!" << std::endl;
+    }
 }
 
 void MCP2210::slaveDeselect(const SPIDevice &slave) {
-
+    auto value = mSlaves.find(slave);
+    if(value != std::end(mSlaves)) {
+        writeGPIO(gpio::gpioState::on, value->second);
+    } else {
+        std::cout << "Error: No such slave found!" << std::endl;
+    }
 }
 
 /*void MCP2210::slaveSelect(const gpio::GPIOPin& slave) {

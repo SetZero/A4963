@@ -73,10 +73,19 @@ int main(int argc, char **argv) {
         std::string str = argv[1];
         std::cout << "Trying to open: " << argv[1] << std::endl;
 
-        std::unique_ptr<spi::SPIBridge> bridge = std::make_unique<MCP2210>(str);
-        bridge->transfer(0x23_spi);
-        //EEPROM eeprom{bridge};
-        //std::cout << "Status: " << std::hex << eeprom.readStatus() << std::endl;
+        MCP2210 spi{str};
+        SPIDevice device{};
+        spi.slaveRegister(device, MCP2210::pin0);
+        spi.setGPIODirection(gpio::gpioDirection::out, MCP2210::pin0);
+
+        std::string str2 = "abc";
+        for(std::string::size_type i = 0; i < str2.size(); i++) {
+            EEPROM_writeByte(device, spi, static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
+        }
+        for(std::string::size_type i = 0; i < str2.size(); i++) {
+            auto back = EEPROM_readByte(device, spi, i);
+            std::cout << "Data: " << back.getData()[0] << std::endl;
+        }
     } else {
         using namespace spi::literals;
 
@@ -89,48 +98,15 @@ int main(int argc, char **argv) {
             SPIDevice device{};
             spi.slaveRegister(device, spi::ATmega32u4SPI::pin0);
             spi.setGPIODirection(gpio::gpioDirection::out, spi::ATmega32u4SPI::pin0);
-            /*while(true) {
-                if (blink) {
-                    spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
-                    blink = false;
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                } else {
-                    spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
-                    blink = true;
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                }
-            }*/
-            /*spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);
 
-            spi.writeGPIO(gpio::gpioState::off, spi::ATmega32u4SPI::pin0);
-            spi::SPIData data1 = spi.transfer(0x05_spi);
-            spi::SPIData data2 = spi.transfer(0x00_spi);
-            spi::SPIData data3 = spi.transfer(0x01_spi);
-            spi::SPIData data4 = spi.transfer(0x02_spi);
-            spi.writeGPIO(gpio::gpioState::on, spi::ATmega32u4SPI::pin0);*/
-            std::string str = "golem";
-            for(std::string::size_type i = 0; i < str.size(); i++) {
-                EEPROM_writeByte(device, spi, static_cast<uint16_t>(i), static_cast<uint8_t>(str[i]));
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::string str2 = "Welcome to my World!";
+            for(std::string::size_type i = 0; i < str2.size(); i++) {
+                EEPROM_writeByte(device, spi, static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
             }
-            for(std::string::size_type i = 0; i < str.size(); i++) {
+            for(std::string::size_type i = 0; i < str2.size(); i++) {
                 auto back = EEPROM_readByte(device, spi, i);
-                for (auto j : back.getData()) {
-                    std::cout << "Data: " << j << std::endl;
-                }
+                std::cout << "Data: " << back.getData()[0] << std::endl;
             }
-            //std::string str = "Guten Morgen";
-            //for(std::string::size_type i = 0; i < str.size(); i++) {
-                /*for(size_t i=0;i<4;i++) {
-                    EEPROM_writeByte(device, spi, i, 'k');
-                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-                    auto back = EEPROM_readByte(device, spi, i);
-                    for (auto j : back.getData()) {
-                        std::cout << "Data: " << j << std::endl;
-                    }
-                }*/
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            //}
         }
     }
 }

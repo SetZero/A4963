@@ -73,9 +73,9 @@ namespace spi {
                 std::cout << "Failed to send data: device not ready yet..." << std::endl;
             } else {
                 data.erase(std::begin(data));
-                for(auto dat : data) {
+                /*for(auto dat : data) {
                     std::cout << static_cast<int>(dat) << std::endl;
-                }
+                }*/
             }
         }
         return data;
@@ -83,6 +83,7 @@ namespace spi {
 
     void ATmega32u4SPI::slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) {
         mSlaves[device] = pin;
+        slaveDeselect(device);
     }
 
     void ATmega32u4SPI::slaveSelect(const SPIDevice &slave) {
