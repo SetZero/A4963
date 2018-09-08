@@ -13,7 +13,6 @@ std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
     int bytes_sent = 0;
     unsigned char data_in[MAX_CONTROL_IN_TRANSFER_SIZE];
     unsigned char data_out[MAX_CONTROL_OUT_TRANSFER_SIZE];
-    int result = 0;
 
     //std::cout << "Splitting into " << (data.size() / MAX_CONTROL_OUT_TRANSFER_SIZE) + 1 << " packages" << std::endl;
     std::vector<uint8_t> dataOutVektor;
@@ -37,24 +36,15 @@ std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
                 TIMEOUT_MS);
 
         if (bytes_sent >= 0) {
-            //std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            /*std::cout << "Feature report data sent:" << std::endl;
-            for (size_t d = 0; d < bytes_sent; d++) {
-                std::cout << std::hex << data_out[d] << std::endl;
-            }*/
-
-            //TODO: y tho?
-            for(int y=0; y<2; y++) {
-                bytes_received = libusb_control_transfer(
-                        handle,
-                        CONTROL_REQUEST_TYPE_IN,
-                        HID_GET_REPORT,
-                        (HID_REPORT_TYPE_INPUT << 8) | 0x00,
-                        INTERFACE_NUMBER,
-                        data_in,
-                        sizeof(data_in),
-                        TIMEOUT_MS);
-            }
+            bytes_received = libusb_control_transfer(
+                    handle,
+                    CONTROL_REQUEST_TYPE_IN,
+                    HID_GET_REPORT,
+                    (HID_REPORT_TYPE_INPUT << 8) | 0x00,
+                    INTERFACE_NUMBER,
+                    data_in,
+                    sizeof(data_in),
+                    TIMEOUT_MS);
             if (bytes_received > 0) {
                 dataOutVektor.insert(std::end(dataOutVektor), std::begin(data_in), std::begin(data_in) + bytes_received);
             }

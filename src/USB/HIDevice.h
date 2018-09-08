@@ -14,7 +14,7 @@ namespace usb {
         std::vector<uint8_t> sendData(const std::vector<uint8_t>& data) override;
 
     private:
-        //TODO: move to own class (source: http://janaxelson.com/code/generic_hid.c)
+        //(source: http://janaxelson.com/code/generic_hid.c)
         static const int CONTROL_REQUEST_TYPE_IN =
                 LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE;
         static const int CONTROL_REQUEST_TYPE_OUT =

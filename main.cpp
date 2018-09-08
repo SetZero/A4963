@@ -12,6 +12,7 @@
 #include "src/SPI/mcp2210_hal.h"
 #include "src/25LC256.h"
 
+//TODO: move EEPROM stuff in own class, use pointer to SPIBridge (and self for SPIDevice).
 void EEPROM_send16bitAddress(spi::SPIBridge& spi, uint16_t address) {
     auto first = static_cast<uint8_t>(address >> 8);
     auto second = static_cast<uint8_t>(address);
@@ -59,7 +60,6 @@ void EEPROM_writeByte(SPIDevice& device, spi::SPIBridge& spi, uint16_t address, 
 
 int main(int argc, char **argv) {
     int ictr;
-    bool blink = false;
 
     std::cout << "\nMCP2210 Evaluation Board Tests" << std::endl;
     std::cout << "\nParameters: " << argc << std::endl;
@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
 		std::cout << "\nParameter(" << ictr << ") -> " << argv[ictr] << std::endl;
 	}
 
+	//TODO: remove redundancy
     if(argc > 1) {
         using namespace spi::literals;
         std::string str = argv[1];

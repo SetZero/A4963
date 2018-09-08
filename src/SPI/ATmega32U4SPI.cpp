@@ -81,6 +81,7 @@ namespace spi {
         return data;
     }
 
+    //TODO: Move this in parent class, don't make a copy of device (use pointer)
     void ATmega32u4SPI::slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) {
         mSlaves[device] = pin;
         slaveDeselect(device);
