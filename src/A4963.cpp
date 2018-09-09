@@ -25,6 +25,7 @@ template<typename T>
 A4963::size_type A4963::createRegisterEntry(T data, const A4963::RegisterPosition &position, const A4963::RegisterMask &mask) {
     A4963::size_type registerData = 0;
     registerData = (static_cast<size_type>(data) << static_cast<size_type>(position)) & static_cast<size_type>(mask);
+    return registerData;
 }
 
 void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
