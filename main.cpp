@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     using namespace spi::literals;
     std::cout << "Starting Atmega32u4..." << std::endl;
     usb::LibUSBDeviceList deviceList;
-    std::cout << "Found " << deviceList.getDevices().size() << " devices" << std::endl;
+    std::cout << "Found " << deviceList.size() << " devices" << std::endl;
     if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
         std::cout << "One of them was the Atmega!" << std::endl;
         auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);

@@ -19,7 +19,7 @@ namespace usb {
         LibUSBDeviceList();
         virtual ~LibUSBDeviceList();
 
-        const std::vector<std::shared_ptr<LibUSBDevice>> &getDevices() const;
+        size_t size();
         const std::optional<std::shared_ptr<LibUSBDevice>> findDevice(const VendorID& vendorID, const DeviceID& deviceID);
 
     private:
@@ -27,8 +27,10 @@ namespace usb {
         libusb_device **list = nullptr;
         ssize_t device_count = 0;
 
-        std::vector<std::shared_ptr<LibUSBDevice>> mDevices;
+        std::unordered_map<size_t, std::shared_ptr<LibUSBDevice>> mDevices;
+        size_t mDeviceID = 0;
 
+        void addDevice(VendorID vendorID, DeviceID deviceID, libusb_device *device);
     };
 }
 

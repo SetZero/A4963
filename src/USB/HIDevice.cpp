@@ -53,7 +53,7 @@ std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
     return dataOutVektor;
 }
 
-usb::HIDevice::HIDevice(const usb::VendorID &vendorID, const usb::DeviceID &deviceID, libusb_device *device)
-        : LibUSBDevice(vendorID, deviceID, device) {
+usb::HIDevice::HIDevice(const usb::VendorID &vendorID, const usb::DeviceID &deviceID, libusb_device *device, size_t usbID)
+        : LibUSBDevice(vendorID, deviceID, device, usbID) {
 
 }

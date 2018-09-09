@@ -10,7 +10,7 @@
 namespace usb {
     class HIDevice : public LibUSBDevice {
     public:
-        HIDevice(const VendorID& vendorID, const DeviceID& deviceID, libusb_device *device);
+        HIDevice(const VendorID& vendorID, const DeviceID& deviceID, libusb_device *device, size_t usbID);
         std::vector<uint8_t> sendData(const std::vector<uint8_t>& data) override;
 
     private:

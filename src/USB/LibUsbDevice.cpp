@@ -13,9 +13,11 @@ namespace usb {
         return deviceID;
     }
 
-    LibUSBDevice::LibUSBDevice(const VendorID& vendorID, const DeviceID& deviceID, libusb_device *device) : vendorID(vendorID),
+    LibUSBDevice::LibUSBDevice(const VendorID& vendorID, const DeviceID& deviceID, libusb_device *device, size_t usbID) : vendorID(vendorID),
                                                                                                             deviceID(deviceID),
-                                                                                                            device(device) {}
+                                                                                                            device(device),
+                                                                                                            mUsbID(usbID){}
+
 
     LibUSBDevice::~LibUSBDevice() {
         _closeDevice();
@@ -72,20 +74,12 @@ namespace usb {
         if (!isOpen)
             return {};
         std::cout << "This shouldn't happen..." << std::endl;
-        /*unsigned char spiData[data.getData().size()];
-        std::copy(data.getData().begin(), data.getData().end(), spiData);
+        unsigned char spiData[data.size()];
+        std::copy(data.begin(), data.end(), spiData);
 
         int actual_length = 0;
         int r = libusb_bulk_transfer(handle, (1 | LIBUSB_ENDPOINT_OUT), spiData, sizeof(spiData), &actual_length, 0);
         std::cout << "Sending Data Code: " << r << std::endl;
-        return false;*/
         return {};
     }
-
-/*LibUSBDevice &LibUSBDevice::operator=(LibUSBDevice &&other) noexcept  {
-    std::swap(vendorID, other.vendorID);
-    std::swap(deviceID, other.deviceID);
-    std::swap(device, other.device);
-    return *this;
-}*/
 }
