@@ -31,7 +31,7 @@ private:
         data2datadly	    = 0,       // delay between subsequent data bytes
         data2csdly		    = 0       // last data byte to chip select delay
     };
-    std::map<SPIDevice, gpio::GPIOPin> mSlaves;
+    std::map<std::shared_ptr<SPIDevice>, gpio::GPIOPin> mSlaves;
 
 public:
 
@@ -45,7 +45,7 @@ public:
     void setGPIODirection(const gpio::gpioDirection& direction, gpio::GPIOPin pin) override;
     void writeGPIO(const gpio::gpioState& state, gpio::GPIOPin pin) override;
     gpio::gpioState readGPIO(gpio::GPIOPin pin) const override;
-    void slaveRegister(const SPIDevice& device, const gpio::GPIOPin& pin) override;
-    void slaveSelect(const SPIDevice& slave) override;
-    void slaveDeselect(const SPIDevice& slave) override;
+    void slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin& pin) override;
+    void slaveSelect(std::shared_ptr<SPIDevice> slave) override;
+    void slaveDeselect(std::shared_ptr<SPIDevice> slave) override;
 };

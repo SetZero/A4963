@@ -81,13 +81,12 @@ namespace spi {
         return data;
     }
 
-    //TODO: Move this in parent class, don't make a copy of device (use pointer)
-    void ATmega32u4SPI::slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) {
+    void ATmega32u4SPI::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) {
         mSlaves[device] = pin;
         slaveDeselect(device);
     }
 
-    void ATmega32u4SPI::slaveSelect(const SPIDevice &slave) {
+    void ATmega32u4SPI::slaveSelect(std::shared_ptr<SPIDevice> slave) {
         auto value = mSlaves.find(slave);
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::off, value->second);
@@ -96,7 +95,7 @@ namespace spi {
         }
     }
 
-    void ATmega32u4SPI::slaveDeselect(const SPIDevice &slave) {
+    void ATmega32u4SPI::slaveDeselect(std::shared_ptr<SPIDevice> slave) {
         auto value = mSlaves.find(slave);
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::on, value->second);

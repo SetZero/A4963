@@ -2,6 +2,7 @@
 #include <utility>
 #include <vector>
 #include <map>
+#include <memory>
 #include "GPIOBridge.h"
 #include "SPIDevice.h"
 
@@ -33,8 +34,8 @@ namespace spi {
     public:
         virtual ~SPIBridge() = default;
         virtual SPIData transfer(const SPIData& spiData) const = 0;
-        virtual void slaveRegister(const SPIDevice& device, const gpio::GPIOPin& pin) = 0;
-        virtual void slaveSelect(const SPIDevice& slave) = 0;
-        virtual void slaveDeselect(const SPIDevice& slave) = 0;
+        virtual void slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin& pin) = 0;
+        virtual void slaveSelect(std::shared_ptr<SPIDevice> slave) = 0;
+        virtual void slaveDeselect(std::shared_ptr<SPIDevice> slave) = 0;
     };
 }

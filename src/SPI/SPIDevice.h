@@ -4,8 +4,10 @@
 
 #pragma once
 
+#include <memory>
 
-class SPIDevice {
+
+class SPIDevice : public std::enable_shared_from_this<SPIDevice> {
 public:
     bool operator<(const SPIDevice &rhs) const;
 

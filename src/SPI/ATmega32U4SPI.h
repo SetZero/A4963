@@ -25,16 +25,16 @@ namespace spi {
         void writeGPIO(const gpio::gpioState &state, gpio::GPIOPin pin) override;
         gpio::gpioState readGPIO(gpio::GPIOPin pin) const override;
         spi::SPIData transfer(const spi::SPIData &spiData) const override;
-        void slaveRegister(const SPIDevice &device, const gpio::GPIOPin &pin) override;
-        void slaveSelect(const SPIDevice &slave) override;
-        void slaveDeselect(const SPIDevice &slave) override;
+        void slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) override;
+        void slaveSelect(std::shared_ptr<SPIDevice> slave) override;
+        void slaveDeselect(std::shared_ptr<SPIDevice> slave) override;
 
         static constexpr gpio::GPIOPin
                 pin0 = gpio::GPIOPin(0), pin1 = gpio::GPIOPin(1<<0), pin2 = gpio::GPIOPin(1<<1), pin3 = gpio::GPIOPin(1<<2),
                 pin4 = gpio::GPIOPin(1<<3);
     private:
         std::shared_ptr<usb::LibUSBDevice> mDevice;
-        std::map<SPIDevice, gpio::GPIOPin> mSlaves;
+        std::map<std::shared_ptr<SPIDevice>, gpio::GPIOPin> mSlaves;
 
         enum class SPIRequestTypes {
             SendSPIData = 1,
