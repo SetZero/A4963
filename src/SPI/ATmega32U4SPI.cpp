@@ -58,6 +58,7 @@ namespace spi {
             std::cout << "sent: " << static_cast<int >(data) << std::endl;
         }*/
         //TODO: Check if SPI data is less than 255 single data
+        //TODO: allow multi byte transfer for spiData!
         auto size = static_cast<uint8_t >(spiData.getData().size());
         std::vector<uint8_t> dataVector;
 
@@ -82,6 +83,7 @@ namespace spi {
     }
 
     void ATmega32u4SPI::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) {
+        setGPIODirection(gpio::gpioDirection::out, pin);
         mSlaves[device] = pin;
         slaveDeselect(device);
     }
