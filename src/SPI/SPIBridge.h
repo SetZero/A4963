@@ -23,6 +23,29 @@ namespace spi {
             return mData;
         }
 
+        SPIData& operator+=(const SPIData& rhs) {
+            mData.insert(std::end(mData), std::begin(rhs.mData), std::end(rhs.mData));
+            return *this;
+        }
+
+        explicit operator uint16_t() {
+            if(mData.size() >= 2) {
+                return (static_cast<uint16_t >(mData[0]) << 8) | static_cast<uint16_t>(mData[1]);
+            } else if(mData.size() == 1) {
+                return static_cast<uint8_t>(mData[0]);
+            } else {
+                return 0;
+            }
+        }
+
+        explicit operator uint8_t() {
+            if(!mData.empty()) {
+                return static_cast<uint8_t>(mData[0]);
+            } else {
+                return 0;
+            }
+        }
+
     private:
         std::vector<unsigned char> mData;
     };
@@ -38,4 +61,10 @@ namespace spi {
         virtual void slaveSelect(std::shared_ptr<SPIDevice> slave) = 0;
         virtual void slaveDeselect(std::shared_ptr<SPIDevice> slave) = 0;
     };
+}
+
+inline spi::SPIData operator+(spi::SPIData lhs, const spi::SPIData& rhs)
+{
+    lhs += rhs;
+    return lhs;
 }

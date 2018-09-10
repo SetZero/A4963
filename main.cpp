@@ -38,6 +38,8 @@ int main(int argc, char **argv) {
         device->setRecirculationMode(A4963::RecirculationModeTypes::High);
         device->commit();
 
+        device->_dbg_reload_commit_and_get_register0();
+
         /*std::string str2 = "Other Text!";
         for(std::string::size_type i = 0; i < str2.size(); i++) {
             device->writeByte(static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
