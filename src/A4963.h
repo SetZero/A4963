@@ -56,11 +56,12 @@ private:
 
     void clearRegister(const RegisterCodes& reg);
     void writeRegister(const RegisterCodes& reg, size_type data);
-    void reloadRegister(const RegisterCodes& reg);
+    void markRegisterForReload(const RegisterCodes &reg);
     spi::SPIData send16bitRegister(size_type address);
     template<typename T>
     size_type createRegisterEntry(T data, const RegisterPosition& position, const RegisterMask& mask);
     size_type getRegisterEntry(const RegisterCodes& registerEntry,  const RegisterPosition& position, const RegisterMask& mask);
+    size_type readRegister(const RegisterCodes& registerCodes);
 public:
 
     enum class RecirculationModeTypes : uint8_t {
@@ -71,8 +72,9 @@ public:
     };
 
     //TODO: read current values in mRegisterData
-    A4963(std::shared_ptr<spi::SPIBridge> mBridge);
+    explicit A4963(std::shared_ptr<spi::SPIBridge> mBridge);
     void setRecirculationMode(const RecirculationModeTypes& type);
     void commit();
-    uint16_t _dbg_reload_commit_and_get_register0();
+    void commit(const RegisterCodes& registerCodes);
+    void show_register();
 };

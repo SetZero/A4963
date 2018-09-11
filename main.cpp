@@ -35,10 +35,10 @@ int main(int argc, char **argv) {
         auto device = std::make_shared<A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
 
-        device->setRecirculationMode(A4963::RecirculationModeTypes::High);
-        device->commit();
+        //device->setRecirculationMode(A4963::RecirculationModeTypes::High);
+        //device->commit();
 
-        device->_dbg_reload_commit_and_get_register0();
+        device->show_register();
 
         /*std::string str2 = "Other Text!";
         for(std::string::size_type i = 0; i < str2.size(); i++) {

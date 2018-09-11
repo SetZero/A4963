@@ -1,4 +1,5 @@
 #include <utility>
+#include <bitset>
 
 #include "A4963.h"
 
@@ -15,7 +16,17 @@ spi::SPIData A4963::send16bitRegister(size_type address) {
     return msb;
 }
 
-A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {}
+A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {
+    //reload all register
+    markRegisterForReload(A4963::RegisterCodes::Config0);
+    markRegisterForReload(A4963::RegisterCodes::Config1);
+    markRegisterForReload(A4963::RegisterCodes::Config2);
+    markRegisterForReload(A4963::RegisterCodes::Config3);
+    markRegisterForReload(A4963::RegisterCodes::Config4);
+    markRegisterForReload(A4963::RegisterCodes::Config5);
+    markRegisterForReload(A4963::RegisterCodes::Mask);
+    markRegisterForReload(A4963::RegisterCodes::Run);
+}
 
 void A4963::writeRegister(const A4963::RegisterCodes &reg, size_type data) {
     clearRegister(reg);
@@ -25,7 +36,7 @@ void A4963::writeRegister(const A4963::RegisterCodes &reg, size_type data) {
     mRegisterData[reg].dirty = true;
 }
 
-void A4963::reloadRegister(const A4963::RegisterCodes &reg) {
+void A4963::markRegisterForReload(const A4963::RegisterCodes &reg) {
     clearRegister(reg);
     mRegisterData[reg].data |= createRegisterEntry(reg, RegisterPosition::RegisterAddress, RegisterMask::RegisterAddress);
     mRegisterData[reg].data |= createRegisterEntry(WriteBit::Read, RegisterPosition::WriteAddress, RegisterMask::WriteAddress);
@@ -54,21 +65,36 @@ void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
 
 void A4963::commit() {
     for(auto& data : mRegisterData) {
-        if(data.second.dirty) {
-            mBridge->slaveSelect(shared_from_this());
-            if(getRegisterEntry(data.first, RegisterPosition::WriteAddress, RegisterMask::WriteAddress) == static_cast<uint16_t>(WriteBit::Read)) {
-                mRegisterData[data.first].data = static_cast<uint16_t>(send16bitRegister(data.second.data));
-            } else {
-                send16bitRegister(data.second.data);
-            }
-            mBridge->slaveDeselect(shared_from_this());
-            data.second.dirty = false;
-        }
+        commit(data.first);
     }
 }
 
-uint16_t A4963::_dbg_reload_commit_and_get_register0() {
-    reloadRegister(A4963::RegisterCodes::Config0);
-    commit();
-    return mRegisterData[A4963::RegisterCodes::Config0].data;
+void A4963::commit(const A4963::RegisterCodes& registerCodes) {
+    if(mRegisterData[registerCodes].dirty) {
+        mBridge->slaveSelect(shared_from_this());
+        if(getRegisterEntry(registerCodes, RegisterPosition::WriteAddress, RegisterMask::WriteAddress) == static_cast<A4963::size_type>(WriteBit::Read)) {
+            mRegisterData[registerCodes].data = createRegisterEntry(registerCodes, RegisterPosition::RegisterAddress, RegisterMask::RegisterAddress) |
+                    (static_cast<A4963::size_type>(send16bitRegister(mRegisterData[registerCodes].data)) &
+                    static_cast<A4963::size_type>(RegisterMask::GeneralData));
+        } else {
+            send16bitRegister(mRegisterData[registerCodes].data);
+        }
+        mBridge->slaveDeselect(shared_from_this());
+        mRegisterData[registerCodes].dirty = false;
+    }
 }
+
+void A4963::show_register() {
+    for(auto registerData : mRegisterData) {
+        std::bitset<16> set(readRegister(registerData.first));
+        std::cout << static_cast<A4963::size_type>(registerData.first) << ": " <<  set << std::endl;
+    }
+}
+
+A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes) {
+    if(mRegisterData[registerCodes].dirty) {
+        commit(registerCodes);
+    }
+    return mRegisterData[registerCodes].data;
+}
+
