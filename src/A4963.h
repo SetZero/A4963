@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <memory>
+#include <chrono>
 #include "src/SPI/mcp2210_hal.h"
 
 class A4963 : public SPIDevice {
@@ -62,6 +63,7 @@ private:
     size_type createRegisterEntry(T data, const RegisterPosition& position, const RegisterMask& mask);
     size_type getRegisterEntry(const RegisterCodes& registerEntry,  const RegisterPosition& position, const RegisterMask& mask);
     size_type readRegister(const RegisterCodes& registerCodes);
+    void commit(const RegisterCodes& registerCodes);
 public:
 
     enum class RecirculationModeTypes : uint8_t {
@@ -74,7 +76,8 @@ public:
     //TODO: read current values in mRegisterData
     explicit A4963(std::shared_ptr<spi::SPIBridge> mBridge);
     void setRecirculationMode(const RecirculationModeTypes& type);
+    void setBlankTime(const std::chrono::nanoseconds& time);
+    void setDeadTime(const std::chrono::nanoseconds& time);
     void commit();
-    void commit(const RegisterCodes& registerCodes);
     void show_register();
 };

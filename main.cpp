@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
 	//MCP2210 spi{str};
 
     using namespace spi::literals;
+    using namespace std::chrono_literals;
     std::cout << "Starting Atmega32u4..." << std::endl;
     usb::LibUSBDeviceList deviceList;
     std::cout << "Found " << deviceList.size() << " devices" << std::endl;
@@ -39,6 +40,7 @@ int main(int argc, char **argv) {
         //device->commit();
 
         device->show_register();
+        device->setBlankTime(1ns);
 
         /*std::string str2 = "Other Text!";
         for(std::string::size_type i = 0; i < str2.size(); i++) {

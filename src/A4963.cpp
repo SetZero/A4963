@@ -98,3 +98,27 @@ A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes) 
     return mRegisterData[registerCodes].data;
 }
 
+void A4963::setBlankTime(const std::chrono::nanoseconds& time) {
+    using namespace std::chrono_literals;
+    auto precision = 400ns;
+    auto maxValue = 6us;
+    auto minValue = 0ns;
+
+    if(time >= minValue && time <= maxValue) {
+        auto steps = std::chrono::duration_cast<std::chrono::nanoseconds>(time);
+        auto value = steps / precision;
+        std::cout << value << std::endl;
+    } else {
+        //TODO: remove hardcoded value
+        std::cerr << "the given blank time value is not between 0ns and 6us" << std::endl;
+    }
+}
+
+void A4963::setDeadTime(const std::chrono::nanoseconds& time) {
+    using namespace std::chrono_literals;
+    auto precision = 50ns;
+    auto maxValue = 3.15us;
+    auto minValue = 100ns;
+    //TODO: make to more generic (move together with blank time)
+
+}
