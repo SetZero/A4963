@@ -73,9 +73,9 @@ public:
         Off  = 0b11
     };
 
-    //TODO: read current values in mRegisterData
     explicit A4963(std::shared_ptr<spi::SPIBridge> mBridge);
     void setRecirculationMode(const RecirculationModeTypes& type);
+    //TODO: use duration instead of fix nanoseconds...
     void setBlankTime(const std::chrono::nanoseconds& time);
     void setDeadTime(const std::chrono::nanoseconds& time);
     void commit();
