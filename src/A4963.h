@@ -3,6 +3,7 @@
 #include <memory>
 #include <chrono>
 #include "src/SPI/mcp2210_hal.h"
+#include "DurationScale.h"
 
 class A4963 : public SPIDevice {
 private:
@@ -56,7 +57,7 @@ private:
     std::map<RegisterCodes, RegisterInfo> mRegisterData;
 
     void clearRegister(const RegisterCodes& reg);
-    void writeRegister(const RegisterCodes& reg, size_type data);
+    void writeRegister(const RegisterCodes& reg, const A4963::RegisterMask &mask, size_type data);
     void markRegisterForReload(const RegisterCodes &reg);
     spi::SPIData send16bitRegister(size_type address);
     template<typename T>

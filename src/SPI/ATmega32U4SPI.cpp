@@ -49,7 +49,7 @@ namespace spi {
     }
 
     gpio::gpioState ATmega32u4SPI::readGPIO(gpio::GPIOPin pin) const {
-        gpio::gpioState state = gpio::gpioState::off;
+        auto state = gpio::gpioState::off;
         return state;
     }
 
