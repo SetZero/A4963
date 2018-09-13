@@ -101,7 +101,7 @@ void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
 
 void A4963::setBlankTime(const std::chrono::nanoseconds& time) {
     using namespace std::chrono_literals;
-    static DurationScale<std::chrono::duration<long double, std::ratio<1, 1000000>>, A4963::size_type> scale{{precision: 400ns, maxValue: 6ns, minValue: 0us}};
+    static DurationScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{precision: 400ns, maxValue: 6ns, minValue: 0us}};
     if(auto checkedValue = scale.checkValue(time)) {
         //TODO: Currently wrong register(should be BlankTime!!!)
         //TODO: Check if this is even working
@@ -112,7 +112,7 @@ void A4963::setBlankTime(const std::chrono::nanoseconds& time) {
 
 void A4963::setDeadTime(const std::chrono::nanoseconds& time) {
     using namespace std::chrono_literals;
-    static DurationScale<std::chrono::duration<long double, std::ratio<1, 1000000>>, A4963::size_type> scale{{precision: 50ns, maxValue: 3.15us, minValue: 100ns}};
+    static DurationScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{precision: 50ns, maxValue: 3.15us, minValue: 100ns}};
     if(auto checkedValue = scale.checkValue(time)) {
         //TODO: Currently wrong register(should be BlankTime!!!)
         A4963::size_type data = createRegisterEntry(*checkedValue, RegisterPosition::RecirculationModeAddress, RegisterMask::RecirculationModeAddress);
