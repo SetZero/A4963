@@ -4,13 +4,15 @@
 
 #pragma once
 
+#include <stdint.h>
+
 namespace gpio {
 
 
-    enum class gpioState {
+    enum class gpioState : uint8_t {
         on, off
     };
-    enum class gpioDirection {
+    enum class gpioDirection : uint8_t {
         in, out
     };
 

@@ -1,7 +1,8 @@
 //
-// Created by sebastian on 31.08.18.
+// Created by sebastian on 13.09.18.
 //
 
+<<<<<<< HEAD:src/SPIDevice.cpp
 #include "SPIDevice.h"
 
 const gpio::GPIOPin &SPIDevice::getSlavePin() const{
@@ -11,3 +12,6 @@ const gpio::GPIOPin &SPIDevice::getSlavePin() const{
 void SPIDevice::selectPin(const gpio::GPIOPin &pin) const{
     slavePin = pin;
 }
+=======
+#include "DurationScale.h"
+>>>>>>> master:src/DurationScale.cpp

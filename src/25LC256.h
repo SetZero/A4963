@@ -1,9 +1,9 @@
 #pragma once
 #include <stdint.h>
 #include <memory>
-#include "mcp2210_hal.h"
+#include "src/SPI/mcp2210_hal.h"
 
-class EEPROM {
+class EEPROM : public SPIDevice {
 private:
     struct Commands {
         static const uint8_t EEPROM_READ    =   0b00000011; //read memory
@@ -16,9 +16,13 @@ private:
         static const uint8_t EEPROM_WRSR    =   0b00000001; // write status register
     };
     
-    std::unique_ptr<spi::SPIBridge> mBridge;
+    std::shared_ptr<spi::SPIBridge> mBridge;
 public:
-    explicit EEPROM(std::unique_ptr<spi::SPIBridge>& bridge);
-    void send16BitAddress(uint16_t address);
-    uint8_t readStatus();
+    EEPROM(std::shared_ptr<spi::SPIBridge> mBridge);
+
+    void send16bitAddress(uint16_t address);
+    spi::SPIData readStatus();
+    void writeEnable();
+    spi::SPIData readByte(uint16_t address);
+    void writeByte(uint16_t address, uint8_t byte);
 };
