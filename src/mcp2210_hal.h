@@ -10,16 +10,19 @@
 class MCP2210 final : public spi::SPIBridge, public gpio::GPIOBridge{
 private:
     static constexpr int SPI_BUF_LEN = 1024;
-    inline static auto txdata = std::unique_ptr<unsigned char[]>(new unsigned char[SPI_BUF_LEN]);
-    inline static auto rxdata = std::unique_ptr<unsigned char[]>(new unsigned char[SPI_BUF_LEN]);
+    inline static auto txdata = std::make_unique<unsigned char[]>(SPI_BUF_LEN);
+    inline static auto rxdata = std::make_unique<unsigned char[]>(SPI_BUF_LEN);
     int fd;
-
     enum class spiMode : uint16_t{
         mode0 = 0, //clock polarity = 0 clock phase = 0
         mode1 = 1, //clock polarity = 0 clock phase = 1
         mode2 = 2, //clock polarity = 1 clock phase = 0
         mode3 = 3  //clock polarity = 1 clock phase = 1
     };
+public:
+    int getFd() const;
+
+private:
 
     enum class spiSettings : uint16_t {
         mode                = static_cast<uint16_t>(spiMode::mode0),
@@ -33,12 +36,13 @@ private:
     };
 
 public:
-
+    inline static bool connection = false;
     static constexpr gpio::GPIOPin
     pin0 = gpio::GPIOPin(1<<0), pin1 = gpio::GPIOPin(1<<1), pin2 = gpio::GPIOPin(1<<2), pin3 = gpio::GPIOPin(1<<3),
     pin4 = gpio::GPIOPin(1<<4), pin5 = gpio::GPIOPin(1<<6), pin6 = gpio::GPIOPin(1<<6), pin7 = gpio::GPIOPin(1<<7);
 
-    explicit MCP2210(std::string device);
+    explicit MCP2210(char number);
+    explicit MCP2210();
     ~MCP2210() override;
     spi::SPIData transfer(const spi::SPIData& input) const override;
     void setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin& pin) override;
@@ -46,5 +50,5 @@ public:
     gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;
     void slaveSelect(const SPIDevice& slave) override;
     void slaveDeselect(const SPIDevice& slave) override;
-    void slaveRegister(const SPIDevice& device, const gpio::GPIOPin& pin) override;
+    void slaveRegister(SPIDevice& device, const gpio::GPIOPin& pin) override;
 };
