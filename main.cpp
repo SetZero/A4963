@@ -41,8 +41,13 @@ int main(int argc, char **argv) {
         //device->setRecirculationMode(A4963::RecirculationModeTypes::High);
         //device->commit();
 
+        auto actldedtime = device->setDeadTime(1us);
+        std::cout << "Actual Dead Time: " << std::chrono::nanoseconds(*actldedtime).count() << "ns" <<  std::endl;
+        auto actlblktime = device->setBlankTime(800ns);
+        std::cout << "Actual Blank Time: " << std::chrono::nanoseconds(*actlblktime).count() << "ns" <<  std::endl;
+        device->commit();
+
         device->show_register();
-        device->setBlankTime(1ns);
 
         /*std::string str2 = "Other Text!";
         for(std::string::size_type i = 0; i < str2.size(); i++) {

@@ -14,6 +14,7 @@ private:
         /* Common Addresses */
         RegisterAddress          = 0b1110000000000000,
         WriteAddress             = 0b0001000000000000,
+        RegisterAndWriteAddress  = 0b1111000000000000,
         GeneralData              = 0b0000111111111111,
 
         /* Config0 Addresses */
@@ -57,7 +58,8 @@ private:
     std::map<RegisterCodes, RegisterInfo> mRegisterData;
 
     void clearRegister(const RegisterCodes& reg);
-    void writeRegister(const RegisterCodes& reg, const A4963::RegisterMask &mask, size_type data);
+    void clearRegister(const RegisterCodes& reg, const A4963::RegisterMask &mask);
+    void writeRegisterEntry(const RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data);
     void markRegisterForReload(const RegisterCodes &reg);
     spi::SPIData send16bitRegister(size_type address);
     template<typename T>
@@ -76,9 +78,33 @@ public:
 
     explicit A4963(std::shared_ptr<spi::SPIBridge> mBridge);
     void setRecirculationMode(const RecirculationModeTypes& type);
+
     //TODO: use duration instead of fix nanoseconds...
-    void setBlankTime(const std::chrono::nanoseconds& time);
-    void setDeadTime(const std::chrono::nanoseconds& time);
+    template<typename Rep, typename Period>
+    std::optional<const std::chrono::duration<Rep, Period>> setBlankTime(const std::chrono::duration<Rep, Period>& time) {
+        using namespace std::chrono_literals;
+        static DurationScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{precision: 400ns, maxValue: 6us, minValue: 0us}};
+
+        if(auto checkedValue = scale.checkValue(time)) {
+            A4963::size_type data = createRegisterEntry(*checkedValue, RegisterPosition::BlankTimeAddress, RegisterMask::BlankTimeAddress);
+            writeRegisterEntry(RegisterCodes::Config0, RegisterMask::BlankTimeAddress, data);
+            return {std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(scale.getActualTime(*checkedValue))};
+        }
+        return std::nullopt;
+    }
+
+    template<typename Rep, typename Period>
+    std::optional<const std::chrono::duration<Rep, Period>> setDeadTime(const std::chrono::duration<Rep, Period>& time) {
+        using namespace std::chrono_literals;
+        static DurationScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{precision: 50ns, maxValue: 3.15us, minValue: 100ns}};
+
+        if(auto checkedValue = scale.checkValue(time)) {
+            A4963::size_type data = createRegisterEntry(*checkedValue, RegisterPosition::DeadTimeAddress, RegisterMask::DeadTimeAddress);
+            writeRegisterEntry(RegisterCodes::Config0, RegisterMask::DeadTimeAddress, data);
+            return {std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(scale.getActualTime(*checkedValue))};
+        }
+        return std::nullopt;
+    }
     void commit();
     void show_register();
 };

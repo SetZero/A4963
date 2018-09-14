@@ -8,6 +8,11 @@ void A4963::clearRegister(const A4963::RegisterCodes &reg) {
     mRegisterData[reg].data = 0;
 }
 
+
+void A4963::clearRegister(const A4963::RegisterCodes &reg, const A4963::RegisterMask &mask) {
+    mRegisterData[reg].data &= ~(static_cast<A4963::size_type>(mask));
+}
+
 spi::SPIData A4963::send16bitRegister(size_type address) {
     auto first = static_cast<uint8_t>(address >> 8);
     auto second = static_cast<uint8_t>(address);
@@ -28,11 +33,12 @@ A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridg
     markRegisterForReload(A4963::RegisterCodes::Run);
 }
 
-void A4963::writeRegister(const A4963::RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data) {
-    clearRegister(reg);
+void A4963::writeRegisterEntry(const A4963::RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data) {
+    clearRegister(reg, RegisterMask::RegisterAndWriteAddress);
+    clearRegister(reg, mask);
+    
     mRegisterData[reg].data |= createRegisterEntry(reg, RegisterPosition::RegisterAddress, RegisterMask::RegisterAddress);
     mRegisterData[reg].data |= createRegisterEntry(WriteBit::Write, RegisterPosition::WriteAddress, RegisterMask::WriteAddress);
-    mRegisterData[reg].data &= ~(static_cast<A4963::size_type>(mask));
     mRegisterData[reg].data |= createRegisterEntry(data, RegisterPosition::GeneralData, RegisterMask::GeneralData);
     mRegisterData[reg].dirty = true;
 }
@@ -96,27 +102,5 @@ A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes) 
 
 void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
     A4963::size_type data = createRegisterEntry(type, RegisterPosition::RecirculationModeAddress, RegisterMask::RecirculationModeAddress);
-    writeRegister(RegisterCodes::Config0, RegisterMask::RecirculationModeAddress, data);
-}
-
-void A4963::setBlankTime(const std::chrono::nanoseconds& time) {
-    using namespace std::chrono_literals;
-    static DurationScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{precision: 400ns, maxValue: 6ns, minValue: 0us}};
-    if(auto checkedValue = scale.checkValue(time)) {
-        //TODO: Currently wrong register(should be BlankTime!!!)
-        //TODO: Check if this is even working
-        A4963::size_type data = createRegisterEntry(*checkedValue, RegisterPosition::RecirculationModeAddress, RegisterMask::RecirculationModeAddress);
-        writeRegister(RegisterCodes::Config0, RegisterMask::RecirculationModeAddress, data);
-    }
-}
-
-void A4963::setDeadTime(const std::chrono::nanoseconds& time) {
-    using namespace std::chrono_literals;
-    static DurationScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{precision: 50ns, maxValue: 3.15us, minValue: 100ns}};
-    if(auto checkedValue = scale.checkValue(time)) {
-        //TODO: Currently wrong register(should be BlankTime!!!)
-        A4963::size_type data = createRegisterEntry(*checkedValue, RegisterPosition::RecirculationModeAddress, RegisterMask::RecirculationModeAddress);
-        writeRegister(RegisterCodes::Config0, RegisterMask::RecirculationModeAddress, data);
-    }
-
+    writeRegisterEntry(RegisterCodes::Config0, RegisterMask::RecirculationModeAddress, data);
 }
