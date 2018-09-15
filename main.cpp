@@ -14,7 +14,7 @@
 #include "A4963.h"
 #include "DurationScale.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) {/*
     int ictr;
 
     std::cout << "\nMCP2210 Evaluation Board Tests" << std::endl;
