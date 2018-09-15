@@ -4,13 +4,15 @@
 
 #pragma once
 
+#include <stdint.h>
+
 namespace gpio {
 
 
-    enum class gpioState {
+    enum class gpioState : uint8_t {
         on, off
     };
-    enum class gpioDirection {
+    enum class gpioDirection : uint8_t {
         in, out
     };
 
@@ -26,12 +28,9 @@ namespace gpio {
     };
 
     class GPIOBridge {
-
-    public:
-        virtual ~GPIOBridge() = default;
-        virtual void setGPIODirection(const gpioDirection& direction,const GPIOPin& pin) = 0;
-        virtual void writeGPIO(const gpioState& state,const GPIOPin& pin) = 0;
-        virtual gpioState readGPIO(const GPIOPin& pin) const = 0;
+        virtual void setGPIODirection(const gpioDirection& direction, GPIOPin pin) = 0;
+        virtual void writeGPIO(const gpioState& state, GPIOPin pin) = 0;
+        virtual gpioState readGPIO(GPIOPin pin) const = 0;
     };
 
 }
