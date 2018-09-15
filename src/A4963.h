@@ -12,26 +12,41 @@ private:
     std::shared_ptr<spi::SPIBridge> mBridge;
     enum class RegisterMask : size_type {
         /* Common Addresses */
-        RegisterAddress          = 0b1110000000000000,
-        WriteAddress             = 0b0001000000000000,
-        RegisterAndWriteAddress  = 0b1111000000000000,
-        GeneralData              = 0b0000111111111111,
+        RegisterAddress                         = 0b1110000000000000,
+        WriteAddress                            = 0b0001000000000000,
+        RegisterAndWriteAddress                 = 0b1111000000000000,
+        GeneralData                             = 0b0000111111111111,
 
         /* Config0 Addresses */
-        RecirculationModeAddress = 0b0000110000000000,
-        BlankTimeAddress         = 0b0000001111000000,
-        DeadTimeAddress          = 0b0000000000111111
+        RecirculationModeAddress                = 0b0000110000000000,
+        BlankTimeAddress                        = 0b0000001111000000,
+        DeadTimeAddress                         = 0b0000000000111111,
+
+        /* Config1 Addresses */
+        PercentFastDecayAddress                 = 0b0000100000000000,
+        InvertPWMInputAddress                   = 0b0000010000000000,
+        CurrentSenseThresholdVoltageAddress     = 0b0000001111000000,
+        BemfTimeQualifierAddress                = 0b0000000000100000,
+        VDSThresholdAddress                     = 0b0000000000011111,
+
     };
     enum class RegisterPosition : size_type {
         /* Common Addresses */
-        RegisterAddress          = 13,
-        WriteAddress             = 12,
-        GeneralData              = 0,
+        RegisterAddress                         = 13,
+        WriteAddress                            = 12,
+        GeneralData                             = 0,
 
         /* Config0 Addresses */
-        RecirculationModeAddress = 10,
-        BlankTimeAddress         = 6,
-        DeadTimeAddress          = 0
+        RecirculationModeAddress                = 10,
+        BlankTimeAddress                        = 6,
+        DeadTimeAddress                         = 0,
+        /* Config1 Addresses */
+        PercentFastDecayAddress                 = 11,
+        InvertPWMInputAddress                   = 10,
+        CurrentSenseThresholdVoltageAddress     = 6,
+        BemfTimeQualifierAddress                = 5,
+        VDSThresholdAddress                     = 0,
+
     };
     enum class RegisterCodes : uint8_t  {
         Config0    = 0b000,
@@ -76,10 +91,24 @@ public:
         Off  = 0b11
     };
 
+    enum class PercentFastDecayTypes : uint8_t  {
+        T12_5Percent = 0,
+        T25Percent   = 1
+    };
+
+    enum class InvertPWMInputTypes : uint8_t {
+        NormalTrueLogic = 0,
+        InverterLogic   = 1
+    };
+
+    enum class BemfTimeQualifier : uint8_t {
+        DebounceTimer = 0,
+        WindowTimer   = 1
+    };
+
     explicit A4963(std::shared_ptr<spi::SPIBridge> mBridge);
     void setRecirculationMode(const RecirculationModeTypes& type);
 
-    //TODO: use duration instead of fix nanoseconds...
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>> setBlankTime(const std::chrono::duration<Rep, Period>& time) {
         using namespace std::chrono_literals;
