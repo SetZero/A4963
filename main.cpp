@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 
         auto actldedtime = device->setDeadTime(1us);
         std::cout << "Actual Dead Time: " << std::chrono::nanoseconds(*actldedtime).count() << "ns" <<  std::endl;
-        auto actlblktime = device->setBlankTime(800ns);
+        auto actlblktime = device->setBlankTime(90ns);
         std::cout << "Actual Blank Time: " << std::chrono::nanoseconds(*actlblktime).count() << "ns" <<  std::endl;
         device->commit();
 
