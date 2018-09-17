@@ -35,7 +35,7 @@ namespace CustomDataTypes {
         constexpr Volt operator+() const { return *this; }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        explicit operator Volt<Rep, std::ratio<oNum, oDenom>>() {
+        explicit operator Volt<oRep, std::ratio<oNum, oDenom>>() {
             internalRepresentation = (internalRepresentation * oNum * Denom) / (Num * oDenom);
         }
 

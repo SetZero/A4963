@@ -21,13 +21,13 @@ TEST_CASE("Test Volt Convertion Floating", "[Volt Floating]") {
 
 TEST_CASE("Test Volt Convertion", "[Volt]") {
     Volt<std::intmax_t, std::mega> v{1000000};
-    auto convertedTera = static_cast<Volt<std::intmax_t, std::tera>>(v);
-    auto convertedGiga = static_cast<Volt<std::intmax_t, std::giga>>(v);
-    auto convertedNone = static_cast<Volt<std::intmax_t, std::mega>>(v);
-    auto convertedKilo = static_cast<Volt<std::intmax_t, std::kilo>>(v);
+    auto convertedTera   = static_cast<Volt<std::intmax_t, std::tera>>(v);
+    auto convertedGiga   = static_cast<Volt<std::intmax_t, std::giga>>(v);
+    auto convertedNone   = static_cast<Volt<std::intmax_t, std::mega>>(v);
+    auto convertedKilo   = static_cast<Volt<std::intmax_t, std::kilo>>(v);
     auto convertedNormal = static_cast<Volt<std::intmax_t>>(v);
-    auto convertedMilli = static_cast<Volt<std::intmax_t, std::milli>>(v);
-    auto convertedMicro = static_cast<Volt<std::intmax_t, std::micro>>(v);
+    auto convertedMilli  = static_cast<Volt<std::intmax_t, std::milli>>(v);
+    auto convertedMicro  = static_cast<Volt<std::intmax_t, std::micro>>(v);
 
     REQUIRE(convertedTera.count()    == 1);
     REQUIRE(convertedGiga.count()    == 1000);
