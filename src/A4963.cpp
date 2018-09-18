@@ -101,6 +101,6 @@ A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes) 
 }
 
 void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
-    A4963::size_type data = createRegisterEntry(type, RegisterPosition::RecirculationModeAddress, RegisterMask::RecirculationModeAddress);
+    auto data = createRegisterEntry(type, RegisterPosition::RecirculationModeAddress, RegisterMask::RecirculationModeAddress);
     writeRegisterEntry(RegisterCodes::Config0, RegisterMask::RecirculationModeAddress, data);
 }

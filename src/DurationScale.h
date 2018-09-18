@@ -29,14 +29,14 @@ public:
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
             auto steps = std::chrono::duration_cast<TDuration>(value);
-            return steps/ mPrecision;
+            return steps / mPrecision;
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
         }
     }
 
-    TDuration getActualTime(TValueType value) {
+    TDuration getActualValue(TValueType value) {
         return TDuration{value * mPrecision.count()};
     }
 

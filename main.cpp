@@ -49,14 +49,14 @@ int main(int argc, char **argv) {
 
         device->show_register();
 
-        /*std::string str2 = "Other Text!";
-        for(std::string::size_type i = 0; i < str2.size(); i++) {
-            device->writeByte(static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
-        }
-        for(std::string::size_type i = 0; i < str2.size(); i++) {
-            auto back = device->readByte(static_cast<uint16_t>(i));
-            std::cout << "Data: " << back.getData()[0] << std::endl;
-        }*/
+        //std::string str2 = "Other Text!";
+        //for(std::string::size_type i = 0; i < str2.size(); i++) {
+        //    device->writeByte(static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
+        //}
+        //for(std::string::size_type i = 0; i < str2.size(); i++) {
+        //    auto back = device->readByte(static_cast<uint16_t>(i));
+        //    std::cout << "Data: " << back.getData()[0] << std::endl;
+        //}
     }
 }
 
