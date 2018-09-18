@@ -39,33 +39,46 @@ namespace CustomDataTypes {
             internalRepresentation = (internalRepresentation * oNum * Denom) / (Num * oDenom);
         }
 
-        bool operator==(const Volt<Rep, std::ratio<Num, Denom>> &rhs) const {
-            return internalRepresentation == rhs.internalRepresentation;
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        bool operator==(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+            return internalRepresentation == (rhs.count() * oNum * Denom) / (Num * oDenom);
         }
 
-        bool operator!=(const Volt<Rep, std::ratio<Num, Denom>> &rhs) const {
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        bool operator!=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return !(rhs == *this);
         }
 
-        bool operator<(const Volt<Rep, std::ratio<Num, Denom>> &rhs) const {
-            return internalRepresentation < rhs.internalRepresentation;
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        bool operator<(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+            return internalRepresentation < (rhs.count() * oNum * Denom) / (Num * oDenom);
         }
 
-        bool operator>(const Volt<Rep, std::ratio<Num, Denom>> &rhs) const {
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        bool operator>(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return rhs < *this;
         }
 
-        bool operator<=(const Volt<Rep, std::ratio<Num, Denom>> &rhs) const {
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        bool operator<=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return !(rhs < *this);
         }
 
-        bool operator>=(const Volt<Rep, std::ratio<Num, Denom>> &rhs) const {
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        bool operator>=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return !(*this < rhs);
         }
 
     private:
         Rep internalRepresentation;
     };
+
+    using nanovolt  = Volt<std::intmax_t, std::nano>;
+    using microvolt = Volt<std::intmax_t, std::micro>;
+    using millivolt = Volt<std::intmax_t, std::milli>;
+    using volt      = Volt<std::intmax_t>;
+    using kilovolt  = Volt<std::intmax_t, std::kilo>;
+    using megavolt  = Volt<std::intmax_t, std::mega>;
 }
 
 
