@@ -80,7 +80,7 @@ typedef struct stSpiXferSettings_S
 int open_device(const char *device);
 
 int spi_data_xfer(int filedesc, unsigned char *txdata,
-                    unsigned char *rxdata, int xferlength,
+                    unsigned char *rxdat, int xferlength,
                     int spimode, int speed,
                     int actcsval, int idlecsval, int gpcsmask,
                     int cs2datadly, int data2datadly, int data2csdly);

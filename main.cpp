@@ -1,20 +1,10 @@
 #include <iostream>
-#include <array>
-#include <string>
-#include <memory>
-#include <vector>
-#include <chrono>
-#include <thread>
-#include "LibUSBDevices.h"
-#include "src/SPI/ATmega32U4SPI.h"
-#include "src/SPI/SPIBridge.h"
-#include "mcp2210_api.h"
 #include "src/SPI/mcp2210_hal.h"
-#include "src/25LC256.h"
-#include "A4963.h"
-#include "DurationScale.h"
 
-int main(int argc, char **argv) {
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+int main(int argc, char **argv) {/*
     int ictr;
 
     std::cout << "\nMCP2210 Evaluation Board Tests" << std::endl;
@@ -57,7 +47,44 @@ int main(int argc, char **argv) {
             auto back = device->readByte(static_cast<uint16_t>(i));
             std::cout << "Data: " << back.getData()[0] << std::endl;
         }*/
+
+    std::cout << "this is sparta" << std::endl;
+    std::unique_ptr<MCP2210> ptr;
+    ptr = std::make_unique<MCP2210>();
+
+        while(true) {
+            auto eingaben = { "spi test","eingabe test","exit"};
+            std::cout << "mögliche eingaben: " << std::endl;
+            size_t i = 0;
+            for(auto val : eingaben){
+                std::cout << i << ".: " << val << std::endl;
+                i++;
+            }
+            uint32_t z = 0;
+            std::cin >> z;
+            switch(z) {
+                case 0: {
+                    for (int j = 0; j < 10; j++) {
+                        using namespace spi::literals;
+                        ptr->transfer(42_spi);
+                    }
+                    break;
+                }
+                case 1: {
+                    std::cout << "give your data: ";
+                    std::string input{};
+                    std::cin >> input;
+                    for(auto ch: input){
+                        ptr->transfer(spi::SPIData(ch));
+                    }
+                    break;
+                }
+                case 2 : return 0;
+                default: break;
+            }
+        }
     }
-}
 
 
+
+#pragma clang diagnostic pop

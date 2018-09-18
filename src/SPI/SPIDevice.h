@@ -4,19 +4,14 @@
 
 #pragma once
 
+#include "GPIOBridge.h"
 #include <memory>
 
-
 class SPIDevice : public std::enable_shared_from_this<SPIDevice> {
-public:
-    bool operator<(const SPIDevice &rhs) const;
-
-    bool operator>(const SPIDevice &rhs) const;
-
-    bool operator<=(const SPIDevice &rhs) const;
-
-    bool operator>=(const SPIDevice &rhs) const;
-
 private:
-    bool someValue;
+    gpio::GPIOPin slavePin;
+public:
+    void selectPin(const gpio::GPIOPin& pin);
+    const gpio::GPIOPin& getSlavePin() const;
+
 };

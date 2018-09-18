@@ -2,6 +2,7 @@
 
 #include "25LC256.h"
 
+
 void EEPROM::send16bitAddress(uint16_t address) {
     auto first = static_cast<uint8_t>(address >> 8);
     auto second = static_cast<uint8_t>(address);

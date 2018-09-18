@@ -1,31 +1,54 @@
 #include "mcp2210_hal.h"
-#include "utils.h"
 
-/*use udev or other similar mechanisms to get the system path "/dev/hidraw1" */
-MCP2210::MCP2210(std::string device) {
-    //TODO: find out which hid number is the right for the device
+MCP2210::MCP2210() {
+    std::string device = "/dev/hidraw";
+    std::unique_ptr<stChipStatus_T> x = std::make_unique<stChipStatus_T>();
+    std::string temp;
+    for(auto z = 0; z < 255; z++) {
+        temp = device;
+        temp.append(std::to_string(z));
+        fd = open_device(temp.c_str());
+        if(fd>0){
+            get_chip_status(fd,x.get());
+            if(x->ucSpiState == ERR_NOERR){
+                std::cout << "device found" << std:: endl;
+                break;
+            }
+            else{
+                close_device(fd);
+            }
+        }
+       temp.empty();
+    }
+    if(fd <= 0) std::cout << "Auto detect could not find your device, try manually " << fd << std::endl;
+    else{
+        gpio_setdir(fd,0);
+        gpio_setval(fd,0);
+    }
+}
 
+//use ls /dev grep | "hid" to find devices, then give the correct number of the spi bridge
+MCP2210::MCP2210(unsigned char number) {
+    std::string device = "/dev/hidraw";
+    device.append(std::to_string(number));
     fd = open_device(device.c_str());
-    if(fd <= 0)
-        std::cout << "Error with device: " << fd << std::endl;
-    else
+    if(fd <= 0) std::cout << "Error with device: " << fd << std::endl;
+    else{
+        connection = true;
         std::cout << "Device successfully opened" << std::endl;
+    }
 }
 
 MCP2210::~MCP2210() {
     close_device(fd);
 }
-/*    spi::SPIData transfer(const spi::SPIData& input) const override;
-    std::vector<spi::SPIData> transfer(const std::vector<spi::SPIData>& input) const;
-    template<typename first, typename... values>
-    std::vector<spi::SPIData> transfer(spi::SPIData f, values...) const;*/
 
 spi::SPIData MCP2210::transfer(const spi::SPIData& input) const {
     //txdata[0] = input;
     int err = 0;
-    auto temp = input.getData();
+    std::vector<unsigned char> temp = input.getData();
     int i = 0;
-    for(auto elem: temp){
+    for(unsigned char elem: temp){
         if(i >= SPI_BUF_LEN){
             err = 42;
             break;
@@ -34,18 +57,20 @@ spi::SPIData MCP2210::transfer(const spi::SPIData& input) const {
         i++;
     }
     if(err == 0)
-            err = spi_data_xfer(fd, txdata.get(), rxdata.get(), 1,
+            err = spi_data_xfer(fd, txdata.get(), rxdata.get(), static_cast<unsigned char>(temp.size()),
             static_cast<uint16_t >(spiSettings::mode), static_cast<uint16_t >(spiSettings::speed), static_cast<uint16_t >(spiSettings::actcsval),
             static_cast<uint16_t >(spiSettings::idlecsval), static_cast<uint16_t >(spiSettings::gpcsmask), static_cast<uint16_t >(spiSettings::cs2datadly),
             static_cast<uint16_t >(spiSettings::data2datadly), static_cast<uint16_t >(spiSettings::data2csdly));
+#ifdef DEBUG_MCP
     if(err != 0) std::cout << " error: " << err << std::endl;
+#endif
     temp.clear();
     for(i = 0; i < SPI_BUF_LEN ; i++)
-        temp.push_back(rxdata[i]);
+        temp.emplace_back(rxdata[i]);
     return spi::SPIData( temp );
 }
 
-void MCP2210::writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin pin) {
+void MCP2210::writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin& pin) {
     if(state == gpio::gpioState::off) {
         gpio_write(fd, ~pin, pin);
     } else {
@@ -53,12 +78,7 @@ void MCP2210::writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin pin) {
     }
 }
 
-gpio::gpioState MCP2210::readGPIO(gpio::GPIOPin pin) const {
-    gpio::gpioState state = gpio::gpioState::off;
-    return state;
-}
-
-void MCP2210::setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin pin) {
+void MCP2210::setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin& pin) {
     if(direction == gpio::gpioDirection::in) {
         gpio_direction(fd, 0x01FF, pin);
     } else if(direction == gpio::gpioDirection::out) {
@@ -66,33 +86,22 @@ void MCP2210::setGPIODirection(const gpio::gpioDirection& direction, const gpio:
     }
 }
 
-void MCP2210::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) {
-    mSlaves[device] = pin;
-    setGPIODirection(gpio::gpioDirection::out, pin);
-}
-
 void MCP2210::slaveSelect(std::shared_ptr<SPIDevice> slave) {
-    auto value = mSlaves.find(slave);
-    if(value != std::end(mSlaves)) {
-        writeGPIO(gpio::gpioState::off, value->second);
-    } else {
-        std::cout << "Error: No such slave found!" << std::endl;
-    }
+    writeGPIO(gpio::gpioState::off, slave->getSlavePin());
 }
 
 void MCP2210::slaveDeselect(std::shared_ptr<SPIDevice> slave) {
-    auto value = mSlaves.find(slave);
-    if(value != std::end(mSlaves)) {
-        writeGPIO(gpio::gpioState::on, value->second);
-    } else {
-        std::cout << "Error: No such slave found!" << std::endl;
-    }
+    writeGPIO(gpio::gpioState::on, slave->getSlavePin());
 }
 
-/*void MCP2210::slaveSelect(const gpio::GPIOPin& slave) {
-    writeGPIO(gpio::gpioState::off, slave);
+void MCP2210::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin& pin) {
+    device->selectPin(pin);
 }
 
-void MCP2210::slaveDeselect(const gpio::GPIOPin& slave) {
-    writeGPIO(gpio::gpioState::on, slave);
-}*/
+gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
+    return pin == 1 ? gpio::gpioState::on : gpio::gpioState::off;
+}
+
+int MCP2210::getFd() const {
+    return fd;
+}

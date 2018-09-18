@@ -12,7 +12,7 @@ namespace spi {
         device.get()->openDevice();
     }
 
-    void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction, gpio::GPIOPin pin) {
+    void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction,const gpio::GPIOPin& pin) {
         if(direction == gpio::gpioDirection::in) {
             mDevice.get()->sendData(
                     {
@@ -30,7 +30,7 @@ namespace spi {
         }
     }
 
-    void ATmega32u4SPI::writeGPIO(const gpio::gpioState &state, gpio::GPIOPin pin) {
+    void ATmega32u4SPI::writeGPIO(const gpio::gpioState &state,const gpio::GPIOPin& pin) {
         if(state == gpio::gpioState::on) {
             mDevice.get()->sendData(
                     {
@@ -48,7 +48,7 @@ namespace spi {
         }
     }
 
-    gpio::gpioState ATmega32u4SPI::readGPIO(gpio::GPIOPin pin) const {
+    gpio::gpioState ATmega32u4SPI::readGPIO(const gpio::GPIOPin& pin) const {
         auto state = gpio::gpioState::off;
         return state;
     }
