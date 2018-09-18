@@ -28,6 +28,13 @@ TEST_CASE("Compare two Volt Representations", "[Volt Comparison]") {
     REQUIRE(v1 != v3);
 }
 
+TEST_CASE("Test Volt Literals", "[Volt Literals]") {
+    using namespace CustomDataTypes::literals;
+    REQUIRE(1_V == 1000_mV);
+    REQUIRE(1000_kV == 1_MV);
+    REQUIRE(1000_nV != 1_MV);
+}
+
 TEST_CASE("Compare greater/smaller", "[Volt Comparison 2]") {
     Volt<std::intmax_t, std::milli>     v1{1000};
     Volt<std::intmax_t, std::milli>     v2{999};
