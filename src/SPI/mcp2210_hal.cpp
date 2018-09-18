@@ -1,5 +1,5 @@
 #include "mcp2210_hal.h"
-#include "utils.h"
+#include "src/utils/utils.h"
 
 /*use udev or other similar mechanisms to get the system path "/dev/hidraw1" */
 MCP2210::MCP2210(std::string device) {

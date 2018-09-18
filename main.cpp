@@ -12,7 +12,7 @@
 #include "src/SPI/mcp2210_hal.h"
 #include "src/25LC256.h"
 #include "A4963.h"
-#include "DurationScale.h"
+#include "src/utils/scales/DurationScale.h"
 
 int main(int argc, char **argv) {
     int ictr;
@@ -49,14 +49,14 @@ int main(int argc, char **argv) {
 
         device->show_register();
 
-        /*std::string str2 = "Other Text!";
-        for(std::string::size_type i = 0; i < str2.size(); i++) {
-            device->writeByte(static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
-        }
-        for(std::string::size_type i = 0; i < str2.size(); i++) {
-            auto back = device->readByte(static_cast<uint16_t>(i));
-            std::cout << "Data: " << back.getData()[0] << std::endl;
-        }*/
+        //std::string str2 = "Other Text!";
+        //for(std::string::size_type i = 0; i < str2.size(); i++) {
+        //    device->writeByte(static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
+        //}
+        //for(std::string::size_type i = 0; i < str2.size(); i++) {
+        //    auto back = device->readByte(static_cast<uint16_t>(i));
+        //    std::cout << "Data: " << back.getData()[0] << std::endl;
+        //}
     }
 }
 
