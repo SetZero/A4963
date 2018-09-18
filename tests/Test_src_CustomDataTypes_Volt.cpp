@@ -19,6 +19,31 @@ TEST_CASE("Test Volt Convertion Floating", "[Volt Floating]") {
     REQUIRE(convertedKilo.count()    == Approx(0.000001));
 }
 
+TEST_CASE("Compare two Volt Representations", "[Volt Comparison]") {
+    Volt<std::intmax_t, std::milli>     v1{1000};
+    Volt<std::intmax_t>                 v2{1};
+    Volt<std::intmax_t, std::nano>      v3{1};
+
+    REQUIRE(v1 == v2);
+    REQUIRE(v1 != v3);
+}
+
+TEST_CASE("Compare greater/smaller", "[Volt Comparison 2]") {
+    Volt<std::intmax_t, std::milli>     v1{1000};
+    Volt<std::intmax_t, std::milli>     v2{999};
+    Volt<std::intmax_t, std::kilo>      v3{1000};
+    Volt<std::intmax_t, std::tera>      v4{1000};
+    Volt<std::intmax_t>                 v5{1};
+    Volt<std::intmax_t, std::nano>      v6{1};
+
+    REQUIRE(v1 > v2);
+    REQUIRE(v2 < v1);
+    REQUIRE(v1 < v4);
+    REQUIRE(v3 > v2);
+    REQUIRE(v5 > v2);
+    REQUIRE(v6 < v4);
+}
+
 TEST_CASE("Test Volt Convertion", "[Volt]") {
     Volt<std::intmax_t, std::mega> v{1000000};
     auto convertedTera   = static_cast<Volt<std::intmax_t, std::tera>>(v);

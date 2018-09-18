@@ -3,7 +3,7 @@
 #include <memory>
 #include <chrono>
 #include "src/SPI/mcp2210_hal.h"
-#include "DurationScale.h"
+#include "src/utils/scales/DurationScale.h"
 
 class A4963 : public SPIDevice {
 private:
