@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <iostream>
 #include <optional>
+#include "UnitScale.h"
 
 template<typename TDuration>
 struct DurationData {
