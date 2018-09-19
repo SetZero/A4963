@@ -8,7 +8,6 @@
 #include <type_traits>
 #include <iostream>
 #include <optional>
-#include "UnitScale.h"
 
 template<typename TDuration>
 struct DurationData {
@@ -25,6 +24,7 @@ public:
         static_assert(is_duration<TDuration>::value, "TDuration must be of type std::chrono::duration");
     }
 
+    //TODO: return ScaleOptional and return if it is too big or too small
     template<typename Rep, typename Period>
     std::optional<TValueType> checkValue(const std::chrono::duration<Rep, Period> &value) {
         //TODO: round value up/down
