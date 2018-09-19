@@ -4,6 +4,7 @@
 #include <chrono>
 #include "src/SPI/mcp2210_hal.h"
 #include "src/utils/scales/DurationScale.h"
+#include "utils/utils.h"
 
 class A4963 : public SPIDevice {
 private:
@@ -28,24 +29,6 @@ private:
         CurrentSenseThresholdVoltageAddress     = 0b0000001111000000,
         BemfTimeQualifierAddress                = 0b0000000000100000,
         VDSThresholdAddress                     = 0b0000000000011111,
-
-    };
-    enum class RegisterPosition : size_type {
-        /* Common Addresses */
-        RegisterAddress                         = 13,
-        WriteAddress                            = 12,
-        GeneralData                             = 0,
-
-        /* Config0 Addresses */
-        RecirculationModeAddress                = 10,
-        BlankTimeAddress                        = 6,
-        DeadTimeAddress                         = 0,
-        /* Config1 Addresses */
-        PercentFastDecayAddress                 = 11,
-        InvertPWMInputAddress                   = 10,
-        CurrentSenseThresholdVoltageAddress     = 6,
-        BemfTimeQualifierAddress                = 5,
-        VDSThresholdAddress                     = 0,
 
     };
     enum class RegisterCodes : uint8_t  {
@@ -78,8 +61,8 @@ private:
     void markRegisterForReload(const RegisterCodes &reg);
     spi::SPIData send16bitRegister(size_type address);
     template<typename T>
-    size_type createRegisterEntry(T data, const RegisterPosition& position, const RegisterMask& mask);
-    size_type getRegisterEntry(const RegisterCodes& registerEntry,  const RegisterPosition& position, const RegisterMask& mask);
+    size_type createRegisterEntry(T data, const RegisterMask& mask);
+    size_type getRegisterEntry(const RegisterCodes& registerEntry, const RegisterMask& mask);
     size_type readRegister(const RegisterCodes& registerCodes);
     void commit(const RegisterCodes& registerCodes);
 public:
@@ -118,9 +101,6 @@ public:
     //Config1
     void setPercentFastDecay(const PercentFastDecayTypes& type);
     void invertPWMInput(const InvertPWMInputTypes& type);
-
-
-
 };
 
 template<typename Rep, typename Period>
@@ -128,8 +108,8 @@ std::optional<const std::chrono::duration<Rep, Period>> A4963::setBlankTime(cons
     using namespace std::chrono_literals;
     static DurationScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{.precision = 400ns, .maxValue = 6us, .minValue = 0us}};
 
-    if(auto checkedValue = scale.checkValue(time)) {
-        A4963::size_type data = createRegisterEntry(*checkedValue, RegisterPosition::BlankTimeAddress, RegisterMask::BlankTimeAddress);
+    if(auto checkedValue = scale.convertValue(time)) {
+        A4963::size_type data = createRegisterEntry(*checkedValue, RegisterMask::BlankTimeAddress);
         writeRegisterEntry(RegisterCodes::Config0, RegisterMask::BlankTimeAddress, data);
         return {std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(scale.getActualValue(*checkedValue))};
     }
@@ -141,8 +121,8 @@ std::optional<const std::chrono::duration<Rep, Period>> A4963::setDeadTime(const
     using namespace std::chrono_literals;
     static DurationScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{.precision = 50ns, .maxValue = 3.15us, .minValue = 100ns}};
 
-    if(auto checkedValue = scale.checkValue(time)) {
-        A4963::size_type data = createRegisterEntry(*checkedValue, RegisterPosition::DeadTimeAddress, RegisterMask::DeadTimeAddress);
+    if(auto checkedValue = scale.convertValue(time)) {
+        A4963::size_type data = createRegisterEntry(*checkedValue, RegisterMask::DeadTimeAddress);
         writeRegisterEntry(RegisterCodes::Config0, RegisterMask::DeadTimeAddress, data);
         return {std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(scale.getActualValue(*checkedValue))};
     }
