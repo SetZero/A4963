@@ -6,7 +6,7 @@
 
 #include <ratio>
 
-namespace CustomDataTypes {
+namespace CustomDataTypes::Electricity {
     template<typename Rep, typename Period = std::ratio<1> >
     class Volt;
 

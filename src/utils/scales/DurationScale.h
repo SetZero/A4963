@@ -26,7 +26,7 @@ public:
 
     //TODO: return ScaleOptional and return if it is too big or too small
     template<typename Rep, typename Period>
-    std::optional<TValueType> checkValue(const std::chrono::duration<Rep, Period> &value) {
+    std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period> &value) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
             auto steps = std::chrono::duration_cast<TDuration>(value);
@@ -40,6 +40,19 @@ public:
     TDuration getActualValue(TValueType value) {
         return TDuration{value * mPrecision.count()};
     }
+
+    TDuration getMPrecision() const {
+        return mPrecision;
+    }
+
+    TDuration getMMaxValue() const {
+        return mMaxValue;
+    }
+
+    TDuration getMMinValue() const {
+        return mMinValue;
+    }
+
 
 private:
     TDuration mPrecision;
