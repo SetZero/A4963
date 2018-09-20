@@ -6,7 +6,7 @@
 
 #include <ratio>
 
-namespace CustomDataTypes {
+namespace CustomDataTypes::Electricity {
     template<typename Rep, typename Period = std::ratio<1> >
     class Volt;
 
@@ -23,7 +23,7 @@ namespace CustomDataTypes {
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
         explicit Volt(Volt<oRep, std::ratio<oNum, oDenom>> &volt) {
-            internalRepresentation = (volt.count() * oNum * Denom) / (Num * oDenom);
+            internalRepresentation = convert_value(volt);
         }
 
         ~Volt() = default;
@@ -41,7 +41,7 @@ namespace CustomDataTypes {
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
         bool operator==(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
-            return internalRepresentation == (rhs.count() * oNum * Denom) / (Num * oDenom);
+            return internalRepresentation == convert_value(rhs);
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
@@ -51,7 +51,7 @@ namespace CustomDataTypes {
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
         bool operator<(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
-            return internalRepresentation < (rhs.count() * oNum * Denom) / (Num * oDenom);
+            return internalRepresentation < convert_value(rhs);
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
@@ -69,16 +69,63 @@ namespace CustomDataTypes {
             return !(*this < rhs);
         }
 
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        Volt<Rep, std::ratio<Num, Denom>>& operator+=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
+            internalRepresentation += convert_value(rhs);
+            return *this;
+        }
+
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        Volt<Rep, std::ratio<Num, Denom>>& operator-=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
+            internalRepresentation -= convert_value(rhs);
+            return *this;
+        }
+
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        Volt<Rep, std::ratio<Num, Denom>>& operator*=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
+            internalRepresentation *= convert_value(rhs);
+            return *this;
+        }
+
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        Volt<Rep, std::ratio<Num, Denom>>& operator/=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
+            internalRepresentation /= convert_value(rhs);
+            return *this;
+        }
     private:
+        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
+        Rep convert_value(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) const {
+            return ((rhs.count() * oNum * Denom) / (Num * oDenom));
+        }
+        template<typename oRep, typename oPeriod>
+        friend class Volt;
         Rep internalRepresentation;
     };
 
-    using nanovolt  = Volt<std::intmax_t, std::nano>;
-    using microvolt = Volt<std::intmax_t, std::micro>;
-    using millivolt = Volt<std::intmax_t, std::milli>;
-    using volt      = Volt<std::intmax_t>;
-    using kilovolt  = Volt<std::intmax_t, std::kilo>;
-    using megavolt  = Volt<std::intmax_t, std::mega>;
+    template<typename Rep, typename Period, typename oRep, typename oPeriod>
+    Volt<Rep, Period> operator+( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
+        lhs += rhs;
+        return lhs;
+    }
+
+    template<typename Rep, typename Period, typename oRep, typename oPeriod>
+    Volt<Rep, Period> operator-( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
+        lhs -= rhs;
+        return lhs;
+    }
+
+    template<typename Rep, typename Period, typename oRep, typename oPeriod>
+    Volt<Rep, Period> operator*( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    template<typename Rep, typename Period, typename oRep, typename oPeriod>
+    Volt<Rep, Period> operator/( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
+        lhs /= rhs;
+        return lhs;
+    }
+
 }
 
 

@@ -36,32 +36,31 @@ A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridg
 void A4963::writeRegisterEntry(const A4963::RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data) {
     clearRegister(reg, RegisterMask::RegisterAndWriteAddress);
     clearRegister(reg, mask);
-    
-    mRegisterData[reg].data |= createRegisterEntry(reg, RegisterPosition::RegisterAddress, RegisterMask::RegisterAddress);
-    mRegisterData[reg].data |= createRegisterEntry(WriteBit::Write, RegisterPosition::WriteAddress, RegisterMask::WriteAddress);
-    mRegisterData[reg].data |= createRegisterEntry(data, RegisterPosition::GeneralData, RegisterMask::GeneralData);
+
+    mRegisterData[reg].data |= createRegisterEntry(reg, RegisterMask::RegisterAddress);
+    mRegisterData[reg].data |= createRegisterEntry(WriteBit::Write, RegisterMask::WriteAddress);
+    mRegisterData[reg].data |= createRegisterEntry(data, RegisterMask::GeneralData);
     mRegisterData[reg].dirty = true;
 }
 
 void A4963::markRegisterForReload(const A4963::RegisterCodes &reg) {
     clearRegister(reg);
-    mRegisterData[reg].data |= createRegisterEntry(reg, RegisterPosition::RegisterAddress, RegisterMask::RegisterAddress);
-    mRegisterData[reg].data |= createRegisterEntry(WriteBit::Read, RegisterPosition::WriteAddress, RegisterMask::WriteAddress);
+    mRegisterData[reg].data |= createRegisterEntry(reg, RegisterMask::RegisterAddress);
+    mRegisterData[reg].data |= createRegisterEntry(WriteBit::Read, RegisterMask::WriteAddress);
     mRegisterData[reg].dirty = true;
 }
 
 template<typename T>
-A4963::size_type A4963::createRegisterEntry(T data, const A4963::RegisterPosition &position, const A4963::RegisterMask &mask) {
+A4963::size_type A4963::createRegisterEntry(T data, const A4963::RegisterMask &mask) {
     A4963::size_type registerData = 0;
-    registerData = (static_cast<size_type>(data) << static_cast<size_type>(position)) & static_cast<size_type>(mask);
+    registerData = (static_cast<size_type>(data) << utils::getFirstSetBitPos(static_cast<size_type>(mask))) & static_cast<size_type>(mask);
     return registerData;
 }
 
 
-A4963::size_type A4963::getRegisterEntry(const A4963::RegisterCodes& registerEntry, const A4963::RegisterPosition &position,
-                                         const A4963::RegisterMask &mask) {
+A4963::size_type A4963::getRegisterEntry(const A4963::RegisterCodes& registerEntry, const A4963::RegisterMask &mask) {
     A4963::size_type registerData = 0;
-    registerData = (mRegisterData[registerEntry].data & static_cast<size_type>(mask)) >> static_cast<size_type>(position);
+    registerData = (mRegisterData[registerEntry].data & static_cast<size_type>(mask)) >> utils::getFirstSetBitPos(static_cast<size_type>(mask));
     return registerData;
 }
 
@@ -74,8 +73,8 @@ void A4963::commit() {
 void A4963::commit(const A4963::RegisterCodes& registerCodes) {
     if(mRegisterData[registerCodes].dirty) {
         mBridge->slaveSelect(shared_from_this());
-        if(getRegisterEntry(registerCodes, RegisterPosition::WriteAddress, RegisterMask::WriteAddress) == static_cast<A4963::size_type>(WriteBit::Read)) {
-            mRegisterData[registerCodes].data = createRegisterEntry(registerCodes, RegisterPosition::RegisterAddress, RegisterMask::RegisterAddress) |
+        if(getRegisterEntry(registerCodes, RegisterMask::WriteAddress) == static_cast<A4963::size_type>(WriteBit::Read)) {
+            mRegisterData[registerCodes].data = createRegisterEntry(registerCodes, RegisterMask::RegisterAddress) |
                     (static_cast<A4963::size_type>(send16bitRegister(mRegisterData[registerCodes].data)) &
                     static_cast<A4963::size_type>(RegisterMask::GeneralData));
         } else {
@@ -101,6 +100,6 @@ A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes) 
 }
 
 void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
-    auto data = createRegisterEntry(type, RegisterPosition::RecirculationModeAddress, RegisterMask::RecirculationModeAddress);
+    auto data = createRegisterEntry(type, RegisterMask::RecirculationModeAddress);
     writeRegisterEntry(RegisterCodes::Config0, RegisterMask::RecirculationModeAddress, data);
 }

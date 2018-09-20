@@ -20,7 +20,7 @@ if(NOT LIBUSB_LIBRARY AND LIBUSB_INCLUDE_DIR)
 endif(NOT LIBUSB_LIBRARY AND LIBUSB_INCLUDE_DIR)
 
 
-add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp)
+add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp)
 add_executable(hid main.cpp)
 
 

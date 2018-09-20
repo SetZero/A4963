@@ -1,7 +1,16 @@
 #pragma once
 #include <limits.h>
+#include<type_traits>
+#include <limits>
+#include <cmath>
 
 namespace utils {
+
+    template<typename T>
+	constexpr typename std::make_unsigned<T>::type getFirstSetBitPos(T n) {
+        static_assert(std::numeric_limits<T>::is_integer);
+        return std::log2(n&-n);
+	}
 
 
 	template<bool condition, typename T1, typename T2>
