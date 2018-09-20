@@ -12,7 +12,7 @@
 #include "src/SPI/mcp2210_hal.h"
 #include "src/25LC256.h"
 #include "A4963.h"
-#include "src/utils/scales/DurationScale.h"
+#include "src/utils/scales/UnitScale.h"
 
 int main(int argc, char **argv) {
     int ictr;
