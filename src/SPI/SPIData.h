@@ -26,7 +26,7 @@ namespace spi {
 		static_assert((numberOfBytes &(numberOfBytes -1)) == 0  , " the number of bytes have to be a pow of 2");
 		static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");
 	private:
-		std::vector<uint8_t> mData = std::vector<uint8_t>(numberOfBytes);
+		std::vector<uint8_t> mData = std::vector<uint8_t>();
 	public:
 		SPIData() = default;
 
@@ -55,17 +55,17 @@ namespace spi {
 			swap(this->mData, other.mData);
 		}
 
-		inline unsigned char operator[](const unsigned char& index){
+		inline unsigned char operator[](const uint8_t& index){
 			assert(index >= 0);
 			return index >= 0 ? mData[index] : mData[0];
 		}
 
 		inline auto begin() {
-			return std::begin(mData);
+			return mData.begin();
 		}
 
 		inline auto end() {
-			return std::end(mData);
+			return mData.end();
 		}
 
 
