@@ -16,12 +16,12 @@
 
 namespace spi {
 
-	enum endianMode{
+	enum EndianMode{
 		little_endian, //small letters because macro is already named this way
 		big_endian
 	};
 
-	template<unsigned char numberOfBytes = 1, endianMode endian = little_endian >
+	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian >
 	class SPIData {
 		static_assert((numberOfBytes &(numberOfBytes -1)) == 0  , " the number of bytes have to be a pow of 2");
 		static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");
@@ -55,7 +55,7 @@ namespace spi {
 			swap(this->mData, other.mData);
 		}
 
-		inline unsigned char operator[](const uint8_t& index){
+		inline uint8_t operator[](const uint8_t& index){
 			assert(index >= 0);
 			return index >= 0 ? mData[index] : mData[0];
 		}
@@ -112,25 +112,25 @@ namespace spi {
 		inline void operator*(const SPIData& rhs) = delete;
 		inline void operator/(const SPIData& rhs) = delete;
 
-		inline uint8_t bytes_used() const { return static_cast<uint8_t>(mData.size()); };
+		inline uint8_t bytesUsed() const { return static_cast<uint8_t>(mData.size()); };
 
 		~SPIData() = default;
 	};
 
-	template<unsigned char numberOfBytes = 1, endianMode endian = little_endian>
+	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
 	inline SPIData<numberOfBytes, endian> operator+(const SPIData<numberOfBytes, endian>& lhs,const SPIData<numberOfBytes, endian>& rhs) {
 		SPIData<numberOfBytes, endian> tmp{lhs};
 		tmp + rhs;
 		return	tmp;
 	 }
 
-	template<unsigned char numberOfBytes = 1, endianMode endian = little_endian>
+	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
 	inline void swap(SPIData<numberOfBytes, endian>& lhs, SPIData<numberOfBytes, endian> rhs) {
 		lhs.swap(rhs);
 	}
 
 	template<typename t>
-	inline auto swap_endian(t value)
+	inline auto swapEndian(t value)
 	{
 		if constexpr (utils::isEqual<t, uint8_t>::value || utils::isEqual<t,int8_t>::value) return value;
 		else if constexpr (utils::isEqual<t,uint16_t>::value|| utils::isEqual<t,int16_t>::value) return bswap_16(value);
