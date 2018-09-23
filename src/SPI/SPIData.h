@@ -85,7 +85,7 @@ namespace spi {
 			return temp;
 		}
 
-		inline SPIData operator+=(const SPIData& rhs) {
+		inline void operator+=(const SPIData& rhs) {
 		    SPIData temp = (*this) +rhs;
 		    swap(temp);
 		};
