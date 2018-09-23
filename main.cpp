@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
                         break;
                 }
             } else {
-                std::cout << "device currently not connected: type 1 to exit the application or anything else to attempt connections" << std::endl;
+                std::cout << "device currently not connected: type 0 to attempt connections or anything else to exit the application" << std::endl;
                 if(userInput()) exit(1);
                 else reconnect(ptr);
             }
