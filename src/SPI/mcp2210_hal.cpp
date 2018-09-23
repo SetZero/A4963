@@ -2,10 +2,8 @@
 
 MCP2210::MCP2210() {
     //tut: http://www.signal11.us/oss/udev/
-
     connect();
 }
-
 
 
 //deprecated
@@ -14,7 +12,7 @@ MCP2210::MCP2210(unsigned char number) {
     std::unique_ptr<stChipStatus_T> x = std::make_unique<stChipStatus_T>();
     device.append(std::to_string(number));
     fd = open_device(device.c_str());
-    if(fd>0) {
+    if (fd > 0) {
         get_chip_status(fd, x.get());
         if (x->ucSpiState == ERR_NOERR) {
             try {
@@ -22,23 +20,22 @@ MCP2210::MCP2210(unsigned char number) {
                 transfer(0_spi8);
                 std::cout << "device found: " << device << std::endl;
             }
-            catch (std::exception& e) {
+            catch (std::exception &e) {
                 e.what();
                 close_device(fd);
             }
         } else {
             close_device(fd);
         }
-    }
-    else std::cout << "Error with device: " << fd << std::endl;
+    } else std::cout << "Error with device: " << fd << std::endl;
 }
 
 MCP2210::~MCP2210() {
     close_device(fd);
 }
 
-SPI8 MCP2210::transfer(const SPI8& input) {
-    if(connection) {
+SPI8 MCP2210::transfer(const SPI8 &input) {
+    if (connection) {
         txdata[0] = (uint8_t) input;
         int32_t err = send(1);
         if (err != ERR_NOERR) {
@@ -53,18 +50,18 @@ SPI8 MCP2210::transfer(const SPI8& input) {
     return 0_spi8;
 }
 
-void MCP2210::writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin& pin) {
-    if(state == gpio::gpioState::off) {
+void MCP2210::writeGPIO(const gpio::gpioState &state, const gpio::GPIOPin &pin) {
+    if (state == gpio::gpioState::off) {
         gpio_write(fd, ~pin, pin);
     } else {
         gpio_write(fd, pin, pin);
     }
 }
 
-void MCP2210::setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin& pin) {
-    if(direction == gpio::gpioDirection::in) {
+void MCP2210::setGPIODirection(const gpio::gpioDirection &direction, const gpio::GPIOPin &pin) {
+    if (direction == gpio::gpioDirection::in) {
         gpio_direction(fd, 0x01FF, pin);
-    } else if(direction == gpio::gpioDirection::out) {
+    } else if (direction == gpio::gpioDirection::out) {
         gpio_direction(fd, 0x0000, pin);
     }
 }
@@ -77,7 +74,7 @@ void MCP2210::slaveDeselect(std::shared_ptr<SPIDevice> slave) {
     writeGPIO(gpio::gpioState::on, slave->getSlavePin());
 }
 
-void MCP2210::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin& pin) {
+void MCP2210::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) {
     device->selectPin(pin);
 }
 
@@ -87,14 +84,17 @@ gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
 
 int32_t MCP2210::send(const uint16_t &dataCount) const {
     return spi_data_xfer(fd, txdata.get(), rxdata.get(), dataCount,
-                        static_cast<uint16_t >(spiSettings::mode), static_cast<uint16_t >(spiSettings::speed), static_cast<uint16_t >(spiSettings::actcsval),
-                        static_cast<uint16_t >(spiSettings::idlecsval), static_cast<uint16_t >(spiSettings::gpcsmask), static_cast<uint16_t >(spiSettings::cs2datadly),
-                        static_cast<uint16_t >(spiSettings::data2datadly), static_cast<uint16_t >(spiSettings::data2csdly));
+                         static_cast<uint16_t >(spiSettings::mode), static_cast<uint16_t >(spiSettings::speed),
+                         static_cast<uint16_t >(spiSettings::actcsval),
+                         static_cast<uint16_t >(spiSettings::idlecsval), static_cast<uint16_t >(spiSettings::gpcsmask),
+                         static_cast<uint16_t >(spiSettings::cs2datadly),
+                         static_cast<uint16_t >(spiSettings::data2datadly),
+                         static_cast<uint16_t >(spiSettings::data2csdly));
 }
 
 std::vector<SPI8>
-MCP2210::transfer(const std::initializer_list<SPI8> &spiData)  {
-    if(connection) {
+MCP2210::transfer(const std::initializer_list<SPI8> &spiData) {
+    if (connection) {
         uint16_t i = 0;
         for (const auto &elem: spiData) {
             if (i >= SPI_BUF_LEN) break;
@@ -114,7 +114,7 @@ MCP2210::transfer(const std::initializer_list<SPI8> &spiData)  {
 }
 
 void MCP2210::connect() {
-    if(!connection) {
+    if (!connection) {
         const char *npath = nullptr;
         struct udev *udev;
         struct udev_enumerate *enumerate;
@@ -191,8 +191,66 @@ MCP2210::operator bool() {
     return connection;
 }
 
-//TODO: debug strings
 void MCP2210::exceptionHandling(int32_t errorCode) {
+    switch (-errorCode) {
+        case (0) :
+            return;
+        case (10): {
+            std::cout << " Write Error " << std::endl;
+            break;
+        }
+        case (20): {
+            std::cout << " Read Error " << std::endl;
+            break;
+        }
+        case (30): {
+            std::cout << " Hardware Error " << std::endl;
+            break;
+        }
+        case (100): {
+            std::cout << " Chip Status Error " << std::endl;
+            break;
+        }
+        case (110): {
+            std::cout << " Get Settings Error " << std::endl;
+            break;
+        }
+        case (120): {
+            std::cout << " Set Settings Error " << std::endl;
+            break;
+        }
+        case (130): {
+            std::cout << " Get SPI Settings Error " << std::endl;
+            break;
+        }
+        case (140): {
+            std::cout << " Set SPI Settings Error " << std::endl;
+            break;
+        }
+        case (150): {
+            std::cout << " Address out of range Error " << std::endl;
+            break;
+        }
+        case (160): {
+            std::cout << " Blocked Access Error " << std::endl;
+            break;
+        }
+        case (170): {
+            std::cout << " Write GPIO Error " << std::endl;
+            break;
+        }
+        case (180): {
+            std::cout << " Read GPIO Error " << std::endl;
+            break;
+        }
+        case (190): {
+            std::cout << " Set GPIO direction Error " << std::endl;
+            break;
+        }
+        default: {
+            return;
+        }
+    }
     close_device(fd);
     connection = false;
     std::cerr << "device disconnected" << std::endl;

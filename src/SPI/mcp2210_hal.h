@@ -16,6 +16,7 @@ struct MCPIOException : public std::exception {
         return "MCPIOException";
     };
 };
+using error_pair = std::pair<int, const char*>;
 
 
 namespace deviceinformations {
