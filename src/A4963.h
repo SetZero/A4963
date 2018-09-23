@@ -61,7 +61,7 @@ private:
     void clearRegister(const RegisterCodes& reg, const A4963::RegisterMask &mask);
     void writeRegisterEntry(const RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data);
     void markRegisterForReload(const RegisterCodes &reg);
-    spi::SPIData send16bitRegister(size_type address);
+    SPI16 send16bitRegister(size_type address);
     template<typename T>
     size_type createRegisterEntry(T data, const RegisterPosition& position, const RegisterMask& mask);
     size_type getRegisterEntry(const RegisterCodes& registerEntry,  const RegisterPosition& position, const RegisterMask& mask);

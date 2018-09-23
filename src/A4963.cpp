@@ -13,12 +13,11 @@ void A4963::clearRegister(const A4963::RegisterCodes &reg, const A4963::Register
     mRegisterData[reg].data &= ~(static_cast<A4963::size_type>(mask));
 }
 
-spi::SPIData A4963::send16bitRegister(size_type address) {
+SPI16 A4963::send16bitRegister(size_type address) {
     auto first = static_cast<uint8_t>(address >> 8);
     auto second = static_cast<uint8_t>(address);
-    auto msb = mBridge->transfer({first});
-    msb += mBridge->transfer({second});
-    return msb;
+    auto msb = SPI8{first};
+    return SPI16{msb[0],mBridge->transfer(SPI8{second})[0]};
 }
 
 A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {

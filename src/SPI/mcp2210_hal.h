@@ -8,7 +8,20 @@
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
 #include "./utils.h"
+#include <libudev.h>
 //#include "USB/LibUSBDevices.h"
+
+struct MCPIOException : public std::exception {
+    const char* what() const noexcept override {
+        return "MCPIOException";
+    };
+};
+
+
+namespace deviceinformations {
+    inline static const char *vendor_ID = "04d8";
+    inline static const char *device_ID = "00de";
+};
 
 class MCP2210 final : public spi::SPIBridge, public gpio::GPIOBridge{
 private:
@@ -25,12 +38,9 @@ private:
 public:
     int getFd() const;
 
-    enum class device_information : uint16_t {
-        vendor_ID = 0x04d8,
-        device_ID = 0x00de
-    };
 
 private:
+    int32_t send(const uint16_t& dataCount) const;
 
     enum class spiSettings : uint16_t {
         mode                = static_cast<uint16_t>(spiMode::mode0),
@@ -52,7 +62,8 @@ public:
     explicit MCP2210(unsigned char number);
     explicit MCP2210();
     ~MCP2210() override;
-    spi::SPIData transfer(const spi::SPIData& input) const override;
+    SPI8 transfer(const SPI8& input) const override;
+    std::vector<SPI8> transfer(const std::initializer_list<SPI8>& spiData) const override;
     void setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin& pin) override;
     void writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin& pin) override;
     gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;

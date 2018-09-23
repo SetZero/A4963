@@ -4,9 +4,15 @@
 #include <map>
 #include "GPIOBridge.h"
 #include "SPIDevice.h"
+#include "SPIData.h"
 #include <memory>
 
+using SPI8 = typename spi::SPIData<1,spi::EndianMode::little_endian>;
+using SPI16 = typename spi::SPIData<2,spi::EndianMode::little_endian>;
+
 namespace spi {
+
+    /* this is obsolete
     class SPIData {
     public:
         SPIData(std::vector<unsigned char> data) : mData(std::move(data)) {}
@@ -44,23 +50,16 @@ namespace spi {
         }
     private:
         std::vector<unsigned char> mData;
-    };
+    };*/
 
-    inline namespace literals {
-        inline SPIData operator ""_spi(unsigned long long element) {
-            return SPIData(static_cast<int>(element));
-        }};
 
     class SPIBridge {
     public:
         virtual ~SPIBridge() = default;
-        virtual SPIData transfer(const SPIData& spiData) const = 0;
+        virtual SPI8 transfer(const SPI8& spiData) const = 0;
+        virtual std::vector<SPI8> transfer(const std::initializer_list<SPI8>& spiData) const = 0;
         virtual void slaveRegister(std::shared_ptr<SPIDevice>, const gpio::GPIOPin& pin) = 0;
         virtual void slaveSelect(std::shared_ptr<SPIDevice> slave) = 0;
         virtual void slaveDeselect(std::shared_ptr<SPIDevice> slave) = 0;
     };
-
-    inline spi::SPIData operator+(spi::SPIData lhs,spi::SPIData rhs){
-        return lhs+=rhs;
-    }
 }

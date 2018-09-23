@@ -24,7 +24,8 @@ namespace spi {
         void setGPIODirection(const gpio::gpioDirection &direction,const gpio::GPIOPin& pin) override;
         void writeGPIO(const gpio::gpioState &state,const gpio::GPIOPin& pin) override;
         gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;
-        spi::SPIData transfer(const spi::SPIData &spiData) const override;
+        SPI8 transfer(const SPI8& spiData) const override;
+        std::vector<SPI8> transfer(const std::initializer_list<SPIData<1,spi::little_endian>>& spiData) const override;
         void slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) override;
         void slaveSelect(std::shared_ptr<SPIDevice> slave) override;
         void slaveDeselect(std::shared_ptr<SPIDevice> slave) override;

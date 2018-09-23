@@ -53,18 +53,19 @@ namespace spi {
         return state;
     }
 
-    spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
+    SPI8 ATmega32u4SPI::transfer(const SPI8 &spiData) const {
         /*for(auto data : spiData.getData()) {
             std::cout << "sent: " << static_cast<int >(data) << std::endl;
         }*/
         //TODO: Check if SPI data is less than 255 single data
         //TODO: allow multi byte transfer for spiData!
-        auto size = static_cast<uint8_t >(spiData.getData().size());
+        //auto size = static_cast<uint8_t >(spiData.getData().size());
         std::vector<uint8_t> dataVector;
 
         dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
-        dataVector.push_back(size);
-        dataVector.insert(std::end(dataVector), std::begin(spiData.getData()), std::end(spiData.getData()));
+        dataVector.push_back(1);
+        dataVector.push_back((uint8_t) spiData);
+        //dataVector.insert(std::end(dataVector), std::begin(spiData.getData()), std::end(spiData.getData()));
 
         auto data = mDevice.get()->sendData(dataVector);
         if(data.empty()) {
@@ -79,7 +80,7 @@ namespace spi {
                 }*/
             }
         }
-        return data;
+        return SPI8{data[0]};
     }
 
     void ATmega32u4SPI::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) {
@@ -104,6 +105,14 @@ namespace spi {
         } else {
             std::cout << "Error: No such slave found!" << std::endl;
         }
+    }
+
+    std::vector<SPI8> ATmega32u4SPI::transfer(const std::initializer_list<SPI8> &spiData) const {
+        std::vector<SPI8> temp{};
+        for(const auto &elem : spiData){
+            temp.emplace_back(transfer(elem));
+        }
+        return temp;
     }
 }
 

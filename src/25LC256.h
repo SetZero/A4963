@@ -21,8 +21,8 @@ public:
     EEPROM(std::shared_ptr<spi::SPIBridge> mBridge);
 
     void send16bitAddress(uint16_t address);
-    spi::SPIData readStatus();
+    SPI8 readStatus();
     void writeEnable();
-    spi::SPIData readByte(uint16_t address);
+    SPI8 readByte(uint16_t address);
     void writeByte(uint16_t address, uint8_t byte);
 };

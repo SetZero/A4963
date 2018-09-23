@@ -66,7 +66,7 @@ int main(int argc, char **argv) {/*
                 case 0: {
                     for (int j = 0; j < 10; j++) {
                         using namespace spi::literals;
-                        ptr->transfer(42_spi);
+                        ptr->transfer(42_spi8);
                     }
                     break;
                 }
