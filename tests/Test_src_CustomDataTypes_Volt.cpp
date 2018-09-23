@@ -5,7 +5,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include "catch.hpp"
-#include "../src/CustomDataTypes/Volt.h"
+#include "Volt.h"
 
 template<typename Rep, typename Period = std::ratio<1> >
 using Volt = CustomDataTypes::Electricity::Volt<Rep, Period>;
