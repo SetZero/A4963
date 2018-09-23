@@ -3,3 +3,39 @@
 //
 
 #pragma once
+
+#include <chrono>
+#include "../../utils/scales/UnitScale.h"
+#include "../../CustomDataTypes/Volt.h"
+
+namespace NS_A4963 {
+    enum class A4963RegisterNames {
+        BlankTime,
+        DeadTime,
+        CurrentSenseThresholdVoltage,
+        VDSThreshold
+    };
+
+    template<A4963RegisterNames reg>
+    struct RegisterValues;
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::BlankTime> {
+        using type = UnitScale<std::chrono::duration<long double, std::nano>,  uint16_t >;
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::DeadTime> {
+        using type = UnitScale<std::chrono::duration<long double, std::nano>, uint16_t>;
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::CurrentSenseThresholdVoltage> {
+        using type = UnitScale<CustomDataTypes::Electricity::Volt<long double, std::milli>, uint16_t>;
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::VDSThreshold> {
+        using type = UnitScale<CustomDataTypes::Electricity::Volt<long long, std::milli>, uint16_t>;
+    };
+}

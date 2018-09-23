@@ -20,8 +20,17 @@ struct DurationData {
 template<typename TUnitType, typename TValueType>
 class UnitScale {
 public:
-    explicit UnitScale(const DurationData<TUnitType> data) : mPrecision(data.precision), mMaxValue(data.maxValue),
-                                                                           mMinValue(data.minValue) {
+    /*template <typename... T>
+    explicit UnitScale(T... ts)
+    : UnitScale(DurationData<TUnitType>{ts...})
+    { }*/
+
+    explicit UnitScale(const DurationData<TUnitType>& data) : UnitScale(data.precision, data.maxValue,
+                                                                           data.minValue) {
+    }
+
+    UnitScale(TUnitType precision, TUnitType maxValue, TUnitType minValue) : mPrecision(precision), mMaxValue(maxValue),
+                                                                              mMinValue(minValue) {
         static_assert(is_duration<TUnitType>::value || is_volt<TUnitType>::value, "TUnitType must be of type std::chrono::duration" \
                                                                                   "or CustomDataTypes::Electricity::Volt");
     }

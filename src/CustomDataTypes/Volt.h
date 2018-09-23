@@ -125,7 +125,25 @@ namespace CustomDataTypes::Electricity {
         lhs /= rhs;
         return lhs;
     }
+    namespace literals {
+        auto operator ""_nV(unsigned long long element);
+        auto operator ""_nV(long double element);
 
+        auto operator ""_uV(unsigned long long element);
+        auto operator ""_uV(long double element);
+
+        auto operator ""_mV(unsigned long long element);
+        auto operator ""_mV(long double element);
+
+        auto operator ""_V(unsigned long long element);
+        auto operator ""_V(long double element);
+
+        auto operator ""_kV(unsigned long long element);
+        auto operator ""_kV(long double element);
+
+        auto operator ""_MV(unsigned long long element);
+        auto operator ""_MV(long double element);
+    }
 }
 
 

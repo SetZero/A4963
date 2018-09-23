@@ -20,14 +20,14 @@ if(NOT LIBUSB_LIBRARY AND LIBUSB_INCLUDE_DIR)
 endif(NOT LIBUSB_LIBRARY AND LIBUSB_INCLUDE_DIR)
 
 
-add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp)
+add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp tests/Test_src_scales_RangedUnit.cpp)
 add_executable(hid main.cpp)
 
 
 ## Include Directories
 
-target_link_libraries(hid ${LIBUSB_LIBRARY} src spi usb inc cdt utils scales)
-target_link_libraries(test_cases ${LIBUSB_LIBRARY} src spi usb inc cdt utils scales)
+target_link_libraries(hid ${LIBUSB_LIBRARY}  src spi usb inc  utils scales a4963 cdt)
+target_link_libraries(test_cases ${LIBUSB_LIBRARY} src spi usb inc  utils scales a4963 cdt)
 include_directories(SYSTEM ${LIBUSB_INCLUDE_DIR})
 
 include_directories(inc)
@@ -38,12 +38,14 @@ include_directories(src/SPI)
 add_subdirectory(src/SPI)
 include_directories(src/USB)
 add_subdirectory(src/USB)
-include_directories(src/CustomDataTypes)
-add_subdirectory(src/CustomDataTypes)
 include_directories(src/utils)
 add_subdirectory(src/utils)
 include_directories(src/utils/scales)
 add_subdirectory(src/utils/scales)
+include_directories(src/CustomDataTypes)
+add_subdirectory(src/CustomDataTypes)
+include_directories(src/Devices/A4963)
+add_subdirectory(src/Devices/A4963)
 #add_executable(SPI
 #        inc/mcp2210_api.c
 #        inc/mcp2210_api.h

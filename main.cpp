@@ -11,7 +11,7 @@
 #include "mcp2210_api.h"
 #include "src/SPI/mcp2210_hal.h"
 #include "src/25LC256.h"
-#include "A4963.h"
+#include "src/Devices/A4963/A4963.h"
 #include "src/utils/scales/UnitScale.h"
 
 int main(int argc, char **argv) {
@@ -35,14 +35,15 @@ int main(int argc, char **argv) {
     if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
         std::cout << "One of them was the Atmega!" << std::endl;
         auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
-        auto device = std::make_shared<A4963>(spi);
+        auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
 
         //device->setRecirculationMode(A4963::RecirculationModeTypes::High);
         //device->commit();
 
-        auto actldedtime = device->setDeadTime(1us);
-        std::cout << "Actual Dead Time: " << std::chrono::nanoseconds(*actldedtime).count() << "ns" <<  std::endl;
+        auto minValue = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>().getMMinValue();
+        auto actldedtime = device->setDeadTime(minValue);
+        std::cout << "Actual Dead Time: " << (*actldedtime).count() << "ns" <<  std::endl;
         auto actlblktime = device->setBlankTime(90ns);
         std::cout << "Actual Blank Time: " << std::chrono::nanoseconds(*actlblktime).count() << "ns" <<  std::endl;
         device->commit();
