@@ -3,7 +3,8 @@
 
 
 bool reconnect( std::unique_ptr<MCP2210>& ptr);
-
+int userInput();
+void clearInput();
 
 int main(int argc, char **argv) {
 
@@ -68,15 +69,13 @@ int main(int argc, char **argv) {
                     std::cout << i << ".: " << val << std::endl;
                     i++;
                 }
-                uint32_t z = 0;
-                std::cin >> z;
-                switch (z) {
+                switch (userInput()) {
                     case 0: {
                         for (int j = 0; j < 10; j++) {
                             using namespace spi::literals;
                             try {
                                 if (*ptr)
-                                    ptr->transfer(42_spi8);
+                                    ptr->transfer({42_spi8,21_spi8});
                                 else {
                                     std::cout << " no connection ";
                                     reconnect(ptr);
@@ -89,9 +88,10 @@ int main(int argc, char **argv) {
                         break;
                     }
                     case 1: {
-                        std::cout << "give your data: ";
+                        std::cout << "give your data (no whitespace): ";
                         std::string input{};
                         std::cin >> input;
+                        clearInput();
                         for (auto ch: input) {
                             try {
                                 if (*ptr)
@@ -113,10 +113,8 @@ int main(int argc, char **argv) {
                         break;
                 }
             } else {
-                std::cout << "device currently not connected: type 0 to attempt connections or 1 to exit the application" << std::endl;
-                int z;
-                std::cin >> z;
-                if(z) exit(1);
+                std::cout << "device currently not connected: type 1 to exit the application or anything else to attempt connections" << std::endl;
+                if(userInput()) exit(1);
                 else reconnect(ptr);
             }
         }
@@ -132,5 +130,26 @@ bool reconnect( std::unique_ptr<MCP2210>& ptr){
         ptr->connect();
     } while(!(*ptr));
     return *ptr;
+};
+
+int userInput(){
+    int z = -1;
+    do {
+        try {
+            std::string str = std::to_string(0);
+            std::cin >> str;
+            z = std::stoi(str);
+        } catch(std::exception& e){
+            std::cerr << e.what();
+            std::cout << " please use a valid number! " << std::endl;
+        }
+    } while(z == -1);
+    clearInput();
+    return z;
+};
+
+void clearInput(){
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 };
 

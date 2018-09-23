@@ -5,31 +5,6 @@ MCP2210::MCP2210() {
     connect();
 }
 
-
-//deprecated
-MCP2210::MCP2210(unsigned char number) {
-    std::string device = "/dev/hidraw";
-    std::unique_ptr<stChipStatus_T> x = std::make_unique<stChipStatus_T>();
-    device.append(std::to_string(number));
-    fd = open_device(device.c_str());
-    if (fd > 0) {
-        get_chip_status(fd, x.get());
-        if (x->ucSpiState == ERR_NOERR) {
-            try {
-                using namespace spi::literals;
-                transfer(0_spi8);
-                std::cout << "device found: " << device << std::endl;
-            }
-            catch (std::exception &e) {
-                e.what();
-                close_device(fd);
-            }
-        } else {
-            close_device(fd);
-        }
-    } else std::cout << "Error with device: " << fd << std::endl;
-}
-
 MCP2210::~MCP2210() {
     close_device(fd);
 }
@@ -287,3 +262,27 @@ void MCP2210::setSettings(const MCP2210::spiSettings& settings) {
         }
        temp.empty();
     }*/
+
+/*deprecated
+MCP2210::MCP2210(unsigned char number) {
+    std::string device = "/dev/hidraw";
+    std::unique_ptr<stChipStatus_T> x = std::make_unique<stChipStatus_T>();
+    device.append(std::to_string(number));
+    fd = open_device(device.c_str());
+    if (fd > 0) {
+        get_chip_status(fd, x.get());
+        if (x->ucSpiState == ERR_NOERR) {
+            try {
+                using namespace spi::literals;
+                transfer(0_spi8);
+                std::cout << "device found: " << device << std::endl;
+            }
+            catch (std::exception &e) {
+                e.what();
+                close_device(fd);
+            }
+        } else {
+            close_device(fd);
+        }
+    } else std::cout << "Error with device: " << fd << std::endl;
+}*/
