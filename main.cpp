@@ -2,7 +2,7 @@
 #include "src/SPI/mcp2210_hal.h"
 
 
-void reconnect( std::unique_ptr<MCP2210>& ptr);
+bool reconnect( std::unique_ptr<MCP2210>& ptr);
 
 
 int main(int argc, char **argv) {
@@ -55,68 +55,82 @@ int main(int argc, char **argv) {
             std::cout << "Data: " << back.getData()[0] << std::endl;
         }*/
 
-    std::cout << "this is sparta" << std::endl;
+    std::cout << "this is sparta!" << std::endl;
     std::unique_ptr<MCP2210> ptr;
     ptr = std::make_unique<MCP2210>();
-
+    auto eingaben = {"spi test", "eingabe test", "exit"};
         while(true) {
-            auto eingaben = { "spi test","eingabe test","exit"};
-            std::cout << "mögliche eingaben: " << std::endl;
-            size_t i = 0;
-            for(auto val : eingaben){
-                std::cout << i << ".: " << val << std::endl;
-                i++;
-            }
-            uint32_t z = 0;
-            std::cin >> z;
-            switch(z) {
-                case 0: {
-                    for (int j = 0; j < 10; j++) {
-                        using namespace spi::literals;
-                        try {
-                            if(*ptr)
-                                ptr->transfer(42_spi8);
-                            else{
-                                std::cout << " no connection ";
+
+            if (*ptr) {
+                std::cout << "mögliche eingaben: " << std::endl;
+                size_t i = 0;
+                for (auto val : eingaben) {
+                    std::cout << i << ".: " << val << std::endl;
+                    i++;
+                }
+                uint32_t z = 0;
+                std::cin >> z;
+                switch (z) {
+                    case 0: {
+                        for (int j = 0; j < 10; j++) {
+                            using namespace spi::literals;
+                            try {
+                                if (*ptr)
+                                    ptr->transfer(42_spi8);
+                                else {
+                                    std::cout << " no connection ";
+                                    reconnect(ptr);
+                                }
+                            } catch (MCPIOException &e) {
+                                std::cout << e.what();
+                                if (!reconnect(ptr)) break;
+                            }
+                        }
+                        break;
+                    }
+                    case 1: {
+                        std::cout << "give your data: ";
+                        std::string input{};
+                        std::cin >> input;
+                        for (auto ch: input) {
+                            try {
+                                if (*ptr)
+                                    ptr->transfer(spi::SPIData(ch));
+                                else {
+                                    std::cout << " no connection ";
+                                    reconnect(ptr);
+                                }
+                            } catch (MCPIOException &e) {
+                                std::cout << e.what();
                                 reconnect(ptr);
                             }
-                        } catch(MCPIOException& e){
-                            std::cout << e.what();
-                            reconnect(ptr);
                         }
+                        break;
                     }
-                    break;
+                    case 2 :
+                        return 0;
+                    default:
+                        break;
                 }
-                case 1: {
-                    std::cout << "give your data: ";
-                    std::string input{};
-                    std::cin >> input;
-                    for(auto ch: input){
-                        try{
-                            if(*ptr)
-                                ptr->transfer(spi::SPIData(ch));
-                            else{
-                                std::cout << " no connection ";
-                                reconnect(ptr);
-                            }
-                        } catch(MCPIOException& e){
-                            std::cout << e.what();
-                            reconnect(ptr);
-                        }
-                    }
-                    break;
-                }
-                case 2 : return 0;
-                default: break;
+            } else {
+                std::cout << "device currently not connected: type 0 to attempt connections or 1 to exit the application" << std::endl;
+                int z;
+                std::cin >> z;
+                if(z) exit(1);
+                else reconnect(ptr);
             }
         }
     }
 
 
-void reconnect( std::unique_ptr<MCP2210>& ptr){
-    std::cout << " type sth to attempt a reconnect " << std::endl;
-    int z;
-    std::cin >> z;
-    ptr->connect();
+bool reconnect( std::unique_ptr<MCP2210>& ptr){
+    do {
+        std::cout << " type sth to attempt a reconnect ('break' for stop trying) " << std::endl;
+        std::string z;
+        std::cin >> z;
+        if(z == "break") break;
+        ptr->connect();
+    } while(!(*ptr));
+    return *ptr;
 };
 
