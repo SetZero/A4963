@@ -4,6 +4,9 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
+
+void reconnect( std::unique_ptr<MCP2210>& ptr);
+
 int main(int argc, char **argv) {/*
     int ictr;
 
@@ -39,7 +42,7 @@ int main(int argc, char **argv) {/*
 
         device->show_register();
 
-        /*std::string str2 = "Other Text!";
+        std::string str2 = "Other Text!";
         for(std::string::size_type i = 0; i < str2.size(); i++) {
             device->writeByte(static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
         }
@@ -66,7 +69,17 @@ int main(int argc, char **argv) {/*
                 case 0: {
                     for (int j = 0; j < 10; j++) {
                         using namespace spi::literals;
-                        ptr->transfer(42_spi8);
+                        try {
+                            if(*ptr)
+                                ptr->transfer(42_spi8);
+                            else{
+                                std::cout << " no connection ";
+                                reconnect(ptr);
+                            }
+                        } catch(MCPIOException& e){
+                            std::cout << e.what();
+                            reconnect(ptr);
+                        }
                     }
                     break;
                 }
@@ -75,7 +88,17 @@ int main(int argc, char **argv) {/*
                     std::string input{};
                     std::cin >> input;
                     for(auto ch: input){
-                        ptr->transfer(spi::SPIData(ch));
+                        try{
+                            if(*ptr)
+                                ptr->transfer(spi::SPIData(ch));
+                            else{
+                                std::cout << " no connection ";
+                                reconnect(ptr);
+                            }
+                        } catch(MCPIOException& e){
+                            std::cout << e.what();
+                            reconnect(ptr);
+                        }
                     }
                     break;
                 }
@@ -85,6 +108,11 @@ int main(int argc, char **argv) {/*
         }
     }
 
-
+void reconnect( std::unique_ptr<MCP2210>& ptr){
+    std::cout << " type sth to attempt a reconnect " << std::endl;
+    int z;
+    std::cin >> z;
+    ptr->connect();
+};
 
 #pragma clang diagnostic pop

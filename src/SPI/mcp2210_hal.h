@@ -19,12 +19,13 @@ struct MCPIOException : public std::exception {
 
 
 namespace deviceinformations {
-    inline static const char *vendor_ID = "04d8";
-    inline static const char *device_ID = "00de";
+    inline static constexpr const char *vendor_ID = "04d8";
+    inline static constexpr const char *device_ID = "00de";
 };
 
 class MCP2210 final : public spi::SPIBridge, public gpio::GPIOBridge{
 private:
+    bool connection = false;
     static constexpr int SPI_BUF_LEN = 1024;
     inline static auto txdata = std::make_unique<unsigned char[]>(SPI_BUF_LEN);
     inline static auto rxdata = std::make_unique<unsigned char[]>(SPI_BUF_LEN);
@@ -35,11 +36,7 @@ private:
         mode2 = 2, //clock polarity = 1 clock phase = 0
         mode3 = 3  //clock polarity = 1 clock phase = 1
     };
-public:
-    int getFd() const;
 
-
-private:
     int32_t send(const uint16_t& dataCount) const;
 
     enum class spiSettings : uint16_t {
@@ -54,7 +51,7 @@ private:
     };
 
 public:
-    inline static bool connection = false;
+
     static constexpr gpio::GPIOPin
     pin0 = gpio::GPIOPin(1<<0), pin1 = gpio::GPIOPin(1<<1), pin2 = gpio::GPIOPin(1<<2), pin3 = gpio::GPIOPin(1<<3),
     pin4 = gpio::GPIOPin(1<<4), pin5 = gpio::GPIOPin(1<<6), pin6 = gpio::GPIOPin(1<<6), pin7 = gpio::GPIOPin(1<<7);
@@ -62,12 +59,15 @@ public:
     explicit MCP2210(unsigned char number);
     explicit MCP2210();
     ~MCP2210() override;
-    SPI8 transfer(const SPI8& input) const override;
-    std::vector<SPI8> transfer(const std::initializer_list<SPI8>& spiData) const override;
+    SPI8 transfer(const SPI8& input) override;
+    std::vector<SPI8> transfer(const std::initializer_list<SPI8>& spiData) override;
     void setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin& pin) override;
     void writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin& pin) override;
     gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;
     void slaveSelect(std::shared_ptr<SPIDevice> slave) override;
     void slaveDeselect(std::shared_ptr<SPIDevice> slave) override;
     void slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin& pin) override;
+    void exceptionHandling(int32_t errorCode);
+    operator bool();
+    void connect();
 };

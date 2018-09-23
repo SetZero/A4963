@@ -56,8 +56,8 @@ namespace spi {
     class SPIBridge {
     public:
         virtual ~SPIBridge() = default;
-        virtual SPI8 transfer(const SPI8& spiData) const = 0;
-        virtual std::vector<SPI8> transfer(const std::initializer_list<SPI8>& spiData) const = 0;
+        virtual SPI8 transfer(const SPI8& spiData)  = 0;
+        virtual std::vector<SPI8> transfer(const std::initializer_list<SPI8>& spiData) = 0;
         virtual void slaveRegister(std::shared_ptr<SPIDevice>, const gpio::GPIOPin& pin) = 0;
         virtual void slaveSelect(std::shared_ptr<SPIDevice> slave) = 0;
         virtual void slaveDeselect(std::shared_ptr<SPIDevice> slave) = 0;

@@ -53,7 +53,7 @@ namespace spi {
         return state;
     }
 
-    SPI8 ATmega32u4SPI::transfer(const SPI8 &spiData) const {
+    SPI8 ATmega32u4SPI::transfer(const SPI8 &spiData) {
         /*for(auto data : spiData.getData()) {
             std::cout << "sent: " << static_cast<int >(data) << std::endl;
         }*/
@@ -107,7 +107,7 @@ namespace spi {
         }
     }
 
-    std::vector<SPI8> ATmega32u4SPI::transfer(const std::initializer_list<SPI8> &spiData) const {
+    std::vector<SPI8> ATmega32u4SPI::transfer(const std::initializer_list<SPI8> &spiData) {
         std::vector<SPI8> temp{};
         for(const auto &elem : spiData){
             temp.emplace_back(transfer(elem));

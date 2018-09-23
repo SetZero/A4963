@@ -32,7 +32,7 @@ namespace spi {
 
 		template<typename t, typename ... args>
 		explicit SPIData(t first, args... ss) {
-			std::initializer_list<t> ins = { first, ss... };
+			auto ins = { first, ss... };
 			static_assert(sizeof...(args)+1 <= numberOfBytes, "too much bytes for this data type" );
 			if constexpr (endian == little_endian)
 				mData.insert(std::begin(mData), std::begin(ins), std::end(ins));
@@ -72,7 +72,6 @@ namespace spi {
 		inline auto end() const {
 			return mData.end();
 		}
-
 
 		inline SPIData operator+(const SPIData& rhs) const {
 		    SPIData temp{*this};
@@ -123,6 +122,9 @@ namespace spi {
 		inline void operator-(const SPIData& rhs) = delete;
 		inline void operator*(const SPIData& rhs) = delete;
 		inline void operator/(const SPIData& rhs) = delete;
+        inline void operator-=(const SPIData& rhs) = delete;
+        inline void operator*=(const SPIData& rhs) = delete;
+        inline void operator/=(const SPIData& rhs) = delete;
 
 		inline uint8_t bytesUsed() const { return static_cast<uint8_t>(mData.size()); };
 
@@ -131,11 +133,11 @@ namespace spi {
 
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
 	inline SPIData<numberOfBytes, endian> operator+(const SPIData<numberOfBytes, endian>& lhs,const SPIData<numberOfBytes, endian>& rhs) {
-		return	rhs + rhs;
+		return	lhs + rhs;
 	 }
 
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
-	inline void swap(SPIData<numberOfBytes, endian>& lhs, SPIData<numberOfBytes, endian> rhs) {
+	inline void swap(SPIData<numberOfBytes, endian>& lhs, SPIData<numberOfBytes, endian>& rhs) {
 		lhs.swap(rhs);
 	}
 
