@@ -84,12 +84,8 @@ gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
 
 int32_t MCP2210::send(const uint16_t &dataCount) const {
     return spi_data_xfer(fd, txdata.get(), rxdata.get(), dataCount,
-                         static_cast<uint16_t >(spiSettings::mode), static_cast<uint16_t >(spiSettings::speed),
-                         static_cast<uint16_t >(spiSettings::actcsval),
-                         static_cast<uint16_t >(spiSettings::idlecsval), static_cast<uint16_t >(spiSettings::gpcsmask),
-                         static_cast<uint16_t >(spiSettings::cs2datadly),
-                         static_cast<uint16_t >(spiSettings::data2datadly),
-                         static_cast<uint16_t >(spiSettings::data2csdly));
+                         static_cast<uint16_t>(settings.mode), settings.speed, settings.actcsval, settings.idlecsval, settings.gpcsmask,
+                         settings.cs2datadly, settings.data2datadly, settings.data2csdly);
 }
 
 std::vector<SPI8>
@@ -255,10 +251,18 @@ void MCP2210::exceptionHandling(int32_t errorCode) {
     connection = false;
     std::cerr << "device disconnected" << std::endl;
     throw MCPIOException{};
-};
+}
+
+MCP2210::spiSettings MCP2210::getSettings() const {
+    return settings;
+}
+
+void MCP2210::setSettings(const MCP2210::spiSettings& settings) {
+    MCP2210::settings = settings;
+}
 
 
-//old find mechanism for hidraw:
+//old search mechanism for hidraw:
 /*
     for(auto z = 0; z < 255; z++) {
         temp = device;

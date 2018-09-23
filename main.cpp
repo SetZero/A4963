@@ -2,12 +2,16 @@
 #include "src/SPI/mcp2210_hal.h"
 
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
-
 void reconnect( std::unique_ptr<MCP2210>& ptr);
 
-int main(int argc, char **argv) {/*
+
+int main(int argc, char **argv) {
+
+    for(int i = 1; i < argc ; i++){
+        std::cout << "Arg number " << std::to_string(i) << ": " <<argv[i] << std::endl;
+    }
+
+    /*
     int ictr;
 
     std::cout << "\nMCP2210 Evaluation Board Tests" << std::endl;
@@ -108,6 +112,7 @@ int main(int argc, char **argv) {/*
         }
     }
 
+
 void reconnect( std::unique_ptr<MCP2210>& ptr){
     std::cout << " type sth to attempt a reconnect " << std::endl;
     int z;
@@ -115,4 +120,3 @@ void reconnect( std::unique_ptr<MCP2210>& ptr){
     ptr->connect();
 };
 
-#pragma clang diagnostic pop
