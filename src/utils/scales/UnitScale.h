@@ -68,7 +68,7 @@ public:
         return mPrecision;
     }
 
-    TUnitType getMMaxValue() const {
+    TUnitType getMaxValue() const {
         return mMaxValue;
     }
 

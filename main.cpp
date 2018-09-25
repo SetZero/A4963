@@ -43,10 +43,10 @@ int main(int argc, char **argv) {
 
         device->setRecirculationMode(NS_A4963::A4963::RecirculationModeTypes::Off);
         auto deadTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
-        auto actldedtime = device->setDeadTime(deadTimeRange.getMMaxValue());
+        auto actldedtime = device->setDeadTime(deadTimeRange.getMaxValue());
 
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
-        auto actlblktime = device->setBlankTime(blankTimeRange.getMMaxValue());
+        auto actlblktime = device->setBlankTime(blankTimeRange.getMaxValue());
         device->commit();
 
         device->show_register();
