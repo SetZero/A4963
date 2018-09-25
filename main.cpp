@@ -14,18 +14,7 @@
 #include "src/Devices/A4963/A4963.h"
 #include "src/utils/scales/UnitScale.h"
 
-int main(int argc, char **argv) {
-    int ictr;
-
-    std::cout << "\nMCP2210 Evaluation Board Tests" << std::endl;
-    std::cout << "\nParameters: " << argc << std::endl;
-    for (ictr = 0; ictr < argc; ictr++)
-	{
-		std::cout << "\nParameter(" << ictr << ") -> " << argv[ictr] << std::endl;
-	}
-
-	//MCP2210 spi{str};
-
+int main() {
     using namespace spi::literals;
     using namespace std::chrono_literals;
 
@@ -38,27 +27,15 @@ int main(int argc, char **argv) {
         auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
 
-        //device->setRecirculationMode(NS_A4963::A4963::RecirculationModeTypes::High);
-        //device->commit();
-
         device->setRecirculationMode(NS_A4963::A4963::RecirculationModeTypes::Off);
         auto deadTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
-        auto actldedtime = device->setDeadTime(deadTimeRange.getMaxValue());
+        device->setDeadTime(deadTimeRange.getMaxValue());
 
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
-        auto actlblktime = device->setBlankTime(blankTimeRange.getMaxValue());
+        device->setBlankTime(blankTimeRange.getMaxValue());
         device->commit();
 
         device->show_register();
-
-        //std::string str2 = "Other Text!";
-        //for(std::string::size_type i = 0; i < str2.size(); i++) {
-        //    device->writeByte(static_cast<uint16_t>(i), static_cast<uint8_t>(str2[i]));
-        //}
-        //for(std::string::size_type i = 0; i < str2.size(); i++) {
-        //    auto back = device->readByte(static_cast<uint16_t>(i));
-        //    std::cout << "Data: " << back.getData()[0] << std::endl;
-        //}
     }
 }
 
