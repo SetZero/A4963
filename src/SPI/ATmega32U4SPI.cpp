@@ -54,9 +54,7 @@ namespace spi {
     }
 
     spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
-        /*for(auto data : spiData.getData()) {
-            std::cout << "sent: " << static_cast<int >(data) << std::endl;
-        }*/
+
         //TODO: Check if SPI data is less than 255 single data
         //TODO: allow multi byte transfer for spiData!
         auto size = static_cast<uint8_t >(spiData.getData().size());
@@ -68,15 +66,12 @@ namespace spi {
 
         auto data = mDevice.get()->sendData(dataVector);
         if(data.empty()) {
-            std::cout << "There was an error with the spi data!" << std::endl;
+            throw std::logic_error{"There was an error with the spi data: it was empty!"};
         } else {
             if (data[0] == static_cast<unsigned char>(SPIAnswerypes::SPIAnswerWaiting)) {
-                std::cout << "Failed to send data: device not ready yet..." << std::endl;
+                throw std::logic_error{"Failed to send data: device not ready yet..."};
             } else {
                 data.erase(std::begin(data));
-                /*for(auto dat : data) {
-                    std::cout << static_cast<int>(dat) << std::endl;
-                }*/
             }
         }
         return data;
@@ -93,7 +88,7 @@ namespace spi {
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::off, value->second);
         } else {
-            std::cout << "Error: No such slave found!" << std::endl;
+            throw std::logic_error{"Error: No such slave found!"};
         }
     }
 
@@ -102,7 +97,7 @@ namespace spi {
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::on, value->second);
         } else {
-            std::cout << "Error: No such slave found!" << std::endl;
+            throw std::logic_error{"Error: No such slave found!"};
         }
     }
 }

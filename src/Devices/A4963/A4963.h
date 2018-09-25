@@ -69,7 +69,7 @@ namespace NS_A4963 {
 
         template<A4963RegisterNames type>
         auto getRegisterRange() const {
-            return std::any_cast<typename RegisterValues<type>::type>(data.at(type));
+            return std::any_cast<typename RegisterValues<type>::type>(mRegisterRanges.at(type));
         }
     private:
 
@@ -121,7 +121,7 @@ namespace NS_A4963 {
             return std::pair<A4963RegisterNames, typename RegisterValues<reg>::type>{reg, range};
         }
 
-        const std::map<A4963RegisterNames, std::any> data = {
+        const std::map<A4963RegisterNames, std::any> mRegisterRanges = {
                 mapEntry<A4963RegisterNames::BlankTime>({400ns, 6us, 0us}),
                 mapEntry<A4963RegisterNames::DeadTime>({50ns, 3.15us, 100ns}),
                 mapEntry<A4963RegisterNames::CurrentSenseThresholdVoltage>({12.5_mV, 200.0_mV, 12.5_mV})

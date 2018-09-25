@@ -251,5 +251,5 @@ namespace utils {
 				return sameTypes<T...>();
 		}
 	
-	};
+	}
 }
