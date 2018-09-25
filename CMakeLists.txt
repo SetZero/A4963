@@ -26,10 +26,7 @@ add_executable(hid main.cpp)
 
 ## Include Directories
 
-target_link_libraries(hid ${LIBUSB_LIBRARY}  src spi usb inc  utils scales a4963 cdt)
-target_link_libraries(test_cases ${LIBUSB_LIBRARY} src spi usb inc  utils scales a4963 cdt)
 include_directories(SYSTEM ${LIBUSB_INCLUDE_DIR})
-
 include_directories(inc)
 add_subdirectory(inc)
 include_directories(src)
@@ -42,10 +39,15 @@ include_directories(src/utils)
 add_subdirectory(src/utils)
 include_directories(src/utils/scales)
 add_subdirectory(src/utils/scales)
-include_directories(src/CustomDataTypes)
-add_subdirectory(src/CustomDataTypes)
 include_directories(src/Devices/A4963)
 add_subdirectory(src/Devices/A4963)
+include_directories(src/CustomDataTypes)
+add_subdirectory(src/CustomDataTypes)
+
+target_link_libraries(hid        ${LIBUSB_LIBRARY} src spi usb inc  utils scales a4963 cdt)
+target_link_libraries(test_cases ${LIBUSB_LIBRARY} src spi usb inc  utils scales a4963 cdt)
+
+
 #add_executable(SPI
 #        inc/mcp2210_api.c
 #        inc/mcp2210_api.h
