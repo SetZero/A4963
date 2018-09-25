@@ -11,6 +11,7 @@
 namespace NS_A4963 {
 
     using namespace std::literals::chrono_literals;
+    using namespace CustomDataTypes::Electricity::literals;
 
     class A4963 : public SPIDevice {
     public:
@@ -120,11 +121,10 @@ namespace NS_A4963 {
             return std::pair<A4963RegisterNames, typename RegisterValues<reg>::type>{reg, range};
         }
 
-
         const std::map<A4963RegisterNames, std::any> data = {
                 mapEntry<A4963RegisterNames::BlankTime>({400ns, 6us, 0us}),
-                mapEntry<A4963RegisterNames::DeadTime>({50ns, 3.15us, 100ns})
-                //mapEntry<A4963RegisterNames::CurrentSenseThresholdVoltage>(),
+                mapEntry<A4963RegisterNames::DeadTime>({50ns, 3.15us, 100ns}),
+                mapEntry<A4963RegisterNames::CurrentSenseThresholdVoltage>({12.5_mV, 200.0_mV, 12.5_mV})
 
         };
 
@@ -149,48 +149,32 @@ namespace NS_A4963 {
 
         void commit(const RegisterCodes &registerCodes);
 
-        template<typename TUnitType>
-        std::optional<TUnitType>
-        insertCheckedValue(UnitScale<TUnitType, A4963::size_type> scale, const RegisterMask &mask,
-                           const RegisterCodes &registerCode) {
+        template<A4963RegisterNames Name, template<typename, typename> typename E, typename Rep, typename Period>
+        std::optional<const E<Rep, Period>>
+        insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName) {
+            auto scale = getRegisterRange<Name>();
+
             if (auto checkedValue = scale.convertValue(time)) {
                 A4963::size_type data = createRegisterEntry(*checkedValue, mask);
-                writeRegisterEntry(registerCode, mask, data);
-                return {(scale.getActualValue(*checkedValue))};
+                writeRegisterEntry(registerName, mask, data);
+                //TODO: make this more generic, because Volt has no "duration_cast", maybe make getActualValue a template
+                //TODO: with a given return type?
+                return {std::chrono::duration_cast<E<Rep, Period>>(
+                        scale.getActualValue(*checkedValue))};
             }
             return std::nullopt;
         }
-
     };
 
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>>
     A4963::setBlankTime(const std::chrono::duration<Rep, Period> &time) {
-        using namespace std::chrono_literals;
-        static UnitScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{.precision = 400ns, .maxValue = 6us, .minValue = 0us}};
-
-        if (auto checkedValue = scale.convertValue(time)) {
-            A4963::size_type data = createRegisterEntry(*checkedValue, RegisterMask::BlankTimeAddress);
-            writeRegisterEntry(RegisterCodes::Config0, RegisterMask::BlankTimeAddress, data);
-            return {std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(
-                    scale.getActualValue(*checkedValue))};
-        }
-        return std::nullopt;
-        //return insertCheckedValue(scale, RegisterMask::BlankTimeAddress, RegisterCodes::Config0);
+        return insertCheckedValue<A4963RegisterNames::BlankTime>(time, RegisterMask::BlankTimeAddress, RegisterCodes::Config0);
     }
 
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>>
     A4963::setDeadTime(const std::chrono::duration<Rep, Period> &time) {
-        using namespace std::chrono_literals;
-        static UnitScale<std::chrono::duration<long double, std::nano>, A4963::size_type> scale{{.precision = 50ns, .maxValue = 3.15us, .minValue = 100ns}};
-
-        if (auto checkedValue = scale.convertValue(time)) {
-            A4963::size_type data = createRegisterEntry(*checkedValue, RegisterMask::DeadTimeAddress);
-            writeRegisterEntry(RegisterCodes::Config0, RegisterMask::DeadTimeAddress, data);
-            return {std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(
-                    scale.getActualValue(*checkedValue))};
-        }
-        //return insertCheckedValue(scale, RegisterMask::DeadTimeAddress, RegisterCodes::Config0);
+        return insertCheckedValue<A4963RegisterNames::DeadTime>(time, RegisterMask::DeadTimeAddress, RegisterCodes::Config0);
     }
 }
