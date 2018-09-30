@@ -23,6 +23,7 @@ namespace CustomDataTypes {
         explicit  operator accuracy(){
             return getPercent();
         }
+        Percentage& set(accuracy percent){mPercentage = percent;};
         Percentage& operator+=(const Percentage& other){
             this->mPercentage += other.mPercentage;
             return *this;
@@ -32,7 +33,10 @@ namespace CustomDataTypes {
             return *this;
         }
         Percentage& operator*=(const accuracy skalar){
-            this->mPercentage *= skalar;
+            if(skalar >= 0)
+                this->mPercentage = mPercentage/100 * skalar;
+            else
+                this->mPercentage = mPercentage/100 * -skalar;
             return *this;
         }
         Percentage& operator-=(const Percentage& other){
@@ -46,7 +50,7 @@ namespace CustomDataTypes {
             return *this;
         }
         Percentage& operator/=(const accuracy skalar){
-            this->mPercentage /= skalar;
+            this->mPercentage = mPercentage/100/skalar;
             return *this;
         }
 
@@ -88,9 +92,27 @@ namespace CustomDataTypes {
         return temp;
     }
     template<typename accuracy>
+    Percentage<accuracy> operator*(const accuracy& lhs, const Percentage<accuracy>& rhs){
+        Percentage<accuracy> temp{rhs};
+        temp*=lhs;
+        return temp;
+    }
+    template<typename accuracy>
     Percentage<accuracy> operator/(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
         Percentage<accuracy> temp{lhs};
         temp/=rhs;
+        return temp;
+    }
+    template<typename accuracy>
+    Percentage<accuracy> operator/(const Percentage<accuracy>& lhs, const accuracy rhs){
+        Percentage<accuracy> temp{lhs};
+        temp/=rhs;
+        return temp;
+    }
+    template<typename accuracy>
+    Percentage<accuracy> operator/(const accuracy lhs, const Percentage<accuracy>& rhs){
+        Percentage<accuracy> temp{lhs};
+        temp/=(accuracy) rhs;
         return temp;
     }
     template<typename accuracy>
