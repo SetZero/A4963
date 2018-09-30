@@ -13,19 +13,34 @@
 namespace spi {
 class SPIData {
 protected:
-    std::vector<uint8_t > mData;
-    uint8_t  numberOfBytes = 0;
+    std::unique_ptr<uint8_t[]> mData;
+    uint8_t  numberOfBytes = 0,size = 0;
 public:
     SPIData() = delete;
 
-    inline SPIData(std::vector<uint8_t> vector, uint8_t bytes) : mData(std::move(vector)), numberOfBytes(bytes){};
-
-    inline SPIData(const SPIData& other) {
-        numberOfBytes = other.numberOfBytes;
-        mData.insert(std::end(mData), std::begin(other.mData), std::end(other.mData));
+    void push_back(uint8_t elem){
+        mData[size] = elem;
+        size++;
     }
 
-    inline SPIData(const std::initializer_list<uint8_t>& list, uint8_t bytes) : mData(list), numberOfBytes(bytes){};
+    inline SPIData(std::unique_ptr<uint8_t[]> array, uint8_t bytes) : mData(std::move(array)), numberOfBytes(bytes){};
+
+    inline SPIData(const SPIData& other) : numberOfBytes(other.numberOfBytes) {
+        mData = std::make_unique<uint8_t[]>(numberOfBytes);
+        for(int i = 0; i < numberOfBytes ; i++){
+            push_back(other[i]);
+        }
+    }
+
+    inline SPIData(const std::initializer_list<uint8_t>& list, uint8_t bytes) : numberOfBytes(bytes){
+        mData = std::make_unique<uint8_t[]>(numberOfBytes);
+        int i = 0;
+        for(auto elem : list){
+            push_back(elem);
+            i++;
+        }
+
+    };
 
     inline void swap(SPIData& other) {
         std::swap(this->mData, other.mData);
@@ -41,11 +56,11 @@ public:
     }
 
     inline auto begin() const {
-        return mData.begin();
+        return mData.get();
     }
 
     inline auto end() const {
-        return mData.end();
+        return mData.get()+size;
     }
 
     virtual std::shared_ptr<SPIData> operator+(const SPIData& rhs) const = 0;
@@ -56,8 +71,8 @@ public:
     };
 
     inline void operator+(uint8_t data){
-        if (mData.size() < numberOfBytes)
-            mData.push_back(data);
+        if (size < numberOfBytes)
+            push_back(data);
         else
             throw std::exception{};
     }
@@ -91,10 +106,10 @@ public:
     inline void operator*=(const SPIData& rhs) = delete;
     inline void operator/=(const SPIData& rhs) = delete;
 
-    inline uint8_t bytesUsed() const { return static_cast<uint8_t>(mData.size()); };
+    inline uint8_t bytesUsed() const { return static_cast<uint8_t>(size); };
     inline uint8_t bytes() const {return numberOfBytes;};
 
-    inline virtual ~SPIData() {};
+    inline virtual ~SPIData() = default;;
 
 };
 
