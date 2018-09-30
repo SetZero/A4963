@@ -58,11 +58,6 @@ int main(int argc, char **argv) {
         }*/
 
     std::cout << "this is sparta!" << std::endl;
-    using namespace spi::literals;
-    auto test = 43690_spi16;
-    for(auto elem : *test.get()){
-        std::cout << " elem " << elem << std::endl;
-    }
     std::unique_ptr<MCP2210> ptr;
     ptr = std::make_unique<MCP2210>();
     auto eingaben = {"spi test", "eingabe test", "exit"};
