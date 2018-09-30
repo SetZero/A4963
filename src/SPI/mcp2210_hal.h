@@ -3,7 +3,6 @@
 #include <vector>
 #include <iostream>
 #include <memory>
-#include <libusb.h>
 #include "mcp2210_api.h"
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
@@ -60,11 +59,10 @@ public:
 
     spiSettings getSettings() const;
     void setSettings(const spiSettings& settings);
-    explicit MCP2210(unsigned char number);
     explicit MCP2210();
     ~MCP2210() override;
-    SPI8 transfer(const SPI8& input) override;
-    std::vector<SPI8> transfer(const std::initializer_list<SPI8>& spiData) override;
+    std::shared_ptr<spi::SPIData>  transfer(const spi::SPIData& input) override;
+    std::vector<std::shared_ptr<spi::SPIData>> transfer(const std::initializer_list<std::shared_ptr<spi::SPIData>>& spiData) override;
     void setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin& pin) override;
     void writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin& pin) override;
     gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;

@@ -9,20 +9,25 @@ MCP2210::~MCP2210() {
     close_device(fd);
 }
 
-SPI8 MCP2210::transfer(const SPI8 &input) {
+std::shared_ptr<spi::SPIData> MCP2210::transfer(const spi::SPIData &input) {
     if (connection) {
-        txdata[0] = (uint8_t) input;
-        int32_t err = send(1);
-        if (err != ERR_NOERR) {
-            exceptionHandling(err);
+        uint16_t i = 0;
+            for(uint8_t data : input) {
+                std::cout << std::to_string(i) << std::endl;
+                txdata[i] = data;
+                i++;
+            }
+        int32_t error = send(static_cast<uint16_t>(i));
+        if (error != ERR_NOERR) {
+            exceptionHandling(error);
         }
 #ifdef DEBUG_MCP
         if(err != 0) std::cout << " error: " << err << std::endl;
 #endif
-        return SPI8{rxdata[0]};
+        return  std::make_shared<spi::spi8>(rxdata[0]);
     }
     using namespace spi::literals;
-    return 0_spi8;
+    return std::shared_ptr<spi::SPIData>(0_spi8);
 }
 
 void MCP2210::writeGPIO(const gpio::gpioState &state, const gpio::GPIOPin &pin) {
@@ -63,25 +68,28 @@ int32_t MCP2210::send(const uint16_t &dataCount) const {
                          settings.cs2datadly, settings.data2datadly, settings.data2csdly);
 }
 
-std::vector<SPI8>
-MCP2210::transfer(const std::initializer_list<SPI8> &spiData) {
+std::vector<std::shared_ptr<spi::SPIData>>
+MCP2210::transfer(const std::initializer_list<std::shared_ptr<spi::SPIData>> &spiData) {
     if (connection) {
         uint16_t i = 0;
-        for (const auto &elem: spiData) {
+        for (const auto& elem: spiData) {
             if (i >= SPI_BUF_LEN) break;
-            txdata[i] = (uint8_t) elem;
-            i++;
+            auto spicontainer = elem.get();
+            for(uint8_t data : *spicontainer) {
+                txdata[i] = data;
+                i++;
+            }
         }
-        int32_t error = send(static_cast<uint16_t>(spiData.size()));
+        int32_t error = send(static_cast<uint16_t>(i));
         if (error != ERR_NOERR) exceptionHandling(error);
-        std::vector<SPI8> dataOut = std::vector<SPI8>{i};
+        std::vector<std::shared_ptr<spi::SPIData>> dataOut = std::vector<std::shared_ptr<spi::SPIData>>{i};
         for (i = 0; i < spiData.size(); i++) {
             if (i >= SPI_BUF_LEN) break;
-            dataOut.emplace_back(rxdata[i]);
+            dataOut.emplace_back(new spi::spi8(rxdata[i]));
         }
         return dataOut;
     }
-    return std::vector<SPI8>{};
+    return std::vector<std::shared_ptr<spi::SPIData>>{};
 }
 
 void MCP2210::connect() {

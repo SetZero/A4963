@@ -1,5 +1,6 @@
 #include <iostream>
 #include "src/SPI/mcp2210_hal.h"
+#include "Percentage.h"
 
 
 bool reconnect( std::unique_ptr<MCP2210>& ptr);
@@ -56,6 +57,8 @@ int main(int argc, char **argv) {
             std::cout << "Data: " << back.getData()[0] << std::endl;
         }*/
 
+    using perc = math::Percentage<math::Accuracy::Bit64>;
+    perc testz = perc{};
     std::cout << "this is sparta!" << std::endl;
     std::unique_ptr<MCP2210> ptr;
     ptr = std::make_unique<MCP2210>();
@@ -75,7 +78,7 @@ int main(int argc, char **argv) {
                             using namespace spi::literals;
                             try {
                                 if (*ptr)
-                                    ptr->transfer({42_spi8,21_spi8});
+                                    ptr->transfer({43690_spi16});
                                 else {
                                     std::cout << " no connection ";
                                     reconnect(ptr);
@@ -95,7 +98,7 @@ int main(int argc, char **argv) {
                         for (auto ch: input) {
                             try {
                                 if (*ptr)
-                                    ptr->transfer(spi::SPIData(ch));
+                                    ptr->transfer(spi::spi8(ch));
                                 else {
                                     std::cout << " no connection ";
                                     reconnect(ptr);

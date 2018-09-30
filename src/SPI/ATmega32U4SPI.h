@@ -12,7 +12,6 @@
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
 #include "src/USB/LibUsbDevice.h"
-//#include "src/USB/LibUSBDevices.h"
 
 namespace spi {
     class ATmega32u4SPI : public spi::SPIBridge, public gpio::GPIOBridge {
@@ -24,8 +23,8 @@ namespace spi {
         void setGPIODirection(const gpio::gpioDirection &direction,const gpio::GPIOPin& pin) override;
         void writeGPIO(const gpio::gpioState &state,const gpio::GPIOPin& pin) override;
         gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;
-        SPI8 transfer(const SPI8& spiData)  override;
-        std::vector<SPI8> transfer(const std::initializer_list<SPIData<1,spi::little_endian>>& spiData)  override;
+        std::shared_ptr<SPIData> transfer(const SPIData& spiData)  override;
+        std::vector<std::shared_ptr<SPIData>> transfer(const std::initializer_list<std::shared_ptr<SPIData>>& spiData)  override;
         void slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) override;
         void slaveSelect(std::shared_ptr<SPIDevice> slave) override;
         void slaveDeselect(std::shared_ptr<SPIDevice> slave) override;
