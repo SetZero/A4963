@@ -57,8 +57,6 @@ int main(int argc, char **argv) {
             std::cout << "Data: " << back.getData()[0] << std::endl;
         }*/
 
-    using perc = math::Percentage<math::Accuracy::Bit64>;
-    perc testz = perc{};
     std::cout << "this is sparta!" << std::endl;
     std::unique_ptr<MCP2210> ptr;
     ptr = std::make_unique<MCP2210>();
