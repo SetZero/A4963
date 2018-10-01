@@ -9,6 +9,8 @@
 namespace spi {
     class spi8 : public SPIData {
     public:
+        static constexpr uint8_t BYTES = 1;
+
         spi8();
 
         spi8(const uint8_t& data);

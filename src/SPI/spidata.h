@@ -13,25 +13,18 @@
 namespace spi {
 class SPIData {
 protected:
-    std::vector<uint8_t > mData;
+    std::vector<uint8_t > mData = std::vector<uint8_t>();
     uint8_t  numberOfBytes = 0;
 public:
     SPIData() = delete;
 
-    inline SPIData(std::vector<uint8_t> vector, uint8_t bytes) : mData(std::move(vector)), numberOfBytes(bytes){
-        mData.reserve(bytes);
-    };
+    inline SPIData(uint8_t bytes) : numberOfBytes(bytes){};
 
-    inline SPIData(const SPIData& other) :numberOfBytes(other.numberOfBytes){
-        mData.reserve(numberOfBytes);
+    inline SPIData(const SPIData& other) : numberOfBytes(other.numberOfBytes){
         mData.insert(std::end(mData), std::begin(other.mData), std::end(other.mData));
     }
 
-    inline SPIData(const std::initializer_list<uint8_t>& list, uint8_t bytes) :  numberOfBytes(bytes){
-        mData = std::vector<uint8_t >{};
-        mData.reserve(numberOfBytes);
-        mData.insert(std::end(mData), std::begin(list), std::end(list));
-    };
+    inline SPIData(const std::initializer_list<uint8_t>& list, uint8_t bytes) : mData(list), numberOfBytes(bytes){};
 
     inline void swap(SPIData& other) {
         std::swap(this->mData, other.mData);
@@ -99,8 +92,6 @@ public:
 
     inline uint8_t bytesUsed() const { return static_cast<uint8_t>(mData.size()); };
     inline uint8_t bytes() const {return numberOfBytes;};
-    inline uint8_t cap() const {return mData.capacity();};
-
 
     inline virtual ~SPIData() {};
 

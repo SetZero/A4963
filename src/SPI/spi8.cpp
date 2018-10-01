@@ -16,15 +16,13 @@ std::shared_ptr<spi::SPIData> spi::spi8::operator+(const SPIData &rhs) const {
     return temp;
 }
 
-spi::spi8::spi8() : SPIData(std::vector<uint8_t>(),1) {
+spi::spi8::spi8() : SPIData(BYTES) {
 
 }
 
-spi::spi8::spi8(const spi8 &data) : SPIData(data){
+spi::spi8::spi8(const spi8 &data) = default;
 
-}
-
-spi::spi8::spi8(const std::initializer_list<uint8_t> &data) : SPIData(data,1) {
+spi::spi8::spi8(const std::initializer_list<uint8_t> &data) : SPIData(data,BYTES) {
 
 }
 

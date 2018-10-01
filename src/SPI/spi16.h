@@ -10,6 +10,9 @@
 namespace spi {
     class spi16 : public SPIData {
     public:
+
+        static constexpr uint8_t BYTES = 2;
+
         spi16();
 
         spi16(const uint16_t& data);
