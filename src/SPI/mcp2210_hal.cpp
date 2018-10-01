@@ -13,7 +13,6 @@ std::shared_ptr<spi::SPIData> MCP2210::transfer(const spi::SPIData &input) {
     if (connection) {
         uint16_t i = 0;
             for(uint8_t data : input) {
-                std::cout << std::to_string(i) << std::endl;
                 txdata[i] = data;
                 i++;
             }
