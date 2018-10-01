@@ -61,10 +61,6 @@ namespace CustomDataTypes {
             swap(other.mPercentage, this->mPercentage);
             return *this;
         }
-
-
-
-        friend std::ostream &operator<<(std::ostream &os, const Percentage &percentage);
     };
 
     namespace literals {

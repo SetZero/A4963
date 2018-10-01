@@ -17,7 +17,7 @@ std::shared_ptr<spi::SPIData> spi::spi16::operator+(const spi::SPIData &rhs) con
     return temp;
 }
 
-spi::spi16::spi16() : SPIData(std::vector<uint8_t>(),1) {
+spi::spi16::spi16() : SPIData(std::vector<uint8_t>(),2) {
 
 }
 
