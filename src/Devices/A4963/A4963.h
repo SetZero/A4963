@@ -67,9 +67,14 @@ namespace NS_A4963 {
         void invertPWMInput(const InvertPWMInputTypes &type);
 
 
-        template<A4963RegisterNames type>
+        template<typename Rep, typename Period>
+        std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
+        setCurrentSenseThresholdVoltage(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
+
+
+        template<A4963RegisterNames reg>
         auto getRegisterRange() const {
-            return std::any_cast<typename RegisterValues<type>::type>(mRegisterRanges.at(type));
+            return RegisterValues<reg>::value;
         }
     private:
 
@@ -116,17 +121,6 @@ namespace NS_A4963 {
             bool dirty;
         };
 
-        template<A4963RegisterNames reg>
-        constexpr std::pair<A4963RegisterNames, typename RegisterValues<reg>::type> mapEntry(typename RegisterValues<reg>::type range) {
-            return std::pair<A4963RegisterNames, typename RegisterValues<reg>::type>{reg, range};
-        }
-
-        const std::map<A4963RegisterNames, std::any> mRegisterRanges = {
-                mapEntry<A4963RegisterNames::BlankTime>({400ns, 6us, 0us}),
-                mapEntry<A4963RegisterNames::DeadTime>({50ns, 3.15us, 100ns}),
-                mapEntry<A4963RegisterNames::CurrentSenseThresholdVoltage>({12.5_mV, 200.0_mV, 12.5_mV})
-
-        };
 
         std::map<RegisterCodes, RegisterInfo> mRegisterData;
 
@@ -149,18 +143,27 @@ namespace NS_A4963 {
 
         void commit(const RegisterCodes &registerCodes);
 
-        template<A4963RegisterNames Name, template<typename, typename> typename E, typename Rep, typename Period>
+        template<A4963RegisterNames Name, typename Functor, template<typename, typename> typename E, typename Rep, typename Period>
         std::optional<const E<Rep, Period>>
-        insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName) {
+        insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName, Functor normalizerFunction) {
             auto scale = getRegisterRange<Name>();
 
             if (auto checkedValue = scale.convertValue(time)) {
+                std::cout << "\t Value (before): " << *checkedValue << std::endl;
+                *checkedValue = normalizerFunction(*checkedValue);
+                std::cout << "\t Value (after): " << *checkedValue << std::endl;
                 A4963::size_type data = createRegisterEntry(*checkedValue, mask);
                 writeRegisterEntry(registerName, mask, data);
                 //TODO: make this more generic, because Volt has no "duration_cast", maybe make getActualValue a template
                 //TODO: with a given return type?
-                return {std::chrono::duration_cast<E<Rep, Period>>(
-                        scale.getActualValue(*checkedValue))};
+                if constexpr(utils::is_duration<E<Rep, Period>>::value) {
+                    std::cout << "\t Value: " << data << std::endl;
+                    return {std::chrono::duration_cast<E<Rep, Period>>(
+                            scale.getActualValue(*checkedValue))};
+                } else {
+                    std::cout << "\t Value: " << *checkedValue << std::endl;
+                    return {static_cast<E<Rep, Period>>(scale.getActualValue(*checkedValue))};
+                }
             }
             return std::nullopt;
         }
@@ -169,12 +172,25 @@ namespace NS_A4963 {
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>>
     A4963::setBlankTime(const std::chrono::duration<Rep, Period> &time) {
-        return insertCheckedValue<A4963RegisterNames::BlankTime>(time, RegisterMask::BlankTimeAddress, RegisterCodes::Config0);
+        std::cout << "Blank Time: " << std::endl;
+        auto normalizer = [](Rep input) { return input; };
+        return insertCheckedValue<A4963RegisterNames::BlankTime>(time, RegisterMask::BlankTimeAddress, RegisterCodes::Config0, normalizer);
     }
 
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>>
     A4963::setDeadTime(const std::chrono::duration<Rep, Period> &time) {
-        return insertCheckedValue<A4963RegisterNames::DeadTime>(time, RegisterMask::DeadTimeAddress, RegisterCodes::Config0);
+        std::cout << "Dead Time: " << std::endl;
+        auto normalizer = [](Rep input) { return input; };
+        return insertCheckedValue<A4963RegisterNames::DeadTime>(time, RegisterMask::DeadTimeAddress, RegisterCodes::Config0, normalizer);
+    }
+
+    template<typename Rep, typename Period>
+    std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
+    A4963::setCurrentSenseThresholdVoltage(
+            const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
+        std::cout << "CSTV: " << std::endl;
+        auto normalizer = [](Rep input) { return input - 1; };
+        return insertCheckedValue<A4963RegisterNames::CurrentSenseThresholdVoltage>(voltage, RegisterMask::CurrentSenseThresholdVoltageAddress, RegisterCodes::Config1, normalizer);
     }
 }

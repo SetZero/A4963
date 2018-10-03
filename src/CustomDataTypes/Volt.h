@@ -17,7 +17,7 @@ namespace CustomDataTypes::Electricity {
 
         Volt(const Volt &) = default;
 
-        explicit Volt(Rep input) {
+        constexpr explicit Volt(Rep input) {
             internalRepresentation = input;
         }
 
