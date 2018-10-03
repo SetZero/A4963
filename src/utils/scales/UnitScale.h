@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <iostream>
 #include <optional>
+#include <stdexcept>
 #include "../../CustomDataTypes/Volt.h"
 #include "utils.h"
 
@@ -26,19 +27,17 @@ public:
     : UnitScale(DurationData<TUnitType>{ts...})
     { }*/
 
-    explicit UnitScale(const DurationData<TUnitType>& data) : UnitScale(data.precision, data.maxValue,
+    constexpr explicit UnitScale(const DurationData<TUnitType>& data) : UnitScale(data.precision, data.maxValue,
                                                                            data.minValue) {
     }
 
-    UnitScale(TUnitType precision, TUnitType maxValue, TUnitType minValue) : mPrecision(precision), mMaxValue(maxValue),
+    constexpr UnitScale(TUnitType precision, TUnitType maxValue, TUnitType minValue) : mPrecision(precision), mMaxValue(maxValue),
                                                                               mMinValue(minValue) {
-        static_assert(utils::is_duration<TUnitType>::value || utils::is_volt<TUnitType>::value, "TUnitType must be of type std::chrono::duration" \
-                                                                                  "or CustomDataTypes::Electricity::Volt");
     }
 
     //TODO: return ScaleOptional and return if it is too big or too small
-    template<typename Rep, typename Period>
-    std::optional<TValueType> convertValue(const CustomDataTypes::Electricity::Volt<Rep, Period>& value) {
+    template<typename T>
+    std::optional<TValueType> convertValue(const T& value) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
             return {static_cast<TValueType>(static_cast<TUnitType>(value / mPrecision))};
@@ -60,28 +59,24 @@ public:
         }
     }
 
-    TUnitType getActualValue(TValueType value) {
-        return TUnitType{value * mPrecision.count()};
-    }
-
-    template<template<typename, typename> typename E, typename Rep, typename Period>
-    E<Rep, Period> getActualValue(TValueType value) {
-        if constexpr (utils::is_duration<E<Rep, Period>>::value) {
-            return std::chrono::duration_cast(TUnitType{value * mPrecision.count()});
-        } else {
-            return static_cast<E<Rep, Period>>(TUnitType{value * mPrecision.count()});
+    //template<typename = std::enable_if_t<std::is_arithmetic<TValueType>::value>>
+    constexpr TUnitType getActualValue(TValueType value) {
+        if constexpr (utils::is_volt<TUnitType>::value || utils::is_duration<TUnitType>::value) {
+            return TUnitType{value * mPrecision.count()};
+        } else if (std::is_arithmetic<TUnitType>::value) {
+            return TUnitType{value * mPrecision};
         }
     }
 
-    TUnitType getPrecision() const {
+    constexpr TUnitType getPrecision() const {
         return mPrecision;
     }
 
-    TUnitType getMaxValue() const {
+    constexpr TUnitType getMaxValue() const {
         return mMaxValue;
     }
 
-    TUnitType getMinValue() const {
+    constexpr TUnitType getMinValue() const {
         return mMinValue;
     }
 

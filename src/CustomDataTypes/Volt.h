@@ -17,18 +17,21 @@ namespace CustomDataTypes::Electricity {
     public:
         constexpr Volt() = default;
 
-        Volt(const Volt &) = default;
+        constexpr Volt(const Volt& v) : internalRepresentation(v.internalRepresentation) {}
+
+        constexpr Volt(Volt&& v) noexcept : internalRepresentation(std::move(v.internalRepresentation)) { }
 
         constexpr explicit Volt(Rep input) : internalRepresentation{input} { }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        explicit Volt(Volt<oRep, std::ratio<oNum, oDenom>> &volt) {
-            internalRepresentation = convert_value(volt);
-        }
+        constexpr explicit Volt(Volt<oRep, std::ratio<oNum, oDenom>> &volt) : internalRepresentation(convert_value(volt)){ }
 
         ~Volt() = default;
 
-        Volt &operator=(const Volt &) = default;
+        constexpr Volt& operator=(Volt other) {
+            std::swap(internalRepresentation, other.internalRepresentation);
+            return *this;
+        }
 
         constexpr Rep count() const { return internalRepresentation; }
 

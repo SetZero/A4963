@@ -26,19 +26,19 @@ namespace NS_A4963 {
     template<>
     struct RegisterValues<A4963RegisterNames::BlankTime> {
         using type = UnitScale<std::chrono::duration<long double, std::nano>,  uint16_t >;
-        static const type value;
+        static constexpr type value{400ns, 6us, 0us};
     };
 
     template<>
     struct RegisterValues<A4963RegisterNames::DeadTime> {
         using type = UnitScale<std::chrono::duration<long double, std::nano>, uint16_t>;
-        static const type value;
+        static constexpr type value{50ns, 3.15us, 100ns};
     };
 
     template<>
     struct RegisterValues<A4963RegisterNames::CurrentSenseThresholdVoltage> {
         using type = UnitScale<CustomDataTypes::Electricity::Volt<long double, std::milli>, uint16_t>;
-        static const type value;
+        static constexpr type value{12.5_mV, 200.0_mV, 12.5_mV};
     };
 
     template<>
