@@ -35,7 +35,11 @@ int main() {
         device->setBlankTime(blankTimeRange.getMinValue());
 
         auto thresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
-        device->setCurrentSenseThresholdVoltage(thresholdVoltage.getMinValue());
+        double insert = 0;
+        std::cout << "Insert a value between 12.5 and 200 (mV): " << std::endl;
+        std::cin >> insert;
+        auto v = decltype(thresholdVoltage.getMinValue()){insert};
+        device->setCurrentSenseThresholdVoltage(v);
         device->commit();
 
         device->show_register();
