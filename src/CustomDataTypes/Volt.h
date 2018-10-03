@@ -5,6 +5,8 @@
 #pragma once
 
 #include <ratio>
+#include <limits>
+#include <stdexcept>
 
 namespace CustomDataTypes::Electricity {
     template<typename Rep, typename Period = std::ratio<1> >
@@ -17,9 +19,7 @@ namespace CustomDataTypes::Electricity {
 
         Volt(const Volt &) = default;
 
-        constexpr explicit Volt(Rep input) {
-            internalRepresentation = input;
-        }
+        constexpr explicit Volt(Rep input) : internalRepresentation{input} { }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
         explicit Volt(Volt<oRep, std::ratio<oNum, oDenom>> &volt) {
@@ -35,37 +35,46 @@ namespace CustomDataTypes::Electricity {
         constexpr Volt operator+() const { return *this; }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        explicit operator Volt<oRep, std::ratio<oNum, oDenom>>() {
+        constexpr explicit operator Volt<oRep, std::ratio<oNum, oDenom>>() const {
             internalRepresentation = (internalRepresentation * oNum * Denom) / (Num * oDenom);
         }
 
+        template<typename Number, typename = std::enable_if_t<std::is_arithmetic<Number>::value>>
+        constexpr explicit operator Number() const {
+            if(internalRepresentation < std::numeric_limits<Number>::max()) {
+                return count();
+            } else {
+                throw std::overflow_error("Invalid cast of Volt type!");
+            }
+        }
+
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        bool operator==(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+        constexpr bool operator==(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return internalRepresentation == convert_value(rhs);
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        bool operator!=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+        constexpr bool operator!=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return !(rhs == *this);
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        bool operator<(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+        constexpr bool operator<(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return internalRepresentation < convert_value(rhs);
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        bool operator>(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+        constexpr bool operator>(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return rhs < *this;
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        bool operator<=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+        constexpr bool operator<=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return !(rhs < *this);
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        bool operator>=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+        constexpr bool operator>=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
             return !(*this < rhs);
         }
 
@@ -94,7 +103,7 @@ namespace CustomDataTypes::Electricity {
         }
     private:
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        Rep convert_value(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) const {
+        constexpr Rep convert_value(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) const {
             return ((rhs.count() * oNum * Denom) / (Num * oDenom));
         }
         template<typename oRep, typename oPeriod>
@@ -133,23 +142,53 @@ namespace CustomDataTypes::Electricity {
     using megavolt  = Volt<std::intmax_t, std::mega>;
 
     namespace literals {
-        nanovolt operator ""_nV(unsigned long long element);
-        Volt<long double, std::nano> operator ""_nV(long double element);
+        constexpr nanovolt operator ""_nV(unsigned long long element) {
+            return nanovolt(static_cast<intmax_t>(element));
+        }
 
-        microvolt operator ""_uV(unsigned long long element);
-        Volt<long double, std::micro> operator ""_uV(long double element);
+        constexpr Volt<long double, std::nano> operator ""_nV(long double element) {
+            return Volt<long double, std::nano>(element);
+        }
 
-        millivolt operator ""_mV(unsigned long long element);
-        Volt<long double, std::milli> operator ""_mV(long double element);
+        constexpr microvolt operator ""_uV(unsigned long long element) {
+            return microvolt(static_cast<intmax_t>(element));
+        }
 
-        volt operator ""_V(unsigned long long element);
-        Volt<long double> operator ""_V(long double element);
+        constexpr Volt<long double, std::micro> operator ""_uV(long double element) {
+            return Volt<long double, std::micro>(element);
+        }
 
-        kilovolt operator ""_kV(unsigned long long element);
-        Volt<long double, std::kilo> operator ""_kV(long double element);
+        constexpr millivolt operator ""_mV(unsigned long long element) {
+            return millivolt(static_cast<intmax_t>(element));
+        }
 
-        megavolt operator ""_MV(unsigned long long element);
-        Volt<long double, std::mega> operator ""_MV(long double element);
+        constexpr Volt<long double, std::milli> operator ""_mV(long double element) {
+            return Volt<long double, std::milli>(element);
+        }
+
+        constexpr volt operator ""_V(unsigned long long element) {
+            return volt(static_cast<intmax_t>(element));
+        }
+
+        constexpr Volt<long double> operator ""_V(long double element) {
+            return Volt<long double>(element);
+        }
+
+        constexpr kilovolt operator ""_kV(unsigned long long element) {
+            return kilovolt(static_cast<intmax_t>(element));
+        }
+
+        constexpr Volt<long double, std::kilo> operator ""_kV(long double element) {
+            return Volt<long double, std::kilo>(element);
+        }
+
+        constexpr megavolt operator ""_MV(unsigned long long element) {
+            return megavolt(static_cast<intmax_t>(element));
+        }
+
+        constexpr Volt<long double, std::mega> operator ""_MV(long double element) {
+            return Volt<long double, std::mega>(element);
+        }
     }
 }
 

@@ -149,19 +149,13 @@ namespace NS_A4963 {
             auto scale = getRegisterRange<Name>();
 
             if (auto checkedValue = scale.convertValue(time)) {
-                std::cout << "\t Value (before): " << *checkedValue << std::endl;
                 *checkedValue = normalizerFunction(*checkedValue);
-                std::cout << "\t Value (after): " << *checkedValue << std::endl;
                 A4963::size_type data = createRegisterEntry(*checkedValue, mask);
                 writeRegisterEntry(registerName, mask, data);
-                //TODO: make this more generic, because Volt has no "duration_cast", maybe make getActualValue a template
-                //TODO: with a given return type?
                 if constexpr(utils::is_duration<E<Rep, Period>>::value) {
-                    std::cout << "\t Value: " << data << std::endl;
                     return {std::chrono::duration_cast<E<Rep, Period>>(
                             scale.getActualValue(*checkedValue))};
                 } else {
-                    std::cout << "\t Value: " << *checkedValue << std::endl;
                     return {static_cast<E<Rep, Period>>(scale.getActualValue(*checkedValue))};
                 }
             }
@@ -172,7 +166,6 @@ namespace NS_A4963 {
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>>
     A4963::setBlankTime(const std::chrono::duration<Rep, Period> &time) {
-        std::cout << "Blank Time: " << std::endl;
         auto normalizer = [](Rep input) { return input; };
         return insertCheckedValue<A4963RegisterNames::BlankTime>(time, RegisterMask::BlankTimeAddress, RegisterCodes::Config0, normalizer);
     }
@@ -180,7 +173,6 @@ namespace NS_A4963 {
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>>
     A4963::setDeadTime(const std::chrono::duration<Rep, Period> &time) {
-        std::cout << "Dead Time: " << std::endl;
         auto normalizer = [](Rep input) { return input; };
         return insertCheckedValue<A4963RegisterNames::DeadTime>(time, RegisterMask::DeadTimeAddress, RegisterCodes::Config0, normalizer);
     }
@@ -189,7 +181,6 @@ namespace NS_A4963 {
     std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
     A4963::setCurrentSenseThresholdVoltage(
             const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
-        std::cout << "CSTV: " << std::endl;
         auto normalizer = [](Rep input) { return input - 1; };
         return insertCheckedValue<A4963RegisterNames::CurrentSenseThresholdVoltage>(voltage, RegisterMask::CurrentSenseThresholdVoltageAddress, RegisterCodes::Config1, normalizer);
     }

@@ -41,8 +41,7 @@ public:
     std::optional<TValueType> convertValue(const CustomDataTypes::Electricity::Volt<Rep, Period>& value) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
-            auto steps = static_cast<TUnitType>(value);
-            return steps.count() / mPrecision.count();
+            return {static_cast<TValueType>(static_cast<TUnitType>(value / mPrecision))};
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;

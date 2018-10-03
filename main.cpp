@@ -35,7 +35,7 @@ int main() {
         device->setBlankTime(blankTimeRange.getMinValue());
 
         auto thresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
-        device->setCurrentSenseThresholdVoltage(thresholdVoltage.getMaxValue());
+        device->setCurrentSenseThresholdVoltage(thresholdVoltage.getMinValue());
         device->commit();
 
         device->show_register();
