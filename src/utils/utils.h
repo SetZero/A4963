@@ -3,6 +3,8 @@
 #include<type_traits>
 #include <limits>
 #include <cmath>
+#include <chrono>
+#include "../../src/CustomDataTypes/Volt.h"
 
 namespace utils {
 
@@ -252,4 +254,17 @@ namespace utils {
 		}
 	
 	}
+
+
+    template<class T>
+    struct is_duration : std::false_type {};
+
+    template<class Rep, class Period>
+    struct is_duration<std::chrono::duration<Rep, Period>> : std::true_type {};
+
+    template<class T>
+    struct is_volt : std::false_type {};
+
+    template<class Rep, class Period>
+    struct is_volt<CustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
 }

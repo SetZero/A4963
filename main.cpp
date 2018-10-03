@@ -29,10 +29,13 @@ int main() {
 
         device->setRecirculationMode(NS_A4963::A4963::RecirculationModeTypes::Off);
         auto deadTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
-        device->setDeadTime(deadTimeRange.getMaxValue());
+        device->setDeadTime(deadTimeRange.getMinValue());
 
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
-        device->setBlankTime(blankTimeRange.getMaxValue());
+        device->setBlankTime(blankTimeRange.getMinValue());
+
+        auto thresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
+        device->setCurrentSenseThresholdVoltage(thresholdVoltage.getMaxValue());
         device->commit();
 
         device->show_register();
