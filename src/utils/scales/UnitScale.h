@@ -19,6 +19,7 @@ struct DurationData {
     TDuration minValue;
 };
 
+//TODO: maybe make min, etc... as a template parameter?
 template<typename TUnitType, typename TValueType>
 class UnitScale {
 public:
@@ -31,8 +32,10 @@ public:
                                                                            data.minValue) {
     }
 
-    constexpr UnitScale(TUnitType precision, TUnitType maxValue, TUnitType minValue) : mPrecision(precision), mMaxValue(maxValue),
+    constexpr UnitScale(const TUnitType& precision, const TUnitType& maxValue, const TUnitType& minValue) : mPrecision(precision), mMaxValue(maxValue),
                                                                               mMinValue(minValue) {
+        //static_assert(maxValue <= minValue);
+        //static_assert((maxValue - minValue) % precision == 0);
     }
 
     //TODO: return ScaleOptional and return if it is too big or too small
