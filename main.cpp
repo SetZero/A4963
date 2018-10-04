@@ -34,12 +34,15 @@ int main() {
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
         device->setBlankTime(blankTimeRange.getMinValue());
 
-        //auto thresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
+        auto csThresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
         //double insert = 0;
         //std::cout << "Insert a value between 12.5 and 200 (mV): " << std::endl;
         //std::cin >> insert;
         //auto v = decltype(thresholdVoltage.getMinValue()){insert};
-        //device->setCurrentSenseThresholdVoltage(v);
+        device->setCurrentSenseThresholdVoltage(csThresholdVoltage.getMaxValue());
+
+        auto vdsThresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::VDSThreshold>();
+        device->setVDSThreshold(vdsThresholdVoltage.getMaxValue());
         device->commit();
 
         device->show_register();

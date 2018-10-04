@@ -66,11 +66,15 @@ namespace NS_A4963 {
 
         void invertPWMInput(const InvertPWMInputTypes &type);
 
-
         template<typename Rep, typename Period>
         std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
         setCurrentSenseThresholdVoltage(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
 
+        void setBemfTimeQualifier(const BemfTimeQualifier &type);
+
+        template<typename Rep, typename Period>
+        std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
+        setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
 
         template<A4963RegisterNames reg>
         auto getRegisterRange() const {
@@ -143,11 +147,10 @@ namespace NS_A4963 {
 
         void commit(const RegisterCodes &registerCodes);
 
-        template<A4963RegisterNames Name, typename Functor, template<typename, typename> typename E, typename Rep, typename Period>
+        template<A4963RegisterNames Name, template<typename, typename> typename E, typename Rep, typename Period, typename Functor>
         std::optional<const E<Rep, Period>>
         insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName, Functor normalizerFunction) {
             auto scale = getRegisterRange<Name>();
-
             if (auto checkedValue = scale.convertValue(time)) {
                 *checkedValue = normalizerFunction(*checkedValue);
                 A4963::size_type data = createRegisterEntry(*checkedValue, mask);
@@ -183,5 +186,12 @@ namespace NS_A4963 {
             const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
         auto normalizer = [](Rep input) { return input - 1; };
         return insertCheckedValue<A4963RegisterNames::CurrentSenseThresholdVoltage>(voltage, RegisterMask::CurrentSenseThresholdVoltageAddress, RegisterCodes::Config1, normalizer);
+    }
+
+    template<typename Rep, typename Period>
+    std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
+    A4963::setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
+        auto normalizer = [](Rep input) { return input; };
+        return insertCheckedValue<A4963RegisterNames::VDSThreshold>(voltage, RegisterMask::VDSThresholdAddress, RegisterCodes::Config1, normalizer);
     }
 }

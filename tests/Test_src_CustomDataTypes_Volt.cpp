@@ -79,8 +79,10 @@ TEST_CASE("Test Volt Arithmetic", "[Volt Arithmetic]") {
     REQUIRE(1_nV + 1_mV < 1_MV);
 }
 
-/*TEST_CASE("Implicit Convertion", "[Implicit Convertion]") {
+TEST_CASE("Implicit Convertion", "[Implicit Convertion]") {
     using namespace CustomDataTypes::Electricity::literals;
-    Volt<long double, std::milli> v = 20_kV;
-}*/
+    auto v1 = 2.0_V;
+    auto v2 = 500.0_mV;
+    REQUIRE((v1 - v2) == 1.5_V);
+}
 

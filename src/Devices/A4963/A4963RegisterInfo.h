@@ -43,7 +43,7 @@ namespace NS_A4963 {
 
     template<>
     struct RegisterValues<A4963RegisterNames::VDSThreshold> {
-        using type = UnitScale<CustomDataTypes::Electricity::Volt<long long, std::milli>, uint16_t>;
-        static const type value;
+        using type = UnitScale<CustomDataTypes::Electricity::Volt<long double, std::milli>, uint16_t>;
+        static constexpr type value{50.0_mV, 1.55_V, 0.0_mV};
     };
 }

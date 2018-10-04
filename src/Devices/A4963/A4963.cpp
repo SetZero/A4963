@@ -109,4 +109,18 @@ namespace NS_A4963 {
         writeRegisterEntry(RegisterCodes::Config0, RegisterMask::RecirculationModeAddress, data);
     }
 
+    void A4963::setPercentFastDecay(const A4963::PercentFastDecayTypes &type) {
+        auto data = createRegisterEntry(type, RegisterMask::PercentFastDecayAddress);
+        writeRegisterEntry(RegisterCodes::Config1, RegisterMask::PercentFastDecayAddress, data);
+    }
+
+    void A4963::invertPWMInput(const A4963::InvertPWMInputTypes &type) {
+        auto data = createRegisterEntry(type, RegisterMask::InvertPWMInputAddress);
+        writeRegisterEntry(RegisterCodes::Config1, RegisterMask::InvertPWMInputAddress, data);
+    }
+
+    void A4963::setBemfTimeQualifier(const A4963::BemfTimeQualifier &type) {
+        auto data = createRegisterEntry(type, RegisterMask::BemfTimeQualifierAddress);
+        writeRegisterEntry(RegisterCodes::Config1, RegisterMask::BemfTimeQualifierAddress, data);
+    }
 }
