@@ -54,12 +54,10 @@ namespace NS_A4963 {
         void setRecirculationMode(const RecirculationModeTypes &type);
 
         template<typename Rep, typename Period>
-        std::optional<const std::chrono::duration<Rep, Period>>
-        setBlankTime(const std::chrono::duration<Rep, Period> &time);
+        auto setBlankTime(const std::chrono::duration<Rep, Period> &time);
 
         template<typename Rep, typename Period>
-        std::optional<const std::chrono::duration<Rep, Period>>
-        setDeadTime(const std::chrono::duration<Rep, Period> &time);
+        auto setDeadTime(const std::chrono::duration<Rep, Period> &time);
 
         //Config1
         void setPercentFastDecay(const PercentFastDecayTypes &type);
@@ -67,14 +65,12 @@ namespace NS_A4963 {
         void invertPWMInput(const InvertPWMInputTypes &type);
 
         template<typename Rep, typename Period>
-        std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
-        setCurrentSenseThresholdVoltage(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
+        auto setCurrentSenseThresholdVoltage(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
 
         void setBemfTimeQualifier(const BemfTimeQualifier &type);
 
         template<typename Rep, typename Period>
-        std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
-        setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
+        auto setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
 
         template<A4963RegisterNames reg>
         auto getRegisterRange() const {
@@ -171,27 +167,23 @@ namespace NS_A4963 {
     };
 
     template<typename Rep, typename Period>
-    std::optional<const std::chrono::duration<Rep, Period>>
-    A4963::setBlankTime(const std::chrono::duration<Rep, Period> &time) {
+    auto A4963::setBlankTime(const std::chrono::duration<Rep, Period> &time) {
         return insertCheckedValue<A4963RegisterNames::BlankTime>(time, RegisterMask::BlankTimeAddress, RegisterCodes::Config0);
     }
 
     template<typename Rep, typename Period>
-    std::optional<const std::chrono::duration<Rep, Period>>
-    A4963::setDeadTime(const std::chrono::duration<Rep, Period> &time) {
+    auto A4963::setDeadTime(const std::chrono::duration<Rep, Period> &time) {
         return insertCheckedValue<A4963RegisterNames::DeadTime>(time, RegisterMask::DeadTimeAddress, RegisterCodes::Config0);
     }
 
     template<typename Rep, typename Period>
-    std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
-    A4963::setCurrentSenseThresholdVoltage(
+    auto A4963::setCurrentSenseThresholdVoltage(
             const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
         return insertCheckedValue<A4963RegisterNames::CurrentSenseThresholdVoltage>(voltage, RegisterMask::CurrentSenseThresholdVoltageAddress, RegisterCodes::Config1);
     }
 
     template<typename Rep, typename Period>
-    std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
-    A4963::setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
+    auto A4963::setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
         return insertCheckedValue<A4963RegisterNames::VDSThreshold>(voltage, RegisterMask::VDSThresholdAddress, RegisterCodes::Config1);
     }
 }
