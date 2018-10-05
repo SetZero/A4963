@@ -23,6 +23,7 @@ struct DurationData {
 template<typename TUnitType, typename TValueType>
 class UnitScale {
 public:
+    using value_type = TValueType;
     /*template <typename... T>
     explicit UnitScale(T... ts)
     : UnitScale(DurationData<TUnitType>{ts...})
@@ -39,23 +40,23 @@ public:
     }
 
     //TODO: return ScaleOptional and return if it is too big or too small
-    template<typename T>
-    std::optional<TValueType> convertValue(const T& value) {
+    template<typename T, typename Functor>
+    std::optional<TValueType> convertValue(const T& value, Functor functor) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
-            return {static_cast<TValueType>(static_cast<TUnitType>(value / mPrecision))};
+            return {functor(static_cast<TUnitType>(value), mPrecision)};
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
         }
     }
 
-    template<typename Rep, typename Period>
-    std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value) {
+    template<typename Rep, typename Period, typename Functor>
+    std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value, Functor functor) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
             auto steps = std::chrono::duration_cast<TUnitType>(value);
-            return steps / mPrecision;
+            return functor(steps, mPrecision);
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;

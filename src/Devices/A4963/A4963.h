@@ -102,6 +102,11 @@ namespace NS_A4963 {
             BemfTimeQualifierAddress            = 0b0000000000100000,
             VDSThresholdAddress                 = 0b0000000000011111,
 
+            /* Config2 Addresses */
+            PositionControllerProportionalGain  = 0b0000111100000000,
+            OverspeedLimitRatio                 = 0b0000000011000000,
+            DegaussCompensation                 = 0b0000000000100000,
+            FixedPeriod                         = 0b0000000000011111,
         };
         enum class RegisterCodes : uint8_t {
             Config0     = 0b000,
@@ -147,12 +152,11 @@ namespace NS_A4963 {
 
         void commit(const RegisterCodes &registerCodes);
 
-        template<A4963RegisterNames Name, template<typename, typename> typename E, typename Rep, typename Period, typename Functor>
+        template<A4963RegisterNames Name, template<typename, typename> typename E, typename Rep, typename Period>
         std::optional<const E<Rep, Period>>
-        insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName, Functor normalizerFunction) {
+        insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName) {
             auto scale = getRegisterRange<Name>();
-            if (auto checkedValue = scale.convertValue(time)) {
-                *checkedValue = normalizerFunction(*checkedValue);
+            if (auto checkedValue = scale.convertValue(time, RegisterValues<Name>::normalizer)) {
                 A4963::size_type data = createRegisterEntry(*checkedValue, mask);
                 writeRegisterEntry(registerName, mask, data);
                 if constexpr(utils::is_duration<E<Rep, Period>>::value) {
@@ -169,29 +173,25 @@ namespace NS_A4963 {
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>>
     A4963::setBlankTime(const std::chrono::duration<Rep, Period> &time) {
-        auto normalizer = [](Rep input) { return input; };
-        return insertCheckedValue<A4963RegisterNames::BlankTime>(time, RegisterMask::BlankTimeAddress, RegisterCodes::Config0, normalizer);
+        return insertCheckedValue<A4963RegisterNames::BlankTime>(time, RegisterMask::BlankTimeAddress, RegisterCodes::Config0);
     }
 
     template<typename Rep, typename Period>
     std::optional<const std::chrono::duration<Rep, Period>>
     A4963::setDeadTime(const std::chrono::duration<Rep, Period> &time) {
-        auto normalizer = [](Rep input) { return input; };
-        return insertCheckedValue<A4963RegisterNames::DeadTime>(time, RegisterMask::DeadTimeAddress, RegisterCodes::Config0, normalizer);
+        return insertCheckedValue<A4963RegisterNames::DeadTime>(time, RegisterMask::DeadTimeAddress, RegisterCodes::Config0);
     }
 
     template<typename Rep, typename Period>
     std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
     A4963::setCurrentSenseThresholdVoltage(
             const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
-        auto normalizer = [](Rep input) { return input - 1; };
-        return insertCheckedValue<A4963RegisterNames::CurrentSenseThresholdVoltage>(voltage, RegisterMask::CurrentSenseThresholdVoltageAddress, RegisterCodes::Config1, normalizer);
+        return insertCheckedValue<A4963RegisterNames::CurrentSenseThresholdVoltage>(voltage, RegisterMask::CurrentSenseThresholdVoltageAddress, RegisterCodes::Config1);
     }
 
     template<typename Rep, typename Period>
     std::optional<const CustomDataTypes::Electricity::Volt<Rep, Period>>
     A4963::setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
-        auto normalizer = [](Rep input) { return input; };
-        return insertCheckedValue<A4963RegisterNames::VDSThreshold>(voltage, RegisterMask::VDSThresholdAddress, RegisterCodes::Config1, normalizer);
+        return insertCheckedValue<A4963RegisterNames::VDSThreshold>(voltage, RegisterMask::VDSThresholdAddress, RegisterCodes::Config1);
     }
 }
