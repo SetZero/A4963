@@ -13,11 +13,12 @@ void A4963::clearRegister(const A4963::RegisterCodes &reg, const A4963::Register
     mRegisterData[reg].data &= ~(static_cast<A4963::size_type>(mask));
 }
 
-SPI16 A4963::send16bitRegister(size_type address) {
-    auto first = static_cast<uint8_t>(address >> 8);
-    auto second = static_cast<uint8_t>(address);
-    auto msb = SPI8{first};
-    return SPI16{msb[0],mBridge->transfer(SPI8{second})[0]};
+std::shared_ptr<spi::Data> A4963::send16bitRegister(size_type address) {
+    //auto first = static_cast<uint8_t>(address >> 8);
+    //auto second = static_cast<uint8_t>(address);
+    //auto msb = SPI8{first};
+    std::shared_ptr<spi::Data> d = mBridge->transfer(spi::SPIData<2>(address));
+    return d;
 }
 
 A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {
@@ -75,7 +76,7 @@ void A4963::commit(const A4963::RegisterCodes& registerCodes) {
         mBridge->slaveSelect(shared_from_this());
         if(getRegisterEntry(registerCodes, RegisterPosition::WriteAddress, RegisterMask::WriteAddress) == static_cast<A4963::size_type>(WriteBit::Read)) {
             mRegisterData[registerCodes].data = createRegisterEntry(registerCodes, RegisterPosition::RegisterAddress, RegisterMask::RegisterAddress) |
-                    (static_cast<A4963::size_type>(send16bitRegister(mRegisterData[registerCodes].data)) &
+                    (static_cast<A4963::size_type>(*send16bitRegister(mRegisterData[registerCodes].data)) &
                     static_cast<A4963::size_type>(RegisterMask::GeneralData));
         } else {
             send16bitRegister(mRegisterData[registerCodes].data);

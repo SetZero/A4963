@@ -4,13 +4,11 @@
 
 
 void EEPROM::send16bitAddress(uint16_t address) {
-    auto first = static_cast<uint8_t>(address >> 8);
-    auto second = static_cast<uint8_t>(address);
-    mBridge->transfer(SPI8{first});
-    mBridge->transfer(SPI8{second});
+    mBridge->transfer(spi::SPIData<2>(address));
+    //mBridge->transfer(SPI8{second});
 }
 
-SPI8 EEPROM::readStatus() {
+std::shared_ptr<spi::Data> EEPROM::readStatus() {
     using namespace spi::literals;
     mBridge->slaveSelect(shared_from_this());
     mBridge->transfer(0x05_spi8);
@@ -27,7 +25,7 @@ void EEPROM::writeEnable() {
     mBridge->slaveDeselect(shared_from_this());
 }
 
-SPI8 EEPROM::readByte(uint16_t address) {
+std::shared_ptr<spi::Data> EEPROM::readByte(uint16_t address) {
     using namespace spi::literals;
     mBridge->slaveSelect(shared_from_this());
     mBridge->transfer(0x03_spi8);
@@ -43,9 +41,9 @@ void EEPROM::writeByte(uint16_t address, uint8_t byte) {
     mBridge->slaveSelect(shared_from_this());
     mBridge->transfer(0x02_spi8);
     send16bitAddress(address);
-    mBridge->transfer(SPI8{byte});
+    mBridge->transfer(spi::SPIData<>{byte});
     mBridge->slaveDeselect(shared_from_this());
-    while(readStatus()[0] & (1 << 0)){;}
+    while((*readStatus())[0] & (1 << 0)){__asm("nop");}
 }
 
 EEPROM::EEPROM(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {}

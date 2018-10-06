@@ -12,9 +12,79 @@
 #include <exception>
 #include <byteswap.h>
 #include <assert.h>
+#include <memory>
 
 
 namespace spi {
+
+class SPI_Exception : public std::exception {
+    const char* info;
+public:
+    inline explicit SPI_Exception(const char* what) : info(what){
+
+    };
+
+    inline const char *what() const noexcept override {
+        return info;
+    }
+};
+
+    class Data {
+
+    protected:
+        std::vector<uint8_t> mData = std::vector<uint8_t>();
+    public:
+
+        std::vector<uint8_t>& getData() {return mData;};
+        const std::vector<uint8_t>& getData() const {return mData;};
+
+        Data() = default;
+
+        virtual void swap(Data& other) = 0;
+
+        inline uint8_t operator[](const uint8_t& index) const {
+            return mData[index];
+        }
+
+        inline uint8_t& operator[](const uint8_t& index) {
+            return mData[index];
+        }
+
+
+        inline auto begin() const {
+            return mData.begin();
+        }
+
+        inline auto end() const {
+            return mData.end();
+        }
+
+        virtual std::unique_ptr<Data> operator+(const Data& rhs) const = 0;
+
+        virtual void operator+=(const Data& rhs) = 0;
+
+        virtual void operator+(uint8_t data) = 0;
+
+        virtual explicit operator uint8_t () const = 0;
+
+        virtual explicit operator uint16_t() const = 0;
+
+        virtual explicit operator uint32_t() const = 0;
+
+        virtual explicit operator uint64_t() const = 0;
+
+
+        inline void operator-(const Data& rhs) = delete;
+        inline void operator*(const Data& rhs) = delete;
+        inline void operator/(const Data& rhs) = delete;
+        inline void operator-=(const Data& rhs) = delete;
+        inline void operator*=(const Data& rhs) = delete;
+        inline void operator/=(const Data& rhs) = delete;
+
+        inline uint8_t bytesUsed() const { return static_cast<uint8_t>(mData.size()); };
+
+        virtual ~Data() = default;
+    };
 
 	enum EndianMode{
 		little_endian, //small letters because macro is already named this way
@@ -22,16 +92,14 @@ namespace spi {
 	};
 
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian >
-	class SPIData {
+	class SPIData : public Data {
 		static_assert((numberOfBytes &(numberOfBytes -1)) == 0  , " the number of bytes have to be a pow of 2");
 		static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");
-	private:
-		std::vector<uint8_t> mData = std::vector<uint8_t>();
 	public:
-		SPIData() = default;
+		SPIData() {mData.reserve(numberOfBytes);};
 
 		template<typename t, typename ... args>
-		explicit SPIData(t first, args... ss) {
+		explicit SPIData(t first, args... ss) : SPIData() {
 			auto ins = { first, ss... };
 			static_assert(sizeof...(args)+1 <= numberOfBytes, "too much bytes for this data type" );
 			if constexpr (endian == little_endian)
@@ -46,76 +114,59 @@ namespace spi {
 			}
 		};
 
-		SPIData(const SPIData& other) {
-			mData.insert(std::end(mData), std::begin(other.mData), std::end(other.mData));
+		explicit SPIData(const Data& other) : SPIData() {
+			mData.insert(std::end(mData), std::begin(other.getData()), std::end(other.getData()));
 		}
 
-		inline void swap(SPIData& other) {
-			using namespace std;
-			swap(this->mData, other.mData);
+		inline void swap(Data& other) override{
+			std::swap(this->mData, other.getData());
 		}
 
-		inline uint8_t operator[](const uint8_t& index) const {
-			assert(index >= 0);
-			return index >= 0 ? mData[index] : mData[0];
-		}
 
-        inline uint8_t& operator[](const uint8_t& index) {
-            assert(index >= 0);
-            return index >= 0 ? mData[index] : mData[0];
-        }
-
-		inline auto begin() const {
-			return mData.begin();
-		}
-
-		inline auto end() const {
-			return mData.end();
-		}
-
-		inline SPIData operator+(const SPIData& rhs) const {
-		    SPIData temp{*this};
-			for (size_t i = 0; i < rhs.mData.size(); i++) {
-				if (temp.mData.size() < numberOfBytes) {
-					temp.mData.push_back(rhs.mData[i]);
+		inline std::unique_ptr<Data> operator+(const Data& rhs) const override {
+            auto * temp = new SPIData{*this};
+			for (size_t i = 0; i < rhs.bytesUsed(); i++) {
+				if (temp->mData.size() < numberOfBytes) {
+					temp->mData.push_back(rhs[i]);
 				} else {
-					throw std::exception{};
+                    throw SPI_Exception{"Data Overflow"};
 				}
 			}
-			return temp;
+			return std::unique_ptr<Data>(temp);
 		}
 
-		inline void operator+=(const SPIData& rhs) {
-		    SPIData temp = (*this) +rhs;
-		    swap(temp);
+		inline void operator+=(const Data& rhs) override {
+		    Data* temp = ((*this) +rhs).get();
+		    swap(*temp);
 		};
 
-		inline void operator+(uint8_t data){
+		inline void operator+(uint8_t data) override{
 			if (mData.size() < numberOfBytes)
 				mData.push_back(data);
 			else
-				throw std::exception{};
+				throw SPI_Exception{"Data Overflow"};
 		}
 
-		explicit operator uint8_t () const {
-			static_assert(numberOfBytes <= 1 && numberOfBytes > 0, "SPIData did not fit into a uint8_t type");
+
+		explicit operator uint8_t () const override {
+            if (numberOfBytes > 1) throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
 			return mData[0];
 		};
 
-		explicit operator uint16_t() const {
-			static_assert(numberOfBytes <= 2 && numberOfBytes > 0, "SPIData did not fit into a uint16_t type");
-				return (mData[0] << 8) | mData[1];
+		explicit operator uint16_t() const override {
+            if (numberOfBytes > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
+				return (mData[1] << 8) | mData[0];
 		}
 
-		explicit operator uint32_t() const {
-			static_assert(numberOfBytes <= 4 && numberOfBytes > 0, "SPIData did not fit into a uint32_t type");
-				return (mData[0] << 24) | (mData[1] << 16) | (mData[2] << 8) | mData[3];
+		explicit operator uint32_t() const override {
+            if (numberOfBytes > 4) throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
+				return (mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8) | mData[0];
 		}
 
-		explicit operator uint64_t() const {
-			static_assert(numberOfBytes <= 8 && numberOfBytes > 0, "SPIData did not fit into a uint64_t type");
-				return ((uint64_t)(mData[0]) << 56) | ((uint64_t)(mData[1]) << 48) | ((uint64_t)(mData[2]) << 40) | ((uint64_t)(mData[3]) << 32)
-				|(mData[4] << 24) | (mData[5] << 16) | (mData[6] << 8)  | mData[7];
+		explicit operator uint64_t() const override {
+            if (numberOfBytes > 8) throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
+				return ((uint64_t)(mData[7]) << 56) | ((uint64_t)(mData[6]) << 48) | ((uint64_t)(mData[5]) << 40) | ((uint64_t)(mData[4]) << 32)
+				|(mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8)  | mData[0];
 		}
 
 
@@ -126,9 +177,7 @@ namespace spi {
         inline void operator*=(const SPIData& rhs) = delete;
         inline void operator/=(const SPIData& rhs) = delete;
 
-		inline uint8_t bytesUsed() const { return static_cast<uint8_t>(mData.size()); };
-
-		~SPIData() = default;
+		~SPIData() override = default;
 	};
 
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
