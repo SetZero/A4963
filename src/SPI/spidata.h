@@ -18,13 +18,15 @@ protected:
 public:
     SPIData() = delete;
 
-    inline SPIData(uint8_t bytes) : numberOfBytes(bytes){};
+    inline explicit SPIData(const uint8_t bytes) : numberOfBytes(bytes){};
 
-    inline SPIData(const SPIData& other) : numberOfBytes(other.numberOfBytes){
+    inline SPIData(const SPIData& other) : SPIData(other.numberOfBytes){
         mData.insert(std::end(mData), std::begin(other.mData), std::end(other.mData));
     }
 
-    inline SPIData(const std::initializer_list<uint8_t>& list, uint8_t bytes) : mData(list), numberOfBytes(bytes){};
+    inline SPIData(const std::initializer_list<uint8_t>& list, const uint8_t bytes) : SPIData(bytes){
+        mData = std::vector<uint8_t>{list};
+    };
 
     inline void swap(SPIData& other) {
         std::swap(this->mData, other.mData);

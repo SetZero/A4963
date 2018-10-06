@@ -26,8 +26,6 @@ spi::spi8::spi8(const std::initializer_list<uint8_t> &data) : SPIData(data,BYTES
 
 }
 
-spi::spi8::spi8(const uint8_t &data) : spi8() {
-    mData.push_back(data);
-}
+spi::spi8::spi8(const uint8_t &data) : SPIData(data) {}
 
 spi::spi8::~spi8() = default;

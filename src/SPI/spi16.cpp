@@ -18,7 +18,6 @@ std::shared_ptr<spi::SPIData> spi::spi16::operator+(const spi::SPIData &rhs) con
 }
 
 spi::spi16::spi16() : SPIData(BYTES) {
-
 }
 
 spi::spi16::spi16(const spi16 &data) = default;
@@ -27,13 +26,10 @@ spi::spi16::spi16(const std::initializer_list<uint8_t> &data) : SPIData(data,BYT
 
 }
 
-spi::spi16::spi16(const uint16_t &data) : spi16() {
-    mData.push_back(static_cast<uint8_t>(data >> 8));
-    mData.push_back(static_cast<uint8_t>(data));
+spi::spi16::spi16(const uint16_t &data) : spi16({static_cast<uint8_t>(data),static_cast<uint8_t>(data >> 8)}) {
 }
 
 spi::spi16::spi16(const SPIData &other) : SPIData(other) {
-
 }
 
 

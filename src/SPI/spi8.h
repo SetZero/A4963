@@ -13,7 +13,7 @@ namespace spi {
 
         spi8();
 
-        spi8(const uint8_t& data);
+        explicit spi8(const uint8_t& data);
 
         spi8(const spi8 &data);
 

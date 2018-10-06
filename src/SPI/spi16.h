@@ -15,7 +15,7 @@ namespace spi {
 
         spi16();
 
-        spi16(const uint16_t& data);
+        explicit spi16(const uint16_t& data);
 
         spi16(const spi16& data);
 
