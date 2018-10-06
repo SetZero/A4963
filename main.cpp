@@ -1,5 +1,6 @@
 #include <iostream>
 #include "src/SPI/mcp2210_hal.h"
+#include "Percentage.h"
 
 
 bool reconnect( std::unique_ptr<MCP2210>& ptr);
@@ -55,7 +56,8 @@ int main(int argc, char **argv) {
             auto back = device->readByte(static_cast<uint16_t>(i));
             std::cout << "Data: " << back.getData()[0] << std::endl;
         }*/
-
+    using namespace CustomDataTypes::literals;
+    auto t = 42.0_perc;
     std::cout << "this is sparta!" << std::endl;
     std::unique_ptr<MCP2210> ptr;
     ptr = std::make_unique<MCP2210>();

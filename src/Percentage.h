@@ -20,8 +20,8 @@ namespace CustomDataTypes {
         constexpr inline Percentage(Percentage&& other) noexcept : Percentage() { this->swap(other);};
         constexpr inline Percentage(const Percentage& other) : mPercentage(other.mPercentage) {};
         constexpr inline accuracy getPercent() const { return mPercentage; };
-        constexpr explicit operator accuracy(){
-            return getPercent();
+        constexpr explicit operator accuracy() const {
+            return mPercentage;
         }
         constexpr Percentage& set(accuracy percent){mPercentage = percent;};
         constexpr Percentage& operator+=(const Percentage& other){
