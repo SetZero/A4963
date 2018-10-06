@@ -43,7 +43,9 @@ void EEPROM::writeByte(uint16_t address, uint8_t byte) {
     send16bitAddress(address);
     mBridge->transfer(spi::SPIData<>{byte});
     mBridge->slaveDeselect(shared_from_this());
-    while((*readStatus())[0] & (1 << 0)){__asm("nop");}
+    while((*readStatus())[0] & (1 << 0)){
+        ; //optimized nop
+    }
 }
 
 EEPROM::EEPROM(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {}
