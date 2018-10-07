@@ -23,18 +23,18 @@ namespace spi {
         void setGPIODirection(const gpio::gpioDirection &direction,const gpio::GPIOPin& pin) override;
         void writeGPIO(const gpio::gpioState &state,const gpio::GPIOPin& pin) override;
         gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;
-        std::shared_ptr<Data> transfer(const Data& spiData)  override;
-        std::vector<std::shared_ptr<Data>> transfer(const std::initializer_list<std::shared_ptr<Data>>& spiData)  override;
-        void slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) override;
-        void slaveSelect(std::shared_ptr<SPIDevice> slave) override;
-        void slaveDeselect(std::shared_ptr<SPIDevice> slave) override;
+        std::unique_ptr<Data> transfer(const Data& spiData)  override;
+        std::vector<std::unique_ptr<Data>> transfer(const std::initializer_list<std::unique_ptr<Data>>& spiData)  override;
+        void slaveRegister(const std::unique_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) override;
+        void slaveSelect(const std::unique_ptr<SPIDevice>& slave) override;
+        void slaveDeselect(const std::unique_ptr<SPIDevice>& slave) override;
 
         static constexpr gpio::GPIOPin
                 pin0 = gpio::GPIOPin(0), pin1 = gpio::GPIOPin(1<<0), pin2 = gpio::GPIOPin(1<<1), pin3 = gpio::GPIOPin(1<<2),
                 pin4 = gpio::GPIOPin(1<<3);
     private:
         std::shared_ptr<usb::LibUSBDevice> mDevice;
-        std::map<std::shared_ptr<SPIDevice>, gpio::GPIOPin> mSlaves;
+        std::map<SPIDevice*, gpio::GPIOPin> mSlaves;
 
         enum class SPIRequestTypes {
             SendSPIData = 1,

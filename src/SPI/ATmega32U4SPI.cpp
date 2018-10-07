@@ -53,7 +53,7 @@ namespace spi {
         return state;
     }
 
-    std::shared_ptr<Data> ATmega32u4SPI::transfer(const Data &spiData) {
+    std::unique_ptr<Data> ATmega32u4SPI::transfer(const Data &spiData) {
         /*for(auto data : spiData.getData()) {
             std::cout << "sent: " << static_cast<int >(data) << std::endl;
         }*/
@@ -83,17 +83,17 @@ namespace spi {
                 }*/
             }
         }
-        return std::make_shared<spi::SPIData<>>(data[0]);
+        return std::make_unique<spi::SPIData<>>(data[0]);
     }
 
-    void ATmega32u4SPI::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) {
+    void ATmega32u4SPI::slaveRegister(const std::unique_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {
         setGPIODirection(gpio::gpioDirection::out, pin);
-        mSlaves[device] = pin;
+        mSlaves[device.get()] = pin;
         slaveDeselect(device);
     }
 
-    void ATmega32u4SPI::slaveSelect(std::shared_ptr<SPIDevice> slave) {
-        auto value = mSlaves.find(slave);
+    void ATmega32u4SPI::slaveSelect(const std::unique_ptr<SPIDevice>& slave) {
+        auto value = mSlaves.find(slave.get());
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::off, value->second);
         } else {
@@ -101,8 +101,8 @@ namespace spi {
         }
     }
 
-    void ATmega32u4SPI::slaveDeselect(std::shared_ptr<SPIDevice> slave) {
-        auto value = mSlaves.find(slave);
+    void ATmega32u4SPI::slaveDeselect(const std::unique_ptr<SPIDevice>& slave) {
+        auto value = mSlaves.find(slave.get());
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::on, value->second);
         } else {
@@ -110,8 +110,8 @@ namespace spi {
         }
     }
 
-    std::vector<std::shared_ptr<Data>> ATmega32u4SPI::transfer(const std::initializer_list<std::shared_ptr<Data>> &spiData) {
-        std::vector<std::shared_ptr<Data>> temp{};
+    std::vector<std::unique_ptr<Data>> ATmega32u4SPI::transfer(const std::initializer_list<std::unique_ptr<Data>> &spiData) {
+        std::vector<std::unique_ptr<Data>> temp{};
         for(const auto &elem : spiData){
             temp.emplace_back(transfer(*elem));
         }

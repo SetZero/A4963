@@ -9,7 +9,7 @@ MCP2210::~MCP2210() {
     close_device(fd);
 }
 
-std::shared_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
+std::unique_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
     if (connection) {
         uint16_t i = 0;
             for(uint8_t data : input) {
@@ -23,10 +23,10 @@ std::shared_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
 #ifdef DEBUG_MCP
         if(err != 0) std::cout << " error: " << err << std::endl;
 #endif
-        return  std::make_shared<spi::SPIData<1>>(rxdata[0]);
+        return  std::make_unique<spi::SPIData<1>>(rxdata[0]);
     }
     using namespace spi::literals;
-    return std::make_shared<spi::SPIData<1>>(0_spi8);
+    return std::make_unique<spi::SPIData<1>>(*0_spi8);
 }
 
 void MCP2210::writeGPIO(const gpio::gpioState &state, const gpio::GPIOPin &pin) {
@@ -45,15 +45,15 @@ void MCP2210::setGPIODirection(const gpio::gpioDirection &direction, const gpio:
     }
 }
 
-void MCP2210::slaveSelect(std::shared_ptr<SPIDevice> slave) {
+void MCP2210::slaveSelect(const std::unique_ptr<SPIDevice>& slave) {
     writeGPIO(gpio::gpioState::off, slave->getSlavePin());
 }
 
-void MCP2210::slaveDeselect(std::shared_ptr<SPIDevice> slave) {
+void MCP2210::slaveDeselect(const std::unique_ptr<SPIDevice>& slave) {
     writeGPIO(gpio::gpioState::on, slave->getSlavePin());
 }
 
-void MCP2210::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) {
+void MCP2210::slaveRegister(const std::unique_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {
     device->selectPin(pin);
 }
 
@@ -67,8 +67,8 @@ int32_t MCP2210::send(const uint16_t &dataCount) const {
                          settings.cs2datadly, settings.data2datadly, settings.data2csdly);
 }
 
-std::vector<std::shared_ptr<spi::Data>>
-MCP2210::transfer(const std::initializer_list<std::shared_ptr<spi::Data>> &spiData) {
+std::vector<std::unique_ptr<spi::Data>>
+MCP2210::transfer(const std::initializer_list<std::unique_ptr<spi::Data>>& spiData) {
     if (connection) {
         uint16_t i = 0;
         for (const auto& elem: spiData) {
@@ -81,14 +81,14 @@ MCP2210::transfer(const std::initializer_list<std::shared_ptr<spi::Data>> &spiDa
         }
         int32_t error = send(static_cast<uint16_t>(i));
         if (error != ERR_NOERR) exceptionHandling(error);
-        std::vector<std::shared_ptr<spi::Data>> dataOut = std::vector<std::shared_ptr<spi::Data>>{i};
+        std::vector<std::unique_ptr<spi::Data>> dataOut = std::vector<std::unique_ptr<spi::Data>>{i};
         for (i = 0; i < spiData.size(); i++) {
             if (i >= SPI_BUF_LEN) break;
-            dataOut.emplace_back(std::make_shared<spi::SPIData<>>(rxdata[i]));
+            dataOut.emplace_back(std::make_unique<spi::SPIData<>>(rxdata[i]));
         }
         return dataOut;
     }
-    return std::vector<std::shared_ptr<spi::Data>>{};
+    return std::vector<std::unique_ptr<spi::Data>>{};
 }
 
 void MCP2210::connect() {

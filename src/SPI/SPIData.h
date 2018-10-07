@@ -13,6 +13,8 @@
 #include <byteswap.h>
 #include <assert.h>
 #include <memory>
+#include <utility>
+#include <iostream>
 
 
 namespace spi {
@@ -93,28 +95,38 @@ public:
 
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian >
 	class SPIData : public Data {
-		static_assert((numberOfBytes &(numberOfBytes -1)) == 0  , " the number of bytes have to be a pow of 2");
+	    static_assert((numberOfBytes &(numberOfBytes -1)) == 0  , " the number of bytes have to be a pow of 2");
 		static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");
 	public:
+
 		SPIData() {mData.reserve(numberOfBytes);};
 
 		template<typename t, typename ... args>
-		explicit SPIData(t first, args... ss) : SPIData() {
-			auto ins = { first, ss... };
-			static_assert(sizeof...(args)+1 <= numberOfBytes, "too much bytes for this data type" );
-			if constexpr (endian == little_endian)
-				mData.insert(std::begin(mData), std::begin(ins), std::end(ins));
+		explicit SPIData(t first,args ... ss) : SPIData() {
+            static constexpr uint8_t bytesSum = (sizeof...(args)+1) * sizeof(t);
+            static_assert(utils::sameTypes<t,args...>(),"there are different types in the constructor, this is not allowed");
+            //static_assert(bytesSum <= numberOfBytes,"too much data");
+			static_assert(bytesSum <= numberOfBytes, "too much bytes for this data type" );
+			auto ins = {first, ss...};
+			if constexpr (endian == little_endian){
+				for(auto elem : ins){
+				    for(uint8_t i = 0; i < sizeof(t); i++){
+				        mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
+				    }
+				}
+            }
 			else { //back insert
-				auto i = ins.size() -1;
+				auto i = sizeof(t)*ins.size() -1;
 				for (auto elem : ins) {
-					assert(i >=0);
-					mData[i] = elem;
-					i--;
+				    for(uint8_t j = 0;j < sizeof(t) ; i--, j++){
+                        mData[i] = static_cast<uint8_t>(elem >> (j * 8));
+				    }
 				}
 			}
 		};
 
-		explicit SPIData(const Data& other) : SPIData() {
+
+        explicit SPIData(const Data& other) : SPIData() {
 			mData.insert(std::end(mData), std::begin(other.getData()), std::end(other.getData()));
 		}
 
@@ -202,28 +214,28 @@ public:
     inline namespace literals {
 
         inline auto operator ""_spi8(unsigned long long element) {
-            return SPIData(static_cast<uint8_t>(element));
+            return std::unique_ptr<Data>(new SPIData(static_cast<uint8_t>(element)));
         }
         inline auto operator ""_spi16(unsigned long long element) {
-            return SPIData<2>(static_cast<uint16_t>(element));
+            return std::unique_ptr<Data>(new SPIData<2>(static_cast<uint8_t>(element)));
         }
         inline auto operator ""_spi32(unsigned long long element) {
-            return SPIData<4>(static_cast<uint32_t>(element));
+            return std::unique_ptr<Data>(new SPIData<4>(static_cast<uint8_t>(element)));
         }
         inline auto operator ""_spi64(unsigned long long element) {
-            return SPIData<8>(static_cast<uint64_t>(element));
+            return std::unique_ptr<Data>(new SPIData<8>(static_cast<uint8_t>(element)));
         }
         inline auto operator ""_spi8_big(unsigned long long element) {
-            return SPIData<1,big_endian>(static_cast<uint8_t>(element));
+            return std::unique_ptr<Data>(new SPIData<1,big_endian>(static_cast<uint8_t>(element)));
         }
         inline auto operator ""_spi16_big(unsigned long long element) {
-            return SPIData<2,big_endian>(static_cast<uint16_t>(element));
+            return std::unique_ptr<Data>(new SPIData<2,big_endian>(static_cast<uint8_t>(element)));
         }
         inline auto operator ""_spi32_big(unsigned long long element) {
-            return SPIData<4,big_endian>(static_cast<uint32_t>(element));
+            return std::unique_ptr<Data>(new SPIData<4,big_endian>(static_cast<uint8_t>(element)));
         }
         inline auto operator ""_spi64_big(unsigned long long element) {
-            return SPIData<8,big_endian>(static_cast<uint64_t>(element));
+            return std::unique_ptr<Data>(new SPIData<8,big_endian>(static_cast<uint8_t>(element)));
         }
     };
 
