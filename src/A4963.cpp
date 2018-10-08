@@ -73,7 +73,7 @@ void A4963::commit() {
 
 void A4963::commit(const A4963::RegisterCodes& registerCodes) {
     if(mRegisterData[registerCodes].dirty) {
-        mBridge->slaveSelect(unique_from_this());
+        mBridge->slaveSelect(shared_from_this());
         if(getRegisterEntry(registerCodes, RegisterPosition::WriteAddress, RegisterMask::WriteAddress) == static_cast<A4963::size_type>(WriteBit::Read)) {
             mRegisterData[registerCodes].data = createRegisterEntry(registerCodes, RegisterPosition::RegisterAddress, RegisterMask::RegisterAddress) |
                     (static_cast<A4963::size_type>(*send16bitRegister(mRegisterData[registerCodes].data)) &
@@ -81,7 +81,7 @@ void A4963::commit(const A4963::RegisterCodes& registerCodes) {
         } else {
             send16bitRegister(mRegisterData[registerCodes].data);
         }
-        mBridge->slaveDeselect(unique_from_this());
+        mBridge->slaveDeselect(shared_from_this());
         mRegisterData[registerCodes].dirty = false;
     }
 }
@@ -98,10 +98,6 @@ A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes) 
         commit(registerCodes);
     }
     return mRegisterData[registerCodes].data;
-}
-
-const std::unique_ptr<SPIDevice>& A4963::unique_from_this() {
-    return this_ptr == nullptr ? this_ptr = std::unique_ptr<SPIDevice>(this) : this_ptr;
 }
 
 

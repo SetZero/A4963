@@ -8,7 +8,6 @@
 class A4963 : public SPIDevice {
 private:
     using size_type = uint16_t;
-    std::unique_ptr<SPIDevice> this_ptr = nullptr;
     std::shared_ptr<spi::SPIBridge> mBridge;
     enum class RegisterMask : size_type {
         /* Common Addresses */
@@ -57,7 +56,6 @@ private:
 
     std::map<RegisterCodes, RegisterInfo> mRegisterData;
 
-    const std::unique_ptr<SPIDevice>& unique_from_this();
     void clearRegister(const RegisterCodes& reg);
     void clearRegister(const RegisterCodes& reg, const A4963::RegisterMask &mask);
     void writeRegisterEntry(const RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data);

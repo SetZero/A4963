@@ -45,15 +45,15 @@ void MCP2210::setGPIODirection(const gpio::gpioDirection &direction, const gpio:
     }
 }
 
-void MCP2210::slaveSelect(const std::unique_ptr<SPIDevice>& slave) {
+void MCP2210::slaveSelect(const std::shared_ptr<SPIDevice>& slave) {
     writeGPIO(gpio::gpioState::off, slave->getSlavePin());
 }
 
-void MCP2210::slaveDeselect(const std::unique_ptr<SPIDevice>& slave) {
+void MCP2210::slaveDeselect(const std::shared_ptr<SPIDevice>& slave) {
     writeGPIO(gpio::gpioState::on, slave->getSlavePin());
 }
 
-void MCP2210::slaveRegister(const std::unique_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {
+void MCP2210::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {
     device->selectPin(pin);
 }
 

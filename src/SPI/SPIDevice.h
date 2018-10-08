@@ -7,7 +7,7 @@
 #include "GPIOBridge.h"
 #include <memory>
 
-class SPIDevice {
+class SPIDevice : public std::enable_shared_from_this<SPIDevice> {
 private:
     gpio::GPIOPin slavePin;
 public:

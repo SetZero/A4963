@@ -25,9 +25,9 @@ namespace spi {
         gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;
         std::unique_ptr<Data> transfer(const Data& spiData)  override;
         std::vector<std::unique_ptr<Data>> transfer(const std::initializer_list<std::unique_ptr<Data>>& spiData)  override;
-        void slaveRegister(const std::unique_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) override;
-        void slaveSelect(const std::unique_ptr<SPIDevice>& slave) override;
-        void slaveDeselect(const std::unique_ptr<SPIDevice>& slave) override;
+        void slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) override;
+        void slaveSelect(const std::shared_ptr<SPIDevice>& slave) override;
+        void slaveDeselect(const std::shared_ptr<SPIDevice>& slave) override;
 
         static constexpr gpio::GPIOPin
                 pin0 = gpio::GPIOPin(0), pin1 = gpio::GPIOPin(1<<0), pin2 = gpio::GPIOPin(1<<1), pin3 = gpio::GPIOPin(1<<2),

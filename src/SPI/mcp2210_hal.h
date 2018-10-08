@@ -66,9 +66,9 @@ public:
     void setGPIODirection(const gpio::gpioDirection& direction, const gpio::GPIOPin& pin) override;
     void writeGPIO(const gpio::gpioState& state, const gpio::GPIOPin& pin) override;
     gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;
-    void slaveSelect(const std::unique_ptr<SPIDevice>& slave) override;
-    void slaveDeselect(const std::unique_ptr<SPIDevice>& slave) override;
-    void slaveRegister(const std::unique_ptr<SPIDevice>& device, const gpio::GPIOPin& pin) override;
+    void slaveSelect(const std::shared_ptr<SPIDevice>& slave) override;
+    void slaveDeselect(const std::shared_ptr<SPIDevice>& slave) override;
+    void slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin& pin) override;
     void exceptionHandling(int32_t errorCode);
     operator bool();
     void connect();

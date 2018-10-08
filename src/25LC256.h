@@ -5,7 +5,6 @@
 
 class EEPROM : public SPIDevice {
 private:
-    std::unique_ptr<SPIDevice> this_ptr = nullptr;
     struct Commands {
         static const uint8_t EEPROM_READ    =   0b00000011; //read memory
         static const uint8_t EEPROM_WRITE   =   0b00000010; //write to memory
@@ -23,7 +22,6 @@ public:
     void send16bitAddress(uint16_t address);
     std::unique_ptr<spi::Data> readStatus();
     void writeEnable();
-    const std::unique_ptr<SPIDevice>& unique_from_this();
     std::unique_ptr<spi::Data> readByte(uint16_t address);
     void writeByte(uint16_t address, uint8_t byte);
 };

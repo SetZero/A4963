@@ -86,13 +86,13 @@ namespace spi {
         return std::make_unique<spi::SPIData<>>(data[0]);
     }
 
-    void ATmega32u4SPI::slaveRegister(const std::unique_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {
+    void ATmega32u4SPI::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {
         setGPIODirection(gpio::gpioDirection::out, pin);
         mSlaves[device.get()] = pin;
         slaveDeselect(device);
     }
 
-    void ATmega32u4SPI::slaveSelect(const std::unique_ptr<SPIDevice>& slave) {
+    void ATmega32u4SPI::slaveSelect(const std::shared_ptr<SPIDevice>& slave) {
         auto value = mSlaves.find(slave.get());
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::off, value->second);
@@ -101,7 +101,7 @@ namespace spi {
         }
     }
 
-    void ATmega32u4SPI::slaveDeselect(const std::unique_ptr<SPIDevice>& slave) {
+    void ATmega32u4SPI::slaveDeselect(const std::shared_ptr<SPIDevice>& slave) {
         auto value = mSlaves.find(slave.get());
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::on, value->second);
