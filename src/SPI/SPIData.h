@@ -203,7 +203,7 @@ public:
 	inline std::ostream &operator<<(std::ostream &os, const Data &data) {
 		uint32_t i = 0;
 		for(auto& elem: data) {
-			os << "data " << i << ": " << elem;
+			os << "data " << i << ": " << std::to_string(elem) <<" ";
 			i++;
 		}
 		return os;
@@ -221,29 +221,29 @@ public:
 
     inline namespace literals {
 
-        inline auto operator ""_spi8(unsigned long long element) {
-            return std::unique_ptr<Data>(new SPIData(static_cast<uint8_t>(element)));
+        inline std::unique_ptr<Data> operator ""_spi8(unsigned long long element) {
+            return std::make_unique<SPIData<>>(static_cast<uint8_t>(element));
         }
-        inline auto operator ""_spi16(unsigned long long element) {
-            return std::unique_ptr<Data>(new SPIData<2>(static_cast<uint8_t>(element)));
+        inline std::unique_ptr<Data> operator ""_spi16(unsigned long long element) {
+            return std::make_unique<SPIData<2>>(static_cast<uint16_t>(element));
         }
-        inline auto operator ""_spi32(unsigned long long element) {
-            return std::unique_ptr<Data>(new SPIData<4>(static_cast<uint8_t>(element)));
+        inline std::unique_ptr<Data> operator ""_spi32(unsigned long long element) {
+            return std::make_unique<SPIData<4>>(static_cast<uint32_t>(element));
         }
-        inline auto operator ""_spi64(unsigned long long element) {
-            return std::unique_ptr<Data>(new SPIData<8>(static_cast<uint8_t>(element)));
+        inline std::unique_ptr<Data> operator ""_spi64(unsigned long long element) {
+            return std::make_unique<SPIData<8>>(static_cast<uint64_t>(element));
         }
-        inline auto operator ""_spi8_big(unsigned long long element) {
-            return std::unique_ptr<Data>(new SPIData<1,big_endian>(static_cast<uint8_t>(element)));
+        inline std::unique_ptr<Data> operator ""_spi8_big(unsigned long long element) {
+            return std::make_unique<SPIData<1,big_endian>>(static_cast<uint8_t>(element));
         }
-        inline auto operator ""_spi16_big(unsigned long long element) {
-            return std::unique_ptr<Data>(new SPIData<2,big_endian>(static_cast<uint8_t>(element)));
+        inline std::unique_ptr<Data> operator ""_spi16_big(unsigned long long element) {
+            return std::make_unique<SPIData<2,big_endian>>(static_cast<uint16_t>(element));
         }
-        inline auto operator ""_spi32_big(unsigned long long element) {
-            return std::unique_ptr<Data>(new SPIData<4,big_endian>(static_cast<uint8_t>(element)));
+        inline std::unique_ptr<Data> operator ""_spi32_big(unsigned long long element) {
+            return std::make_unique<SPIData<4,big_endian>>(static_cast<uint32_t>(element));
         }
-        inline auto operator ""_spi64_big(unsigned long long element) {
-            return std::unique_ptr<Data>(new SPIData<8,big_endian>(static_cast<uint8_t>(element)));
+        inline std::unique_ptr<Data> operator ""_spi64_big(unsigned long long element) {
+            return std::make_unique<SPIData<8,big_endian>>(static_cast<uint64_t>(element));
         }
     };
 
