@@ -1,0 +1,6 @@
+SET(LIBNAME cdt)
+
+file(GLOB SOURCE_FILES *.cpp)
+file(GLOB HEADER_FILES *.h)
+
+add_library(${LIBNAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})

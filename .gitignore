@@ -160,3 +160,15 @@ $RECYCLE.BIN/
 \.vscode/
 
 \.idea/
+
+CMakeCache\.txt
+
+CMakeFiles/
+
+\.scannerwork/
+
+bw-output/
+
+cmake_install\.cmake
+
+Makefile

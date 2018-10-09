@@ -1,7 +1,18 @@
 #pragma once
 #include <limits.h>
+#include<type_traits>
+#include <limits>
+#include <cmath>
+#include <chrono>
+#include "../../src/CustomDataTypes/Volt.h"
 
 namespace utils {
+
+    template<typename T>
+	constexpr typename std::make_unsigned<T>::type getFirstSetBitPos(T n) {
+        static_assert(std::numeric_limits<T>::is_integer);
+        return std::log2(n&-n);
+	}
 
 
 	template<bool condition, typename T1, typename T2>
@@ -242,5 +253,18 @@ namespace utils {
 				return sameTypes<T...>();
 		}
 	
-	};
+	}
+
+
+    template<class T>
+    struct is_duration : std::false_type {};
+
+    template<class Rep, class Period>
+    struct is_duration<std::chrono::duration<Rep, Period>> : std::true_type {};
+
+    template<class T>
+    struct is_volt : std::false_type {};
+
+    template<class Rep, class Period>
+    struct is_volt<CustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
 }
