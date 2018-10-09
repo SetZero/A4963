@@ -118,8 +118,8 @@ public:
 			static_assert(bytesSum <= numberOfBytes, "too much bytes for this data type" );
 			auto ins = {first, ss...};
             for(auto elem : ins){
-                for(uint8_t i = 0; i < sizeof(t); i++){
-                    mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
+                for(uint8_t i = sizeof(t); i > 0; i--){
+                    mData.emplace_back(static_cast<uint8_t>(elem >> ((i-1) * 8)));
                 }
             }
 		}
@@ -127,6 +127,10 @@ public:
 
         explicit SPIData(const Data& other) : SPIData() {
 			mData.insert(std::end(mData), std::begin(other.getData()), std::end(other.getData()));
+		}
+
+		explicit SPIData(const std::vector<uint8_t >& other) : SPIData() {
+			mData.insert(std::end(mData), std::begin(other), std::end(other));
 		}
 
 		inline void swap(Data& other) override{
