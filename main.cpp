@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
         auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
 
-        /*device->setRecirculationMode(NS_A4963::A4963::RecirculationModeTypes::Off);
+        device->setRecirculationMode(NS_A4963::A4963::RecirculationModeTypes::Off);
         auto deadTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
         device->setDeadTime(deadTimeRange.getMinValue());
 
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
         auto vdsThresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::VDSThreshold>();
         device->setVDSThreshold(vdsThresholdVoltage.getMaxValue());
-        device->commit();*/
+        device->commit();
 
         device->show_register();
     }
