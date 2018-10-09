@@ -31,22 +31,27 @@ std::unique_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
 
 void MCP2210::writeGPIO(const gpio::gpioState &state, const gpio::GPIOPin &pin) {
     if (state == gpio::gpioState::off) {
-        gpio_write(fd, ~pin, pin);
+        gpio_write(fd, ~static_cast<uint8_t>(pin), static_cast<uint8_t>(pin));
     } else {
-        gpio_write(fd, pin, pin);
+        gpio_write(fd, static_cast<uint8_t>(pin), static_cast<uint8_t>(pin));
     }
 }
 
 void MCP2210::setGPIODirection(const gpio::gpioDirection &direction, const gpio::GPIOPin &pin) {
     if (direction == gpio::gpioDirection::in) {
-        gpio_direction(fd, 0x01FF, pin);
+        gpio_direction(fd, 0x01FF, static_cast<uint8_t>(pin));
     } else if (direction == gpio::gpioDirection::out) {
-        gpio_direction(fd, 0x0000, pin);
+        gpio_direction(fd, 0x0000, static_cast<uint8_t>(pin));
     }
 }
 
 void MCP2210::slaveSelect(const std::shared_ptr<SPIDevice>& slave) {
-    writeGPIO(gpio::gpioState::off, slave->getSlavePin());
+    auto& pin = slave->getSlavePin();
+    if((bool)pin)
+        writeGPIO(gpio::gpioState::off, pin);
+    else {
+
+    }
 }
 
 void MCP2210::slaveDeselect(const std::shared_ptr<SPIDevice>& slave) {
@@ -58,7 +63,7 @@ void MCP2210::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio
 }
 
 gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
-    return pin == 1 ? gpio::gpioState::on : gpio::gpioState::off;
+    return static_cast<uint8_t>(pin) == 1 ? gpio::gpioState::on : gpio::gpioState::off;
 }
 
 int32_t MCP2210::send(const uint16_t &dataCount) const {

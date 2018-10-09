@@ -57,11 +57,11 @@ int main(int argc, char **argv) {
             std::cout << "Data: " << back.getData()[0] << std::endl;
         }*/
     using namespace CustomDataTypes::literals;
-    auto t = 42.0_perc;
     std::cout << "this is sparta!" << std::endl;
     std::unique_ptr<MCP2210> ptr;
     ptr = std::make_unique<MCP2210>();
-    auto ttest = spi::SPIData<4, spi::big_endian>(static_cast<uint16_t >(43690),static_cast<uint16_t >(43690));
+    spi::Data* ttest = new spi::SPIData<4, spi::big_endian>(static_cast<uint16_t >(43690),static_cast<uint16_t >(43690));
+    std::cout << std::to_string((*ttest)[0]) << std::endl;
     //std::cout << " 1: " << std::to_string(ttest[0]) << " 2 " << std::to_string(ttest[1]) << " 3 " << std::to_string(ttest[2]) << " 4 " << std::to_string(ttest[3]) << std::endl;
     auto eingaben = {"spi test", "eingabe test", "exit"};
         while(true) {

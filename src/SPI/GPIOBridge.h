@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 namespace gpio {
 
 
@@ -16,13 +18,23 @@ namespace gpio {
 
     class GPIOPin final {
     private:
-        int value;
+        int value = 0;
+        bool isUsed = false;
     public:
-        constexpr GPIOPin() : value{0} {}
+        constexpr GPIOPin() = default;
 
-        constexpr explicit GPIOPin(int value) : value{value} {}
+        constexpr explicit GPIOPin(int value) : value{value},isUsed(true) {}
 
-        constexpr operator int() const { return value; }
+        constexpr explicit operator int() const { return value; }
+
+        constexpr explicit operator uint8_t() const { return static_cast<uint8_t>(value); }
+
+        constexpr explicit operator uint16_t() const { return static_cast<uint16_t>(value); }
+
+        constexpr explicit operator uint32_t() const { return static_cast<uint32_t>(value); }
+
+
+        constexpr explicit operator bool() const {return isUsed;}
     };
 
     class GPIOBridge {

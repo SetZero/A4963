@@ -19,6 +19,15 @@
 
 namespace spi {
 
+    template<typename t>
+    inline auto swapEndian(t value)
+    {
+        if constexpr (utils::isEqual<t, uint8_t>::value || utils::isEqual<t,int8_t>::value) return value;
+        else if constexpr (utils::isEqual<t,uint16_t>::value|| utils::isEqual<t,int16_t>::value) return bswap_16(value);
+        else if constexpr (utils::isEqual<t,uint32_t>::value|| utils::isEqual<t,int32_t>::value) return bswap_32(value);
+        else /*if constexpr (utils::isEqual<t,uint64_t>::value|| utils::isEqual<t,int64_t>::value)*/ return bswap_64(value);
+    }
+
 class SPI_Exception : public std::exception {
     const char* info;
 public:
@@ -32,8 +41,7 @@ public:
 };
 
     class Data {
-
-    protected:
+	protected:
         std::vector<uint8_t> mData = std::vector<uint8_t>();
     public:
 
@@ -53,11 +61,11 @@ public:
         }
 
 
-        inline auto begin() const {
+        auto begin() const {
             return mData.begin();
         }
 
-        inline auto end() const {
+        auto end() const {
             return mData.end();
         }
 
@@ -95,6 +103,7 @@ public:
 
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian >
 	class SPIData : public Data {
+		static constexpr EndianMode endi = endian;
 	    static_assert((numberOfBytes &(numberOfBytes -1)) == 0  , " the number of bytes have to be a pow of 2");
 		static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");
 	public:
@@ -108,21 +117,11 @@ public:
             //static_assert(bytesSum <= numberOfBytes,"too much data");
 			static_assert(bytesSum <= numberOfBytes, "too much bytes for this data type" );
 			auto ins = {first, ss...};
-			if constexpr (endian == little_endian){
-				for(auto elem : ins){
-				    for(uint8_t i = 0; i < sizeof(t); i++){
-				        mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
-				    }
-				}
+            for(auto elem : ins){
+                for(uint8_t i = 0; i < sizeof(t); i++){
+                    mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
+                }
             }
-			else { //back insert
-				auto i = sizeof(t)*ins.size() -1;
-				for (auto elem : ins) {
-				    for(uint8_t j = 0;j < sizeof(t) ; i--, j++){
-                        mData[i] = static_cast<uint8_t>(elem >> (j * 8));
-				    }
-				}
-			}
 		};
 
 
@@ -167,18 +166,27 @@ public:
 
 		explicit operator uint16_t() const override {
             if (numberOfBytes > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
-				return (mData[1] << 8) | mData[0];
+            uint16_t erg = (mData[1] << 8) | mData[0];
+            if constexpr (endian == little_endian)
+				return erg;
+            else return swapEndian<uint16_t>(erg);
 		}
 
 		explicit operator uint32_t() const override {
             if (numberOfBytes > 4) throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
-				return (mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8) | mData[0];
+            uint32_t erg = (mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8) | mData[0];
+            if constexpr (endian == little_endian)
+				return erg;
+            else return swapEndian<uint32_t>(erg);
 		}
 
 		explicit operator uint64_t() const override {
             if (numberOfBytes > 8) throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
-				return ((uint64_t)(mData[7]) << 56) | ((uint64_t)(mData[6]) << 48) | ((uint64_t)(mData[5]) << 40) | ((uint64_t)(mData[4]) << 32)
-				|(mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8)  | mData[0];
+            uint64_t erg = ((uint64_t)(mData[7]) << 56) | ((uint64_t)(mData[6]) << 48) | ((uint64_t)(mData[5]) << 40) | ((uint64_t)(mData[4]) << 32)
+                           |(mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8)  | mData[0];
+            if constexpr (endian == little_endian)
+				return erg;
+            else return swapEndian<uint64_t>(erg);
 		}
 
 
@@ -192,6 +200,15 @@ public:
 		~SPIData() override = default;
 	};
 
+	inline std::ostream &operator<<(std::ostream &os, const Data &data) {
+		uint32_t i = 0;
+		for(auto& elem: data) {
+			os << "data " << i << ": " << elem;
+			i++;
+		}
+		return os;
+	}
+
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
 	inline SPIData<numberOfBytes, endian> operator+(const SPIData<numberOfBytes, endian>& lhs,const SPIData<numberOfBytes, endian>& rhs) {
 		return	lhs + rhs;
@@ -200,15 +217,6 @@ public:
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
 	inline void swap(SPIData<numberOfBytes, endian>& lhs, SPIData<numberOfBytes, endian>& rhs) {
 		lhs.swap(rhs);
-	}
-
-	template<typename t>
-	inline auto swapEndian(t value)
-	{
-		if constexpr (utils::isEqual<t, uint8_t>::value || utils::isEqual<t,int8_t>::value) return value;
-		else if constexpr (utils::isEqual<t,uint16_t>::value|| utils::isEqual<t,int16_t>::value) return bswap_16(value);
-		else if constexpr (utils::isEqual<t,uint32_t>::value|| utils::isEqual<t,int32_t>::value) return bswap_32(value);
-		else /*if constexpr (utils::isEqual<t,uint64_t>::value|| utils::isEqual<t,int64_t>::value)*/ return bswap_64(value);
 	}
 
     inline namespace literals {
