@@ -6,7 +6,7 @@
 
 #pragma once
 #include <stdint.h>
-#include "utils.h"
+#include "../utils/utils.h"
 #include <vector>
 #include <string>
 #include <exception>
@@ -122,7 +122,7 @@ public:
                     mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
                 }
             }
-		};
+		}
 
 
         explicit SPIData(const Data& other) : SPIData() {
@@ -245,6 +245,6 @@ public:
         inline auto operator ""_spi64_big(unsigned long long element) {
             return std::unique_ptr<Data>(new SPIData<8,big_endian>(static_cast<uint8_t>(element)));
         }
-    };
+    }
 
 }

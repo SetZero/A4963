@@ -3,9 +3,10 @@
 #include <memory>
 #include <chrono>
 #include <any>
-#include "src/SPI/mcp2210_hal.h"
+#include <src/SPI/SPIDevice.h>
 #include "src/utils/scales/UnitScale.h"
 #include "utils/utils.h"
+#include "SPI/SPIBridge.h"
 #include "A4963RegisterInfo.h"
 
 namespace NS_A4963 {
@@ -137,7 +138,7 @@ namespace NS_A4963 {
 
         void markRegisterForReload(const RegisterCodes &reg);
 
-        spi::SPIData send16bitRegister(size_type address);
+        std::unique_ptr<spi::Data> send16bitRegister(size_type address);
 
         template<typename T>
         size_type createRegisterEntry(T data, const RegisterMask &mask);

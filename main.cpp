@@ -134,7 +134,7 @@ bool reconnect( std::unique_ptr<MCP2210>& ptr){
         ptr->connect();
     } while(!(*ptr));
     return *ptr;
-};
+}
 
 int userInput(){
     int z = -1;
@@ -150,10 +150,10 @@ int userInput(){
     } while(z == -1);
     clearInput();
     return z;
-};
+}
 
 void clearInput(){
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-};
+}
 

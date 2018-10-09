@@ -6,7 +6,7 @@
 #include "mcp2210_api.h"
 #include "SPIBridge.h"
 #include "GPIOBridge.h"
-#include "./utils.h"
+#include "../utils/utils.h"
 #include <libudev.h>
 //#include "USB/LibUSBDevices.h"
 
@@ -21,7 +21,7 @@ using error_pair = std::pair<int, const char*>;
 namespace deviceinformations {
     inline static constexpr const char *vendor_ID = "04d8";
     inline static constexpr const char *device_ID = "00de";
-};
+}
 
 class MCP2210 final : public spi::SPIBridge, public gpio::GPIOBridge{
 public:
