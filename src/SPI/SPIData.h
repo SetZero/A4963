@@ -247,6 +247,6 @@ namespace spi {
         inline std::unique_ptr<Data> operator ""_spi64_big(unsigned long long element) {
             return std::make_unique<SPIData<8,big_endian>>(static_cast<uint64_t>(element));
         }
-    };
+    }
 
 }
