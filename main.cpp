@@ -1,6 +1,18 @@
 #include <iostream>
+#include <array>
+#include <string>
+#include <memory>
+#include <vector>
+#include <chrono>
+#include <thread>
+#include "LibUSBDevices.h"
+#include "src/SPI/ATmega32U4SPI.h"
+#include "src/SPI/SPIBridge.h"
+#include "mcp2210_api.h"
 #include "src/SPI/mcp2210_hal.h"
-#include "Percentage.h"
+#include "src/25LC256.h"
+#include "src/Devices/A4963/A4963.h"
+#include "src/utils/scales/UnitScale.h"
 
 
 bool reconnect( std::unique_ptr<MCP2210>& ptr);
@@ -77,7 +89,7 @@ int main(int argc, char **argv) {
                 if(userInput()) exit(1);
                 else reconnect(ptr);
             }
-        }
+        }*/
     }
 
 
@@ -90,7 +102,7 @@ bool reconnect( std::unique_ptr<MCP2210>& ptr){
         ptr->connect();
     } while(!(*ptr));
     return *ptr;
-};
+}
 
 int userInput(){
     int z = -1;
@@ -106,10 +118,10 @@ int userInput(){
     } while(z == -1);
     clearInput();
     return z;
-};
+}
 
 void clearInput(){
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-};
+}
 

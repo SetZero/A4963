@@ -37,25 +37,25 @@ namespace usb {
 
             if (libusb_kernel_driver_active(handle, 0) == 1) {
                 if (libusb_detach_kernel_driver(handle, 0) < 0) {
-                    std::cout << "Unable to detach kernel driver: " << std::endl;
+                    throw std::logic_error{ "Unable to detach kernel driver: "};
                     return;
                 }
             }
 
             if (libusb_claim_interface(handle, 0) < 0) {
-                std::cout << "Unable to claim Interface: " << std::endl;
+                throw std::logic_error{"Unable to claim Interface: "};
                 return;
             }
 
         } else {
-            std::cout << "Failed to open device! (Code: " << ret << ")" << std::endl;
+            throw std::logic_error{"Failed to open device! (Code: " + std::to_string(ret) + ")"};
         }
 
     }
 
     void LibUSBDevice::closeDevice() {
         if (!isOpen) {
-            std::cout << "This device isn't opened!" << std::endl;
+            throw std::logic_error{"This device isn't opened!"};
             return;
         }
         _closeDevice();
@@ -71,15 +71,7 @@ namespace usb {
     }
 
     std::vector<uint8_t> LibUSBDevice::sendData(const std::vector<uint8_t>& data) {
-        if (!isOpen)
-            return {};
-        std::cout << "This shouldn't happen..." << std::endl;
-        unsigned char spiData[data.size()];
-        std::copy(data.begin(), data.end(), spiData);
-
-        int actual_length = 0;
-        int r = libusb_bulk_transfer(handle, (1 | LIBUSB_ENDPOINT_OUT), spiData, sizeof(spiData), &actual_length, 0);
-        std::cout << "Sending Data Code: " << r << std::endl;
-        return {};
+        throw std::logic_error{"A generic SPI Device can't send or receive data, as the protocol is unknown!"};
+        return {data};
     }
 }

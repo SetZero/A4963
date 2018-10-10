@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(SPI)
 
 set(CMAKE_CXX_STANDARD 20)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -ludev")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -ludev")
 
 include_directories(.)
 include_directories(inc)
@@ -19,13 +19,7 @@ if(NOT LIBUSB_LIBRARY AND LIBUSB_INCLUDE_DIR)
     message(FATAL_ERROR  "LibUSB Libary not found!")
 endif(NOT LIBUSB_LIBRARY AND LIBUSB_INCLUDE_DIR)
 
-add_executable(hid main.cpp)
-
-## Include Directories
-
-target_link_libraries(hid ${LIBUSB_LIBRARY} src spi usb inc)
-
-
+#find udev
 FIND_PATH(
         UDEV_INCLUDE_DIR
         libudev.h
@@ -50,8 +44,7 @@ IF (UDEV_LIBRARIES AND UDEV_INCLUDE_DIR)
     else (UDEV_STABLE)
         set(UDEV_STABLE 1)
     endif (UDEV_STABLE)
-        target_link_libraries(hid ${UDEV_LIBRARIES} src spi usb inc)
-        MESSAGE("udev linked")
+    MESSAGE("udev linked")
     message(STATUS "libudev stable: ${UDEV_STABLE}")
 ENDIF (UDEV_LIBRARIES AND UDEV_INCLUDE_DIR)
 
@@ -69,10 +62,14 @@ ELSE (UDEV_FOUND)
     ENDIF (UDev_FIND_REQUIRED)
 ENDIF (UDEV_FOUND)
 
+add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp tests/Test_src_scales_RangedUnit.cpp)
+add_executable(hid main.cpp)
 
-include_directories(SYSTEM ${LIBUSB_INCLUDE_DIR})
+
+## Include Directories
+
 include_directories(SYSTEM ${UDEV_INCLUDE_DIR})
-
+include_directories(SYSTEM ${LIBUSB_INCLUDE_DIR})
 include_directories(inc)
 add_subdirectory(inc)
 include_directories(src)
@@ -81,6 +78,19 @@ include_directories(src/SPI)
 add_subdirectory(src/SPI)
 include_directories(src/USB)
 add_subdirectory(src/USB)
+include_directories(src/utils)
+add_subdirectory(src/utils)
+include_directories(src/utils/scales)
+add_subdirectory(src/utils/scales)
+include_directories(src/Devices/A4963)
+add_subdirectory(src/Devices/A4963)
+include_directories(src/CustomDataTypes)
+add_subdirectory(src/CustomDataTypes)
+
+target_link_libraries(hid        ${LIBUSB_LIBRARY} ${UDEV_LIBRARIES} src spi usb inc  utils scales a4963 cdt)
+target_link_libraries(test_cases ${LIBUSB_LIBRARY} src spi usb inc  utils scales a4963 cdt)
+
+
 #add_executable(SPI
 #        inc/mcp2210_api.c
 #        inc/mcp2210_api.h
