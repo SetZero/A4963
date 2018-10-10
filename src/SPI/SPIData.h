@@ -45,12 +45,9 @@ namespace spi {
 		std::vector<uint8_t> mData = std::vector<uint8_t>();
 	public:
 
-		std::vector<uint8_t>& getData() {return mData;};
-		const std::vector<uint8_t>& getData() const {return mData;};
-
 		Data() = default;
 
-		virtual void swap(Data& other) = 0;
+		virtual void swap(Data& other) { std::swap(mData,other.mData);};
 
 		inline uint8_t operator[](const uint8_t& index) const {
 			return mData[index];
@@ -59,7 +56,6 @@ namespace spi {
 		inline uint8_t& operator[](const uint8_t& index) {
 			return mData[index];
 		}
-
 
 		auto begin() const {
 			return mData.begin();
@@ -102,7 +98,6 @@ namespace spi {
 
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian >
 	class SPIData : public Data {
-		static constexpr EndianMode endi = endian;
 		static_assert((numberOfBytes &(numberOfBytes -1)) == 0  , " the number of bytes have to be a pow of 2");
 		static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");
 	public:
@@ -125,7 +120,7 @@ namespace spi {
 
 
 		explicit SPIData(const Data& other) : SPIData() {
-			mData.insert(std::end(mData), std::begin(other.getData()), std::end(other.getData()));
+			mData.insert(std::end(mData), std::begin(other), std::end(other));
 		}
 
 		explicit SPIData(const std::vector<uint8_t >& other) : SPIData() {
@@ -133,7 +128,7 @@ namespace spi {
 		}
 
 		inline void swap(Data& other) override{
-			std::swap(this->mData, other.getData());
+			other.swap(*this);
 		}
 
 		inline std::unique_ptr<Data> clone() const override {
@@ -166,26 +161,29 @@ namespace spi {
 		explicit operator uint16_t() const override {
             if (mData.size() > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
             uint16_t erg = (mData[1] << 8) | mData[0];
-            if constexpr (endian == little_endian)
-				return erg;
-			else return swapEndian<uint16_t>(erg);
+            if constexpr (endian == big_endian)
+                return swapEndian<uint16_t>(erg);
+            else
+                return erg;
 		}
 
 		explicit operator uint32_t() const override {
             if (mData.size() > 4) throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
             uint32_t erg = (mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8) | mData[0];
-            if constexpr (endian == little_endian)
-				return erg;
-			else return swapEndian<uint32_t>(erg);
+            if constexpr (endian == big_endian)
+                return swapEndian<uint32_t>(erg);
+            else
+                return erg;
 		}
 
 		explicit operator uint64_t() const override {
             if (mData.size() > 8) throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
             uint64_t erg = ((uint64_t)(mData[7]) << 56) | ((uint64_t)(mData[6]) << 48) | ((uint64_t)(mData[5]) << 40) | ((uint64_t)(mData[4]) << 32)
                            |(mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8)  | mData[0];
-            if constexpr (endian == little_endian)
-				return erg;
-			else return swapEndian<uint64_t>(erg);
+            if constexpr (endian == big_endian)
+                return swapEndian<uint64_t>(erg);
+            else
+                return erg;
 		}
 
 
@@ -216,8 +214,7 @@ namespace spi {
 		return	tmp;
 	 }
 
-	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
-	inline void swap(SPIData<numberOfBytes, endian>& lhs, SPIData<numberOfBytes, endian>& rhs) {
+	inline void swap(Data& lhs, Data& rhs) {
 		lhs.swap(rhs);
 	}
 
