@@ -129,6 +129,10 @@ namespace spi {
 			mData.insert(std::end(mData), std::begin(other.getData()), std::end(other.getData()));
 		}
 
+		explicit SPIData(const std::vector<uint8_t >& other) : SPIData() {
+			mData.insert(std::end(mData), std::begin(other), std::end(other));
+		}
+
 		inline void swap(Data& other) override{
 			std::swap(this->mData, other.getData());
 		}

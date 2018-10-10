@@ -60,30 +60,29 @@ namespace spi {
         //TODO: Check if SPI data is less than 255 single data
         //TODO: allow multi byte transfer for spiData!
         //auto size = static_cast<uint8_t >(spiData.getData().size());
-        std::vector<uint8_t> dataVector;
-
-        dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
-        dataVector.push_back(1);
-        //dataVector.push_back((uint8_t) spiData);
+        std::vector<uint8_t> returnValue;
         for(auto elem : spiData){
-            dataVector.push_back(elem);
-        }
-        //dataVector.insert(std::end(dataVector), std::begin(spiData.getData()), std::end(spiData.getData()));
+            std::vector<uint8_t> dataVector;
 
-        auto data = mDevice.get()->sendData(dataVector);
-        if(data.empty()) {
-            std::cout << "There was an error with the spi data!" << std::endl;
-        } else {
-            if (data[0] == static_cast<unsigned char>(SPIAnswerypes::SPIAnswerWaiting)) {
-                std::cout << "Failed to send data: device not ready yet..." << std::endl;
+            dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
+            dataVector.push_back(1);
+            //dataVector.push_back((uint8_t) spiData);
+                dataVector.push_back(elem);
+            //dataVector.insert(std::end(dataVector), std::begin(spiData.getData()), std::end(spiData.getData()));
+
+            auto data = mDevice.get()->sendData(dataVector);
+            if(data.empty()) {
+                std::cout << "There was an error with the spi data!" << std::endl;
             } else {
-                data.erase(std::begin(data));
-                /*for(auto dat : data) {
-                    std::cout << static_cast<int>(dat) << std::endl;
-                }*/
+                if (data[0] == static_cast<unsigned char>(SPIAnswerypes::SPIAnswerWaiting)) {
+                    std::cout << "Failed to send data: device not ready yet..." << std::endl;
+                } else {
+                    data.erase(std::begin(data));
+                    returnValue.insert(std::end(returnValue), std::begin(data), std::end(data));
+                }
             }
         }
-        return std::make_unique<spi::SPIData<>>(data[0]);
+        return std::make_unique<spi::SPIData<>>(returnValue);
     }
 
     void ATmega32u4SPI::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {
