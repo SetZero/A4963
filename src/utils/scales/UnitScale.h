@@ -29,11 +29,11 @@ public:
     : UnitScale(DurationData<TUnitType>{ts...})
     { }*/
 
-    constexpr explicit UnitScale(const DurationData<TUnitType>& data) : UnitScale(data.precision, data.maxValue,
+    constexpr explicit UnitScale(const DurationData<TUnitType>& data) noexcept : UnitScale(data.precision, data.maxValue,
                                                                            data.minValue) {
     }
 
-    constexpr UnitScale(const TUnitType& precision, const TUnitType& maxValue, const TUnitType& minValue) : mPrecision(precision), mMaxValue(maxValue),
+    constexpr UnitScale(const TUnitType& precision, const TUnitType& maxValue, const TUnitType& minValue) noexcept : mPrecision(precision), mMaxValue(maxValue),
                                                                               mMinValue(minValue) {
         //static_assert(maxValue <= minValue);
         //static_assert((maxValue - minValue) % precision == 0);

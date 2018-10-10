@@ -73,7 +73,8 @@ namespace NS_A4963 {
         if (mRegisterData[registerCodes].dirty) {
             mBridge->slaveSelect(shared_from_this());
             if (getRegisterEntry(registerCodes, RegisterMask::WriteAddress) ==
-                static_cast<A4963::size_type>(WriteBit::Read)) {
+                static_cast<A4963::size_type>(WriteBit::Read))
+            {
                 mRegisterData[registerCodes].data = createRegisterEntry(registerCodes, RegisterMask::RegisterAddress) |
                                                     (static_cast<A4963::size_type>(*send16bitRegister(
                                                             mRegisterData[registerCodes].data)) &
@@ -93,30 +94,34 @@ namespace NS_A4963 {
         }
     }
 
-    A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes) {
-        if (mRegisterData[registerCodes].dirty) {
+    A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes, bool forceNoReload) {
+        if (mRegisterData[registerCodes].dirty && forceNoReload) {
             commit(registerCodes);
         }
         return mRegisterData[registerCodes].data;
     }
 
     void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
-        auto data = createRegisterEntry(type, RegisterMask::RecirculationModeAddress);
-        writeRegisterEntry(RegisterCodes::Config0, RegisterMask::RecirculationModeAddress, data);
+        setRegisterEntry(type,RegisterMask::RecirculationModeAddress,RegisterCodes::Config0);
     }
 
+
     void A4963::setPercentFastDecay(const A4963::PercentFastDecayTypes &type) {
-        auto data = createRegisterEntry(type, RegisterMask::PercentFastDecayAddress);
-        writeRegisterEntry(RegisterCodes::Config1, RegisterMask::PercentFastDecayAddress, data);
+        setRegisterEntry(type,RegisterMask::PercentFastDecayAddress,RegisterCodes::Config1);
     }
 
     void A4963::invertPWMInput(const A4963::InvertPWMInputTypes &type) {
-        auto data = createRegisterEntry(type, RegisterMask::InvertPWMInputAddress);
-        writeRegisterEntry(RegisterCodes::Config1, RegisterMask::InvertPWMInputAddress, data);
+        setRegisterEntry(type,RegisterMask::InvertPWMInputAddress,RegisterCodes::Config1);
     }
 
     void A4963::setBemfTimeQualifier(const A4963::BemfTimeQualifier &type) {
-        auto data = createRegisterEntry(type, RegisterMask::BemfTimeQualifierAddress);
-        writeRegisterEntry(RegisterCodes::Config1, RegisterMask::BemfTimeQualifierAddress, data);
+        setRegisterEntry(type,RegisterMask::BemfTimeQualifierAddress,RegisterCodes::Config1);
+    }
+
+    template<typename T>
+    void
+    A4963::setRegisterEntry(T data, const A4963::RegisterMask &mask, const A4963::RegisterCodes &registerEntry) {
+        auto val = createRegisterEntry(data,mask);
+        writeRegisterEntry(registerEntry,mask,val);
     }
 }

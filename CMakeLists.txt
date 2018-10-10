@@ -8,6 +8,10 @@ include_directories(.)
 include_directories(inc)
 include_directories(src)
 
+add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp tests/Test_src_scales_RangedUnit.cpp)
+add_executable(hid main.cpp)
+
+
 ## FIND LibUSB ##
 find_library(LIBUSB_LIBRARY
         NAMES usb-1.0)
@@ -62,17 +66,11 @@ ELSE (UDEV_FOUND)
     ENDIF (UDev_FIND_REQUIRED)
 ENDIF (UDEV_FOUND)
 
-add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp tests/Test_src_scales_RangedUnit.cpp)
-add_executable(hid main.cpp)
-
-
 ## Include Directories
 
 include_directories(SYSTEM ${UDEV_INCLUDE_DIR})
 include_directories(SYSTEM ${LIBUSB_INCLUDE_DIR})
-include_directories(inc)
 add_subdirectory(inc)
-include_directories(src)
 add_subdirectory(src)
 include_directories(src/SPI)
 add_subdirectory(src/SPI)
@@ -87,8 +85,9 @@ add_subdirectory(src/Devices/A4963)
 include_directories(src/CustomDataTypes)
 add_subdirectory(src/CustomDataTypes)
 
-target_link_libraries(hid        ${LIBUSB_LIBRARY} ${UDEV_LIBRARIES} src spi usb inc  utils scales a4963 cdt)
-target_link_libraries(test_cases ${LIBUSB_LIBRARY} src spi usb inc  utils scales a4963 cdt)
+target_link_libraries(hid     src spi usbb inc  utils scales a4963 cdt  ${LIBUSB_LIBRARY} )
+
+
 
 
 #add_executable(SPI
