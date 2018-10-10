@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <src/Percentage.h>
 #include "LibUSBDevices.h"
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
@@ -121,7 +122,7 @@ int main(int argc, char **argv) {
                 if(userInput()) exit(1);
                 else reconnect(ptr);
             }
-        }*/
+        }
     }
 
 
