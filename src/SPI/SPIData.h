@@ -69,11 +69,9 @@ public:
             return mData.end();
         }
 
-        virtual std::unique_ptr<Data> operator+(const Data& rhs) const = 0;
-
         virtual void operator+=(const Data& rhs) = 0;
 
-        virtual void operator+(uint8_t data) = 0;
+        virtual void operator+=(uint8_t data) = 0;
 
         virtual explicit operator uint8_t () const = 0;
 
@@ -82,7 +80,8 @@ public:
         virtual explicit operator uint32_t() const = 0;
 
         virtual explicit operator uint64_t() const = 0;
-
+        //virtual copy constructor
+        virtual std::unique_ptr<Data> clone() const = 0;
 
         inline void operator-(const Data& rhs) = delete;
         inline void operator*(const Data& rhs) = delete;
@@ -110,16 +109,16 @@ public:
 
 		SPIData() {mData.reserve(numberOfBytes);};
 
-		template<typename t, typename ... args>
-		explicit SPIData(t first,args ... ss) : SPIData() {
-            static constexpr uint8_t bytesSum = (sizeof...(args)+1) * sizeof(t);
-            static_assert(utils::sameTypes<t,args...>(),"there are different types in the constructor, this is not allowed");
-            //static_assert(bytesSum <= numberOfBytes,"too much data");
+		template<typename T, typename ... args>
+		explicit SPIData(T first,args ... ss) : SPIData() {
+            static constexpr uint8_t bytesSum = (sizeof...(args)+1) * sizeof(T);
+            static_assert(utils::sameTypes<T,args...>(),"there are different types in the constructor, this is not allowed");
 			static_assert(bytesSum <= numberOfBytes, "too much bytes for this data type" );
+            static_assert(std::is_integral<T>::value,"the data type have to be a integral type");
 			auto ins = {first, ss...};
             for(auto elem : ins){
-                for(uint8_t i = sizeof(t); i > 0; i--){
-                    mData.emplace_back(static_cast<uint8_t>(elem >> ((i-1) * 8)));
+                for(uint8_t i = 0; i < sizeof(T); i++){
+                    mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
                 }
             }
 		}
@@ -137,25 +136,21 @@ public:
 			std::swap(this->mData, other.getData());
 		}
 
-
-		inline std::unique_ptr<Data> operator+(const Data& rhs) const override {
-            auto * temp = new SPIData{*this};
-			for (size_t i = 0; i < rhs.bytesUsed(); i++) {
-				if (temp->mData.size() < numberOfBytes) {
-					temp->mData.push_back(rhs[i]);
-				} else {
-                    throw SPI_Exception{"Data Overflow"};
-				}
-			}
-			return std::unique_ptr<Data>(temp);
+		inline std::unique_ptr<Data> clone() const override {
+            return std::make_unique<SPIData>(*this);
 		}
 
 		inline void operator+=(const Data& rhs) override {
-		    Data* temp = ((*this) +rhs).get();
-		    swap(*temp);
+            for (size_t i = 0; i < rhs.bytesUsed(); i++) {
+                if (mData.size() < numberOfBytes) {
+                    mData.emplace_back(rhs[i]);
+                } else {
+                    throw SPI_Exception{"Data Overflow"};
+                }
+            }
 		};
 
-		inline void operator+(uint8_t data) override{
+		inline void operator+=(uint8_t data) override{
 			if (mData.size() < numberOfBytes)
 				mData.push_back(data);
 			else
@@ -164,12 +159,12 @@ public:
 
 
 		explicit operator uint8_t () const override {
-            if (numberOfBytes > 1) throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
+            if (mData.size() > 1) throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
 			return mData[0];
 		};
 
 		explicit operator uint16_t() const override {
-            if (numberOfBytes > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
+            if (mData.size() > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
             uint16_t erg = (mData[1] << 8) | mData[0];
             if constexpr (endian == little_endian)
 				return erg;
@@ -177,7 +172,7 @@ public:
 		}
 
 		explicit operator uint32_t() const override {
-            if (numberOfBytes > 4) throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
+            if (mData.size() > 4) throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
             uint32_t erg = (mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8) | mData[0];
             if constexpr (endian == little_endian)
 				return erg;
@@ -185,7 +180,7 @@ public:
 		}
 
 		explicit operator uint64_t() const override {
-            if (numberOfBytes > 8) throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
+            if (mData.size() > 8) throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
             uint64_t erg = ((uint64_t)(mData[7]) << 56) | ((uint64_t)(mData[6]) << 48) | ((uint64_t)(mData[5]) << 40) | ((uint64_t)(mData[4]) << 32)
                            |(mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8)  | mData[0];
             if constexpr (endian == little_endian)
@@ -197,6 +192,7 @@ public:
 		inline void operator-(const SPIData& rhs) = delete;
 		inline void operator*(const SPIData& rhs) = delete;
 		inline void operator/(const SPIData& rhs) = delete;
+		inline void operator+(const SPIData& rhs) = delete;
         inline void operator-=(const SPIData& rhs) = delete;
         inline void operator*=(const SPIData& rhs) = delete;
         inline void operator/=(const SPIData& rhs) = delete;
@@ -213,9 +209,10 @@ public:
 		return os;
 	}
 
-	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
-	inline SPIData<numberOfBytes, endian> operator+(const SPIData<numberOfBytes, endian>& lhs,const SPIData<numberOfBytes, endian>& rhs) {
-		return	lhs + rhs;
+	inline std::unique_ptr<Data> operator+(const Data& lhs,const Data& rhs) {
+	    auto tmp = lhs.clone();
+	    *tmp += rhs;
+		return	tmp;
 	 }
 
 	template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>

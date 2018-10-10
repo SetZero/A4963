@@ -62,7 +62,7 @@ ELSE (UDEV_FOUND)
     ENDIF (UDev_FIND_REQUIRED)
 ENDIF (UDEV_FOUND)
 
-add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp tests/Test_src_scales_RangedUnit.cpp)
+add_executable(test_cases tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp tests/Test_src_scales_RangedUnit.cpp tests/Test_SPIData.cpp)
 add_executable(hid main.cpp)
 
 
@@ -87,8 +87,8 @@ add_subdirectory(src/Devices/A4963)
 include_directories(src/CustomDataTypes)
 add_subdirectory(src/CustomDataTypes)
 
-target_link_libraries(hid        ${LIBUSB_LIBRARY} ${UDEV_LIBRARIES} src spi usb inc  utils scales a4963 cdt)
-target_link_libraries(test_cases ${LIBUSB_LIBRARY} src spi usb inc  utils scales a4963 cdt)
+target_link_libraries(hid        src spi usb inc  utils scales a4963 cdt ${LIBUSB_LIBRARY})
+target_link_libraries(test_cases src spi usb inc  utils scales a4963 cdt ${LIBUSB_LIBRARY})
 
 
 #add_executable(SPI
