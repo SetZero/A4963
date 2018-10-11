@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
                 if(userInput()) exit(1);
                 else reconnect(ptr);
             }
-        }
+        }*/
     }
 
 

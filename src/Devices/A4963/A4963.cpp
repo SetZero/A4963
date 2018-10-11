@@ -21,12 +21,13 @@ namespace NS_A4963 {
         //reload all register
         markRegisterForReload(A4963::RegisterCodes::Config0);
         markRegisterForReload(A4963::RegisterCodes::Config1);
-        markRegisterForReload(A4963::RegisterCodes::Config2);
+        //TODO: Change this back
+        /*markRegisterForReload(A4963::RegisterCodes::Config2);
         markRegisterForReload(A4963::RegisterCodes::Config3);
         markRegisterForReload(A4963::RegisterCodes::Config4);
         markRegisterForReload(A4963::RegisterCodes::Config5);
         markRegisterForReload(A4963::RegisterCodes::Mask);
-        markRegisterForReload(A4963::RegisterCodes::Run);
+        markRegisterForReload(A4963::RegisterCodes::Run);*/
     }
 
     void A4963::writeRegisterEntry(const A4963::RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data) {
@@ -81,9 +82,11 @@ namespace NS_A4963 {
                                                      static_cast<A4963::size_type>(RegisterMask::GeneralData));
             } else {
                 send16bitRegister(mRegisterData[registerCodes].data);
+                mRegisterData[registerCodes].data &= ~(1 << utils::getFirstSetBitPos(static_cast<size_type>(RegisterMask::WriteAddress)));
             }
             mBridge->slaveDeselect(shared_from_this());
-            mRegisterData[registerCodes].dirty = false;
+            //TODO: Change this back
+            //mRegisterData[registerCodes].dirty = false;
         }
     }
 
@@ -95,7 +98,7 @@ namespace NS_A4963 {
     }
 
     A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes, bool forceNoReload) {
-        if (mRegisterData[registerCodes].dirty && forceNoReload) {
+        if (!forceNoReload && mRegisterData[registerCodes].dirty) {
             commit(registerCodes);
         }
         return mRegisterData[registerCodes].data;
@@ -104,7 +107,6 @@ namespace NS_A4963 {
     void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
         setRegisterEntry(type,RegisterMask::RecirculationModeAddress,RegisterCodes::Config0);
     }
-
 
     void A4963::setPercentFastDecay(const A4963::PercentFastDecayTypes &type) {
         setRegisterEntry(type,RegisterMask::PercentFastDecayAddress,RegisterCodes::Config1);

@@ -112,8 +112,8 @@ namespace spi {
             static_assert(std::is_integral<T>::value,"the data type have to be a integral type");
 			auto ins = {first, ss...};
             for(auto elem : ins){
-                for(uint8_t i = 0; i < sizeof(T); i++){
-                    mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
+                for(uint8_t i = sizeof(T); i > 0; i--){
+                    mData.emplace_back(static_cast<uint8_t>(elem >> ((i-1) * 8)));
                 }
             }
 		}
