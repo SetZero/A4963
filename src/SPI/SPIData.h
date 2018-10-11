@@ -112,9 +112,11 @@ namespace spi {
             static_assert(std::is_integral<T>::value,"the data type have to be a integral type");
 			auto ins = {first, ss...};
             for(auto elem : ins){
-                for(uint8_t i = sizeof(T); i > 0; i--){
-                    mData.emplace_back(static_cast<uint8_t>(elem >> ((i-1) * 8)));
-                }
+                if constexpr(endian == big_endian)
+                    for(uint8_t i = sizeof(T); i > 0; i--)
+                        mData.emplace_back(static_cast<uint8_t>(elem >> ((i-1) * 8)));
+                else for(uint8_t i = 0; i < sizeof(T); i++)
+                        mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
             }
 		}
 
@@ -161,29 +163,24 @@ namespace spi {
 		explicit operator uint16_t() const override {
             if (mData.size() > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
             uint16_t erg = (mData[1] << 8) | mData[0];
-            if constexpr (endian == big_endian)
-                return swapEndian<uint16_t>(erg);
-            else
-                return erg;
+            return erg;
 		}
 
 		explicit operator uint32_t() const override {
             if (mData.size() > 4) throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
             uint32_t erg = (mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8) | mData[0];
-            if constexpr (endian == big_endian)
+            return erg;
+            /*if constexpr (endian == big_endian)
                 return swapEndian<uint32_t>(erg);
             else
-                return erg;
+                return erg;*/
 		}
 
 		explicit operator uint64_t() const override {
             if (mData.size() > 8) throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
             uint64_t erg = ((uint64_t)(mData[7]) << 56) | ((uint64_t)(mData[6]) << 48) | ((uint64_t)(mData[5]) << 40) | ((uint64_t)(mData[4]) << 32)
                            |(mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8)  | mData[0];
-            if constexpr (endian == big_endian)
-                return swapEndian<uint64_t>(erg);
-            else
-                return erg;
+            return erg;
 		}
 
 

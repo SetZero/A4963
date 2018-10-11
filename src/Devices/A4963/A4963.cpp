@@ -14,7 +14,7 @@ namespace NS_A4963 {
     }
 
     std::unique_ptr<spi::Data> A4963::send16bitRegister(size_type address) {
-        return mBridge->transfer(spi::SPIData<sizeof(size_type)>{address});
+        return mBridge->transfer(spi::SPIData<sizeof(size_type),spi::big_endian>{address});
     }
 
     A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {
@@ -92,8 +92,8 @@ namespace NS_A4963 {
 
     void A4963::show_register() {
         for (auto registerData : mRegisterData) {
-            std::bitset<16> set(readRegister(registerData.first));
-            std::cout << static_cast<A4963::size_type>(registerData.first) << ": " << set << std::endl;
+            std::bitset<16> bitset{readRegister(registerData.first)};
+            std::cout << static_cast<A4963::size_type>(registerData.first) << ": " << bitset << std::endl;
         }
     }
 

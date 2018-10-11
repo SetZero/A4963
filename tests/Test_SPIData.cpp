@@ -14,11 +14,14 @@ TEST_CASE("SPIData Constructor"){
     spi::Data* d2 = new spi::SPIData<2>{t16};
     spi::Data* d4 = new spi::SPIData<4>{t32};
     spi::Data* d8 = new spi::SPIData<8>{t64};
+    spi::Data* d_big4 = new spi::SPIData<4,spi::big_endian>{t32};
     REQUIRE((*d1)[0] == t8);
     REQUIRE((*d2)[0] == static_cast<uint8_t>(t16));
     REQUIRE((*d2)[1] == static_cast<uint8_t>(t16 >> 8));
     REQUIRE((*d4)[0] == static_cast<uint8_t>(t32));
     REQUIRE((*d4)[3] == static_cast<uint8_t>(t32 >> 24));
+    REQUIRE((*d_big4)[3] == (*d4)[0]);
+    REQUIRE((*d_big4)[0] == static_cast<uint8_t>(t32 >> 24));
     REQUIRE((*d8)[0] == static_cast<uint8_t>(t64));
     REQUIRE((*d8)[7] == static_cast<uint8_t>(t64 >> 56));
 }
