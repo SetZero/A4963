@@ -21,13 +21,12 @@ namespace NS_A4963 {
         //reload all register
         markRegisterForReload(A4963::RegisterCodes::Config0);
         markRegisterForReload(A4963::RegisterCodes::Config1);
-        //TODO: Change this back
-        /*markRegisterForReload(A4963::RegisterCodes::Config2);
+        markRegisterForReload(A4963::RegisterCodes::Config2);
         markRegisterForReload(A4963::RegisterCodes::Config3);
         markRegisterForReload(A4963::RegisterCodes::Config4);
         markRegisterForReload(A4963::RegisterCodes::Config5);
         markRegisterForReload(A4963::RegisterCodes::Mask);
-        markRegisterForReload(A4963::RegisterCodes::Run);*/
+        markRegisterForReload(A4963::RegisterCodes::Run);
     }
 
     void A4963::writeRegisterEntry(const A4963::RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data) {
@@ -85,8 +84,7 @@ namespace NS_A4963 {
                 mRegisterData[registerCodes].data &= ~(1 << utils::getFirstSetBitPos(static_cast<size_type>(RegisterMask::WriteAddress)));
             }
             mBridge->slaveDeselect(shared_from_this());
-            //TODO: Change this back
-            //mRegisterData[registerCodes].dirty = false;
+            mRegisterData[registerCodes].dirty = false;
         }
     }
 
