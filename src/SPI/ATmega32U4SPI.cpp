@@ -60,7 +60,6 @@ namespace spi {
         std::unique_ptr<Data> tmp = spiData.create();
         for(auto elem : spiData){
             std::vector<uint8_t> dataVector;
-            //TODO: this should'nt be here
             dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
             dataVector.push_back(1);
             //TODO: maybe put in LibUsbDevice implentions

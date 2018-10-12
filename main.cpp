@@ -22,14 +22,11 @@ bool reconnect( std::unique_ptr<MCP2210>& ptr);
 int userInput();
 void clearInput();
 
+enum Chips {
+    ATMEGA, MCP
+};
 
-
-int main2(){
-    /*
-    for(int i = 1; i < argc ; i++){
-        std::cout << "Arg number " << std::to_string(i) << ": " <<argv[i] << std::endl;
-    }
-
+int atmega_main() {
     using namespace spi::literals;
     using namespace std::chrono_literals;
 
@@ -61,7 +58,11 @@ int main2(){
         device->commit();
 
         device->show_register();
-    }*/
+    }
+    return 0;
+}
+
+int mcp_main(){
     using namespace CustomDataTypes::literals;
     std::cout << "this is sparta!" << std::endl;
     std::unique_ptr<MCP2210> ptr;
@@ -137,12 +138,17 @@ int main2(){
             } else reconnect(ptr);
         }
     }
-};
+}
 
 int main(int argc, char **argv) {
-   main2();
-   return 0;
+    constexpr Chips used_chip = Chips::ATMEGA;
+
+    if constexpr (used_chip == Chips::ATMEGA) {
+        return atmega_main();
+    } else if(used_chip == Chips::MCP) {
+        return mcp_main();
     }
+}
 
 
 bool reconnect( std::unique_ptr<MCP2210>& ptr){
