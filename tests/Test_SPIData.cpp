@@ -68,3 +68,18 @@ TEST_CASE("SPIData Operator+"){
     REQUIRE((*d3)[1] == 21);
 }
 
+TEST_CASE("SPIData read"){
+    using namespace spi;
+    Data* d = new SPIData<2>(static_cast<uint16_t>(4711));
+    //we handle it if we would'nt know the concrete type here
+    Data* tmp = d->create().release();
+    int i = 1;
+    for(auto elem : *d){
+        //send elem .......
+        *tmp+= 42/i; //simulate the returned value
+        i++;
+    }
+    REQUIRE((*tmp)[0] == 42); //1st data received
+    REQUIRE((*tmp)[1] == 21); //2nd data received
+}
+

@@ -12,6 +12,7 @@ MCP2210::~MCP2210() {
 }
 
 std::unique_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
+    auto tmp = input.create();
     if (connection) {
         uint16_t i = 0;
             for(uint8_t data : input) {
@@ -19,16 +20,17 @@ std::unique_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
                 i++;
             }
         int32_t error = send(static_cast<uint16_t>(i));
+            for(i = 0; i < input.bytesUsed();i++){
+                *tmp += rxdata[i];
+            }
         if (error != ERR_NOERR) {
             exceptionHandling(error);
         }
 #ifdef DEBUG_MCP
         if(err != 0) std::cout << " error: " << err << std::endl;
 #endif
-        return  std::make_unique<spi::SPIData<1>>(rxdata[0]);
     }
-    using namespace spi::literals;
-    return std::make_unique<spi::SPIData<1>>(*0_spi8);
+    return tmp;
 }
 
 void MCP2210::writeGPIO(const gpio::gpioState &state, const gpio::GPIOPin &pin) {

@@ -60,7 +60,7 @@ namespace spi {
         //TODO: Check if SPI data is less than 255 single data
         //TODO: allow multi byte transfer for spiData!
         //auto size = static_cast<uint8_t >(spiData.getData().size());
-        std::vector<uint8_t> returnValue;
+        std::unique_ptr<Data> tmp = spiData.create();
         for(auto elem : spiData){
             std::vector<uint8_t> dataVector;
 
@@ -78,11 +78,13 @@ namespace spi {
                     std::cout << "Failed to send data: device not ready yet..." << std::endl;
                 } else {
                     data.erase(std::begin(data));
-                    returnValue.insert(std::end(returnValue), std::begin(data), std::end(data));
+                    for(auto element : data){
+                        *tmp += element;
+                    }
                 }
             }
         }
-        return std::make_unique<spi::SPIData<>>(returnValue);
+        return tmp;
     }
 
     void ATmega32u4SPI::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {

@@ -47,6 +47,8 @@ namespace spi {
 
 		Data() = default;
 
+		Data(const Data&) = default;
+
 		virtual void swap(Data& other) { std::swap(mData,other.mData);};
 
 		inline uint8_t operator[](const uint8_t& index) const {
@@ -69,15 +71,17 @@ namespace spi {
 
         virtual void operator+=(uint8_t data) = 0;
 
-		virtual explicit operator uint8_t() const noexcept(false) = 0;
+		virtual explicit operator uint8_t () const = 0;
 
-		virtual explicit operator uint16_t()  const noexcept(false) = 0;
+		virtual explicit operator uint16_t() const = 0;
 
 		virtual explicit operator uint32_t() const = 0;
 
         virtual explicit operator uint64_t() const = 0;
         //virtual copy constructor
         virtual std::unique_ptr<Data> clone() const = 0;
+        //virtual copy constructor
+        virtual std::unique_ptr<Data> create() const = 0;
 
         inline void operator-(const Data& rhs) = delete;
         inline void operator*(const Data& rhs) = delete;
@@ -136,6 +140,9 @@ namespace spi {
 		inline std::unique_ptr<Data> clone() const override {
             return std::make_unique<SPIData>(*this);
 		}
+        inline std::unique_ptr<Data> create() const override {
+            return std::make_unique<SPIData>();
+        }
 
 		inline void operator+=(const Data& rhs) override {
             for (size_t i = 0; i < rhs.bytesUsed(); i++) {
@@ -155,12 +162,12 @@ namespace spi {
 		}
 
 
-		explicit operator uint8_t () const noexcept(false) override {
+		explicit operator uint8_t () const override {
             if (mData.size() > 1) throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
 			return mData[0];
 		}
 
-		explicit operator uint16_t() const noexcept(false) override {
+		explicit operator uint16_t() const override {
             if (mData.size() > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
             uint16_t erg = (mData[1] << 8) | mData[0];
             return erg;

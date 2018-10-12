@@ -22,6 +22,8 @@ bool reconnect( std::unique_ptr<MCP2210>& ptr);
 int userInput();
 void clearInput();
 
+
+
 int main2(){
     /*
     for(int i = 1; i < argc ; i++){
