@@ -138,7 +138,7 @@ int mcp_main(){
             } else reconnect(ptr);
         }
     }
-};
+}
 
 int main(int argc, char **argv) {
     constexpr Chips used_chip = Chips::ATMEGA;
