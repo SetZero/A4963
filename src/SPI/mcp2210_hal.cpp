@@ -6,27 +6,31 @@ MCP2210::MCP2210() {
 }
 
 MCP2210::~MCP2210() {
+    udev_enumerate_unref(enumerate);
+    udev_unref(udev);
     close_device(fd);
 }
 
 std::unique_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
-    if (connection) {
+    auto tmp = input.create();
+    if (*connection) {
         uint16_t i = 0;
             for(uint8_t data : input) {
                 txdata[i] = data;
                 i++;
             }
         int32_t error = send(static_cast<uint16_t>(i));
+            for(i = 0; i < input.bytesUsed();i++){
+                *tmp += rxdata[i];
+            }
         if (error != ERR_NOERR) {
             exceptionHandling(error);
         }
 #ifdef DEBUG_MCP
         if(err != 0) std::cout << " error: " << err << std::endl;
 #endif
-        return  std::make_unique<spi::SPIData<1>>(rxdata[0]);
     }
-    using namespace spi::literals;
-    return std::make_unique<spi::SPIData<1>>(*0_spi8);
+    return tmp;
 }
 
 void MCP2210::writeGPIO(const gpio::gpioState &state, const gpio::GPIOPin &pin) {
@@ -63,18 +67,21 @@ void MCP2210::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio
 }
 
 gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
-    return static_cast<uint8_t>(pin) == 1 ? gpio::gpioState::on : gpio::gpioState::off;
+    int val = 0;
+    exceptionHandling(gpio_read(fd, &val, static_cast<uint8_t>(pin)));
+    auto erg = val == static_cast<uint8_t>(pin) ? gpio::gpioState::on : gpio::gpioState::off; // cannot be null it would cause an exception
+    return erg;
 }
 
-int32_t MCP2210::send(const uint16_t &dataCount) const {
-    return spi_data_xfer(fd, txdata.get(), rxdata.get(), dataCount,
+int32_t MCP2210::send(const uint16_t &dataCount) {
+    return spi_data_xfer(fd, txdata.data() , rxdata.data() , dataCount,
                          static_cast<uint16_t>(settings.mode), settings.speed, settings.actcsval, settings.idlecsval, settings.gpcsmask,
                          settings.cs2datadly, settings.data2datadly, settings.data2csdly);
 }
 
 std::vector<std::unique_ptr<spi::Data>>
 MCP2210::transfer(const std::initializer_list<std::unique_ptr<spi::Data>>& spiData) {
-    if (connection) {
+    if (*connection) {
         uint16_t i = 0;
         for (const auto& elem: spiData) {
             if (i >= SPI_BUF_LEN) break;
@@ -97,12 +104,7 @@ MCP2210::transfer(const std::initializer_list<std::unique_ptr<spi::Data>>& spiDa
 }
 
 void MCP2210::connect() {
-    if (!connection) {
-        const char *npath = nullptr;
-        struct udev *udev;
-        struct udev_enumerate *enumerate;
-        struct udev_list_entry *devices, *dev_list_entry;
-        struct udev_device *dev;
+    if (!(*connection)) {
 
         /* Create the udev object */
         udev = udev_new();
@@ -122,6 +124,7 @@ void MCP2210::connect() {
 
             path = udev_list_entry_get_name(dev_list_entry);
             dev = udev_device_new_from_syspath(udev, path);
+
 #ifdef MCP_DEBUG
             printf("Device Node Path: %s\n", udev_device_get_devnode(dev));
 #endif
@@ -163,18 +166,19 @@ void MCP2210::connect() {
         else { //connection was successful, init the gpios
             gpio_setdir(fd, 0);
             gpio_setval(fd, 0);
-            connection = true;
+            *connection = true;
         }
     } else {
         std::cout << "device is already connected" << std::endl;
     }
+
 }
 
 MCP2210::operator bool() {
-    return connection;
+    return *connection;
 }
 
-void MCP2210::exceptionHandling(int32_t errorCode) {
+void MCP2210::exceptionHandling(int32_t errorCode) const{
     switch (-errorCode) {
         case (0) :
             return;
@@ -234,8 +238,8 @@ void MCP2210::exceptionHandling(int32_t errorCode) {
             return;
         }
     }
+    *connection=false;
     close_device(fd);
-    connection = false;
     std::cerr << "device disconnected" << std::endl;
     throw MCPIOException{};
 }

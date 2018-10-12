@@ -145,7 +145,10 @@ namespace NS_A4963 {
 
         size_type getRegisterEntry(const RegisterCodes &registerEntry, const RegisterMask &mask);
 
-        size_type readRegister(const RegisterCodes &registerCodes);
+        template<typename T>
+        void setRegisterEntry(T data, const RegisterMask &mask, const RegisterCodes& registerEntry);
+
+        size_type readRegister(const RegisterCodes &registerCodes, bool forceNoReload = false);
 
         void commit(const RegisterCodes &registerCodes);
 

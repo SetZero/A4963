@@ -21,9 +21,9 @@ namespace gpio {
         int value = 0;
         bool isUsed = false;
     public:
-        constexpr GPIOPin() = default;
+        constexpr GPIOPin() noexcept = default;
 
-        constexpr explicit GPIOPin(int value) : value{value},isUsed(true) {}
+        constexpr explicit GPIOPin(int value) noexcept : value{value},isUsed(true) {}
 
         constexpr explicit operator int() const { return value; }
 

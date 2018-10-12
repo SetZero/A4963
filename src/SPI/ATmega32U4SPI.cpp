@@ -48,27 +48,23 @@ namespace spi {
         }
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
     gpio::gpioState ATmega32u4SPI::readGPIO(const gpio::GPIOPin& pin) const {
-        auto state = gpio::gpioState::off; //TODO: make this work
-        return state;
+#pragma GCC diagnostic pop
+         //TODO: make this work
+        return gpio::gpioState::off;
     }
 
     std::unique_ptr<Data> ATmega32u4SPI::transfer(const Data &spiData) {
-        /*for(auto data : spiData.getData()) {
-            std::cout << "sent: " << static_cast<int >(data) << std::endl;
-        }*/
-        //TODO: Check if SPI data is less than 255 single data
-        //TODO: allow multi byte transfer for spiData!
-        //auto size = static_cast<uint8_t >(spiData.getData().size());
-        std::vector<uint8_t> returnValue;
+        std::unique_ptr<Data> tmp = spiData.create();
         for(auto elem : spiData){
             std::vector<uint8_t> dataVector;
-
             dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
             dataVector.push_back(1);
+            //TODO: maybe put in LibUsbDevice implentions
             //dataVector.push_back((uint8_t) spiData);
                 dataVector.push_back(elem);
-            //dataVector.insert(std::end(dataVector), std::begin(spiData.getData()), std::end(spiData.getData()));
 
             auto data = mDevice.get()->sendData(dataVector);
             if(data.empty()) {
@@ -78,11 +74,13 @@ namespace spi {
                     std::cout << "Failed to send data: device not ready yet..." << std::endl;
                 } else {
                     data.erase(std::begin(data));
-                    returnValue.insert(std::end(returnValue), std::begin(data), std::end(data));
+                    for(auto element : data){
+                        *tmp += element;
+                    }
                 }
             }
         }
-        return std::make_unique<spi::SPIData<>>(returnValue);
+        return tmp;
     }
 
     void ATmega32u4SPI::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {

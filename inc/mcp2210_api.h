@@ -18,7 +18,9 @@ LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN ANY WAY RELATED TO THIS
 SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY 
 TO MICROCHIP FOR THIS SOFTWARE. 
 */
-#pragma once
+
+#ifndef MCP2210_API
+#define MCP2210_API
 
 #ifdef __cplusplus
 extern "C" {
@@ -171,4 +173,6 @@ void print_report_buffer(unsigned char *bufdata, int len, int rowlen);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

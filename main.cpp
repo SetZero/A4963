@@ -5,11 +5,14 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <src/Percentage.h>
 #include "LibUSBDevices.h"
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
-#include "mcp2210_api.h"
-#include "src/SPI/mcp2210_hal.h"
+#ifdef __linux__
+    #include "mcp2210_api.h"
+    #include "src/SPI/mcp2210_hal.h"
+#endif
 #include "src/25LC256.h"
 #include "src/Devices/A4963/A4963.h"
 #include "src/utils/scales/UnitScale.h"
@@ -19,12 +22,11 @@ bool reconnect( std::unique_ptr<MCP2210>& ptr);
 int userInput();
 void clearInput();
 
-int main(int argc, char **argv) {
+enum Chips {
+    ATMEGA, MCP
+};
 
-    for(int i = 1; i < argc ; i++){
-        std::cout << "Arg number " << std::to_string(i) << ": " <<argv[i] << std::endl;
-    }
-
+int atmega_main() {
     using namespace spi::literals;
     using namespace std::chrono_literals;
 
@@ -57,73 +59,96 @@ int main(int argc, char **argv) {
 
         device->show_register();
     }
-    /*using namespace CustomDataTypes::literals;
+    return 0;
+}
+
+int mcp_main(){
+    using namespace CustomDataTypes::literals;
     std::cout << "this is sparta!" << std::endl;
     std::unique_ptr<MCP2210> ptr;
+    using namespace spi::literals;
     ptr = std::make_unique<MCP2210>();
-    spi::Data* ttest = new spi::SPIData<4, spi::big_endian>(static_cast<uint16_t >(43690),static_cast<uint16_t >(43690));
-    std::cout << std::to_string((*ttest)[0]) << std::endl;
-    //std::cout << " 1: " << std::to_string(ttest[0]) << " 2 " << std::to_string(ttest[1]) << " 3 " << std::to_string(ttest[2]) << " 4 " << std::to_string(ttest[3]) << std::endl;
+    ptr->setGPIODirection(gpio::gpioDirection::in,MCP2210::pin3);
+    while(true){
+        int z = 0;
+        std::cin >> z;
+        if(z == 1)
+            std::cout << "pin3: " << (ptr->readGPIO(MCP2210::pin3) == gpio::gpioState::off ? "0" : "1") << std::endl;
+        else break;
+    }
     auto eingaben = {"spi test", "eingabe test", "exit"};
-        while(true) {
-
-            if (*ptr) {
-                std::cout << "mögliche eingaben: " << std::endl;
-                size_t i = 0;
-                for (auto val : eingaben) {
-                    std::cout << i << ".: " << val << std::endl;
-                    i++;
-                }
-                switch (userInput()) {
-                    case 0: {
-                        for (int j = 0; j < 10; j++) {
-                            using namespace spi::literals;
-                            try {
-                                if (*ptr)
-                                    ptr->transfer({42_spi8,21_spi8});
-                                else {
-                                    std::cout << " no connection ";
-                                    reconnect(ptr);
-                                }
-                            } catch (MCPIOException &e) {
-                                std::cout << e.what();
-                                if (!reconnect(ptr)) break;
-                            }
-                        }
-                        break;
-                    }
-                    case 1: {
-                        std::cout << "give your data (no whitespace): ";
-                        std::string input{};
-                        std::cin >> input;
-                        clearInput();
-                        for (auto ch: input) {
-                            try {
-                                if (*ptr)
-                                    ptr->transfer(spi::SPIData(ch));
-                                else {
-                                    std::cout << " no connection ";
-                                    reconnect(ptr);
-                                }
-                            } catch (MCPIOException &e) {
-                                std::cout << e.what();
+    while(true) {
+        if (*ptr) {
+            std::cout << "mögliche eingaben: " << std::endl;
+            size_t i = 0;
+            for (auto val : eingaben) {
+                std::cout << i << ".: " << val << std::endl;
+                i++;
+            }
+            switch (userInput()) {
+                case 0: {
+                    for (int j = 0; j < 10; j++) {
+                        using namespace spi::literals;
+                        try {
+                            if (*ptr)
+                                ptr->transfer({42_spi8, 21_spi8});
+                            else {
+                                std::cout << " no connection ";
                                 reconnect(ptr);
                             }
+                        } catch (MCPIOException &e) {
+                            std::cout << e.what();
+                            if (!reconnect(ptr)) break;
                         }
-                        break;
                     }
-                    case 2 :
-                        return 0;
-                    default:
-                        break;
+                    break;
                 }
-            } else {
-                std::cout << "device currently not connected: type 0 to attempt connections or anything else to exit the application" << std::endl;
-                if(userInput()) exit(1);
-                else reconnect(ptr);
+                case 1: {
+                    std::cout << "give your data (no whitespace): ";
+                    std::string input{};
+                    std::cin >> input;
+                    clearInput();
+                    for (auto ch: input) {
+                        try {
+                            if (*ptr)
+                                ptr->transfer(spi::SPIData(ch));
+                            else {
+                                std::cout << " no connection ";
+                                reconnect(ptr);
+                            }
+                        } catch (MCPIOException &e) {
+                            std::cout << e.what();
+                            reconnect(ptr);
+                        }
+                    }
+                    break;
+                }
+                case 2 : {
+                    return 0;
+                }
+                default:
+                    break;
             }
-        }*/
+        } else {
+            std::cout
+                    << "device currently not connected: type 0 to attempt connections or anything else to exit the application"
+                    << std::endl;
+            if (userInput()) {
+                exit(1);
+            } else reconnect(ptr);
+        }
     }
+};
+
+int main(int argc, char **argv) {
+    constexpr Chips used_chip = Chips::ATMEGA;
+
+    if constexpr (used_chip == Chips::ATMEGA) {
+        return atmega_main();
+    } else if(used_chip == Chips::MCP) {
+        return mcp_main();
+    }
+}
 
 
 bool reconnect( std::unique_ptr<MCP2210>& ptr){
