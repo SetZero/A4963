@@ -48,7 +48,7 @@ private:
     struct udev_list_entry *devices, *dev_list_entry;
     struct udev_device* dev;
     spiSettings settings;
-    bool connection = false;
+    std::unique_ptr<bool> connection = std::make_unique<bool>(false);
     static constexpr int SPI_BUF_LEN = 1024;
     std::array<unsigned char,SPI_BUF_LEN> txdata{}, rxdata{};
     int fd = -1;
@@ -73,7 +73,7 @@ public:
     void slaveSelect(const std::shared_ptr<SPIDevice>& slave) override;
     void slaveDeselect(const std::shared_ptr<SPIDevice>& slave) override;
     void slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin& pin) override;
-    void exceptionHandling(int32_t errorCode);
+    void exceptionHandling(int32_t errorCode) const;
     operator bool();
     void connect();
 };

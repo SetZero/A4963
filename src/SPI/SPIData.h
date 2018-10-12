@@ -49,6 +49,9 @@ namespace spi {
 
 		Data(const Data&) = default;
 
+
+		const std::vector<uint8_t>& data() {return mData;};
+
 		virtual void swap(Data& other) { std::swap(mData,other.mData);};
 
 		inline uint8_t operator[](const uint8_t& index) const {

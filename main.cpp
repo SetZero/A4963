@@ -67,6 +67,14 @@ int main2(){
     std::unique_ptr<MCP2210> ptr;
     using namespace spi::literals;
     ptr = std::make_unique<MCP2210>();
+    ptr->setGPIODirection(gpio::gpioDirection::in,MCP2210::pin3);
+    while(true){
+        int z = 0;
+        std::cin >> z;
+        if(z == 1)
+            std::cout << "pin3: " << (ptr->readGPIO(MCP2210::pin3) == gpio::gpioState::off ? "0" : "1") << std::endl;
+        else break;
+    }
     auto eingaben = {"spi test", "eingabe test", "exit"};
     while(true) {
         if (*ptr) {

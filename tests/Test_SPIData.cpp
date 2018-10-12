@@ -74,7 +74,10 @@ TEST_CASE("SPIData read"){
     //we handle it if we would'nt know the concrete type here
     Data* tmp = d->create().release();
     int i = 1;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
     for(auto elem : *d){
+#pragma GCC diagnostic pop
         //send elem .......
         *tmp+= 42/i; //simulate the returned value
         i++;

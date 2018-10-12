@@ -13,7 +13,7 @@ MCP2210::~MCP2210() {
 
 std::unique_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
     auto tmp = input.create();
-    if (connection) {
+    if (*connection) {
         uint16_t i = 0;
             for(uint8_t data : input) {
                 txdata[i] = data;
@@ -67,7 +67,10 @@ void MCP2210::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio
 }
 
 gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
-    return static_cast<uint8_t>(pin) == 1 ? gpio::gpioState::on : gpio::gpioState::off;
+    int val = 0;
+    exceptionHandling(gpio_read(fd, &val, static_cast<uint8_t>(pin)));
+    auto erg = val == static_cast<uint8_t>(pin) ? gpio::gpioState::on : gpio::gpioState::off; // cannot be null it would cause an exception
+    return erg;
 }
 
 int32_t MCP2210::send(const uint16_t &dataCount) {
@@ -78,7 +81,7 @@ int32_t MCP2210::send(const uint16_t &dataCount) {
 
 std::vector<std::unique_ptr<spi::Data>>
 MCP2210::transfer(const std::initializer_list<std::unique_ptr<spi::Data>>& spiData) {
-    if (connection) {
+    if (*connection) {
         uint16_t i = 0;
         for (const auto& elem: spiData) {
             if (i >= SPI_BUF_LEN) break;
@@ -101,7 +104,7 @@ MCP2210::transfer(const std::initializer_list<std::unique_ptr<spi::Data>>& spiDa
 }
 
 void MCP2210::connect() {
-    if (!connection) {
+    if (!(*connection)) {
 
         /* Create the udev object */
         udev = udev_new();
@@ -163,7 +166,7 @@ void MCP2210::connect() {
         else { //connection was successful, init the gpios
             gpio_setdir(fd, 0);
             gpio_setval(fd, 0);
-            connection = true;
+            *connection = true;
         }
     } else {
         std::cout << "device is already connected" << std::endl;
@@ -172,10 +175,10 @@ void MCP2210::connect() {
 }
 
 MCP2210::operator bool() {
-    return connection;
+    return *connection;
 }
 
-void MCP2210::exceptionHandling(int32_t errorCode) {
+void MCP2210::exceptionHandling(int32_t errorCode) const{
     switch (-errorCode) {
         case (0) :
             return;
@@ -235,8 +238,8 @@ void MCP2210::exceptionHandling(int32_t errorCode) {
             return;
         }
     }
+    *connection=false;
     close_device(fd);
-    connection = false;
     std::cerr << "device disconnected" << std::endl;
     throw MCPIOException{};
 }
