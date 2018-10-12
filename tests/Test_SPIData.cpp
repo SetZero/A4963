@@ -39,9 +39,9 @@ TEST_CASE("SPIData Conversion"){
     REQUIRE((uint16_t)(*d2) == t16);
     REQUIRE((uint32_t)(*d4) == t32);
     REQUIRE((uint64_t)(*d8) == t64);
-    REQUIRE_THROWS((uint8_t)(*d2));
-    REQUIRE_THROWS((uint16_t)(*d4));
-    REQUIRE_THROWS((uint32_t)(*d8));
+    //EQUIRE_THROWS((uint8_t)(*d2)); if Exceptions turned on
+    //EQUIRE_THROWS((uint16_t)(*d4));
+    //EQUIRE_THROWS((uint32_t)(*d8));
 }
 
 TEST_CASE("SPIData Literals"){
@@ -62,7 +62,7 @@ TEST_CASE("SPIData Literals"){
 
 TEST_CASE("SPIData read"){
     using namespace spi;
-    Data* d = new SPIData<4>(static_cast<uint16_t>(4711));
+    Data* d = new SPIData<2>(static_cast<uint16_t>(4711));
     //we handle it if we would'nt know the concrete type here
     Data* tmp = d->create().release();
     int i = 1;
@@ -76,5 +76,16 @@ TEST_CASE("SPIData read"){
     }
     REQUIRE((*tmp)[0] == 42); //1st data received
     REQUIRE((*tmp)[1] == 21); //2nd data received
+}
+
+TEST_CASE("SPIData fill"){
+    using namespace spi;
+    Data* d = new SPIData<4>(static_cast<uint16_t>(4711));
+    //we handle it if we would'nt know the concrete type here
+    Data* tmp = d->create().release();
+    tmp->fill(std::vector<uint8_t>{1,2,3});
+    REQUIRE(((*tmp)[0]) == 1);
+    REQUIRE(((*tmp)[1]) == 2);
+    REQUIRE(((*tmp)[2]) == 3);
 }
 

@@ -15,27 +15,17 @@ std::unique_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
     auto tmp = input.create();
     if (*connection) {
         uint16_t i = 0;
-            for(uint8_t data : input) {
+            for(auto data : input) {
                 txdata[i] = data;
                 i++;
             }
         int32_t error = send(static_cast<uint16_t>(i));
-            std::vector<uint8_t> vec = std::vector<uint8_t>(i);
             for(i = 0; i < input.bytesUsed();i++){
-                vec.emplace_back(rxdata[i]);
+                (*tmp)[i] = rxdata[i];
             }
-        try {
-            tmp->fill(vec);
-        }
-        catch(std::exception& e){
-            std::cout << e.what() << std::endl;
-        }
         if (error != ERR_NOERR) {
             exceptionHandling(error);
         }
-#ifdef DEBUG_MCP
-        if(err != 0) std::cout << " error: " << err << std::endl;
-#endif
     }
     return tmp;
 }
@@ -100,9 +90,9 @@ MCP2210::transfer(const std::initializer_list<std::unique_ptr<spi::Data>>& spiDa
         }
         int32_t error = send(static_cast<uint16_t>(i));
         if (error != ERR_NOERR) exceptionHandling(error);
-        std::vector<std::unique_ptr<spi::Data>> dataOut = std::vector<std::unique_ptr<spi::Data>>{i};
+        std::vector<std::unique_ptr<spi::Data>> dataOut = std::vector<std::unique_ptr<spi::Data>>(i);
         for (i = 0; i < spiData.size(); i++) {
-            if (i >= SPI_BUF_LEN) break;
+            if (i >= SPI_BUF_LEN) throw MCPIOException{};
             dataOut.emplace_back(std::make_unique<spi::SPIData<>>(rxdata[i]));
         }
         return dataOut;
@@ -132,9 +122,6 @@ void MCP2210::connect() {
             path = udev_list_entry_get_name(dev_list_entry);
             dev = udev_device_new_from_syspath(udev, path);
 
-#ifdef MCP_DEBUG
-            printf("Device Node Path: %s\n", udev_device_get_devnode(dev));
-#endif
             npath = udev_device_get_devnode(dev);
 
             dev = udev_device_get_parent_with_subsystem_devtype(
@@ -142,9 +129,6 @@ void MCP2210::connect() {
                     "usb",
                     "usb_device");
             if (!dev) {
-#ifdef MCP_DEBUG
-                printf("Unable to find parent usb device.");
-#endif
                 exit(1);
             }
 
