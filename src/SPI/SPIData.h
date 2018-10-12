@@ -71,7 +71,7 @@ namespace spi {
 
         virtual void operator+=(const Data& rhs) = 0;
 
-		virtual void operator+=(const std::vector<uint8_t>&);
+		virtual void operator+=(const std::vector<uint8_t>&) = 0;
 
         virtual void operator+=(uint8_t data) = 0;
 
