@@ -75,9 +75,7 @@ namespace spi {
                     std::cout << "Failed to send data: device not ready yet..." << std::endl;
                 } else {
                     data.erase(std::begin(data));
-                    for(auto element : data){
-                        *tmp += element;
-                    }
+                    *tmp += data;
                 }
             }
         }

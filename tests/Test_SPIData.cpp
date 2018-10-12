@@ -70,7 +70,7 @@ TEST_CASE("SPIData Operator+"){
 
 TEST_CASE("SPIData read"){
     using namespace spi;
-    Data* d = new SPIData<2>(static_cast<uint16_t>(4711));
+    Data* d = new SPIData<4>(static_cast<uint32_t>(1000000));
     //we handle it if we would'nt know the concrete type here
     Data* tmp = d->create().release();
     int i = 1;

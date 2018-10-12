@@ -49,7 +49,6 @@ namespace spi {
 
 		Data(const Data&) = default;
 
-
 		const std::vector<uint8_t>& data() {return mData;};
 
 		virtual void swap(Data& other) { std::swap(mData,other.mData);};
@@ -71,6 +70,8 @@ namespace spi {
 		}
 
         virtual void operator+=(const Data& rhs) = 0;
+
+		virtual void operator+=(const std::vector<uint8_t>&);
 
         virtual void operator+=(uint8_t data) = 0;
 
@@ -148,14 +149,27 @@ namespace spi {
         }
 
 		inline void operator+=(const Data& rhs) override {
-            for (size_t i = 0; i < rhs.bytesUsed(); i++) {
-                if (mData.size() < numberOfBytes) {
-                    mData.emplace_back(rhs[i]);
-                } else {
-                    throw SPI_Exception{"Data Overflow"};
-                }
-            }
+			for (auto elem : rhs) {
+				if (mData.size() < numberOfBytes) {
+					mData.emplace_back(elem);
+				} else {
+					throw SPI_Exception{"Data Overflow"};
+				}
+			}
 		};
+
+		void operator+=(const std::vector<uint8_t>& vec) override{
+			if constexpr(endian == little_endian){
+				for(auto elem: vec)
+					mData.emplace_back(elem);
+			}
+			else{
+				for(auto i = vec.size()-1;i >= 0; i--){
+					mData.emplace_back(vec[i]);
+				}
+			}
+
+		}
 
 		inline void operator+=(uint8_t data) override{
 			if (mData.size() < numberOfBytes)
