@@ -85,10 +85,7 @@ add_subdirectory(src/Devices/A4963)
 include_directories(src/CustomDataTypes)
 add_subdirectory(src/CustomDataTypes)
 
-target_link_libraries(hid     src spi usbb inc  utils scales a4963 cdt  ${LIBUSB_LIBRARY} )
-
-
-
+target_link_libraries(hid     src spi usbb inc  utils scales a4963 cdt  ${LIBUSB_LIBRARY})
 
 #add_executable(SPI
 #        inc/mcp2210_api.c

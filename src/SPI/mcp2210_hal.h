@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <vector>
+#include <array>
 #include <iostream>
 #include <memory>
 #include "mcp2210_api.h"
@@ -42,14 +42,18 @@ public:
         data2csdly		    = 0;       // last data byte to chip select delay
     };
 private:
+    const char *npath = nullptr;
+    struct udev *udev;
+    struct udev_enumerate *enumerate;
+    struct udev_list_entry *devices, *dev_list_entry;
+    struct udev_device* dev;
     spiSettings settings;
     bool connection = false;
     static constexpr int SPI_BUF_LEN = 1024;
-    inline static auto txdata = std::make_unique<unsigned char[]>(SPI_BUF_LEN);
-    inline static auto rxdata = std::make_unique<unsigned char[]>(SPI_BUF_LEN);
-    int fd;
+    std::array<unsigned char,SPI_BUF_LEN> txdata{}, rxdata{};
+    int fd = -1;
 
-    int32_t send(const uint16_t& dataCount) const;
+    int32_t send(const uint16_t& dataCount);
 
 
 public:

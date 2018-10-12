@@ -6,6 +6,8 @@ MCP2210::MCP2210() {
 }
 
 MCP2210::~MCP2210() {
+    udev_enumerate_unref(enumerate);
+    udev_unref(udev);
     close_device(fd);
 }
 
@@ -66,8 +68,8 @@ gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
     return static_cast<uint8_t>(pin) == 1 ? gpio::gpioState::on : gpio::gpioState::off;
 }
 
-int32_t MCP2210::send(const uint16_t &dataCount) const {
-    return spi_data_xfer(fd, txdata.get(), rxdata.get(), dataCount,
+int32_t MCP2210::send(const uint16_t &dataCount) {
+    return spi_data_xfer(fd, txdata.data() , rxdata.data() , dataCount,
                          static_cast<uint16_t>(settings.mode), settings.speed, settings.actcsval, settings.idlecsval, settings.gpcsmask,
                          settings.cs2datadly, settings.data2datadly, settings.data2csdly);
 }
@@ -98,11 +100,6 @@ MCP2210::transfer(const std::initializer_list<std::unique_ptr<spi::Data>>& spiDa
 
 void MCP2210::connect() {
     if (!connection) {
-        const char *npath = nullptr;
-        struct udev *udev;
-        struct udev_enumerate *enumerate;
-        struct udev_list_entry *devices, *dev_list_entry;
-        struct udev_device *dev;
 
         /* Create the udev object */
         udev = udev_new();
@@ -122,6 +119,7 @@ void MCP2210::connect() {
 
             path = udev_list_entry_get_name(dev_list_entry);
             dev = udev_device_new_from_syspath(udev, path);
+
 #ifdef MCP_DEBUG
             printf("Device Node Path: %s\n", udev_device_get_devnode(dev));
 #endif
@@ -168,6 +166,7 @@ void MCP2210::connect() {
     } else {
         std::cout << "device is already connected" << std::endl;
     }
+
 }
 
 MCP2210::operator bool() {

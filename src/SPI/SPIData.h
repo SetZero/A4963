@@ -69,9 +69,9 @@ namespace spi {
 
         virtual void operator+=(uint8_t data) = 0;
 
-		virtual explicit operator uint8_t () const = 0;
+		virtual explicit operator uint8_t() const noexcept(false) = 0;
 
-		virtual explicit operator uint16_t() const = 0;
+		virtual explicit operator uint16_t()  const noexcept(false) = 0;
 
 		virtual explicit operator uint32_t() const = 0;
 
@@ -155,12 +155,12 @@ namespace spi {
 		}
 
 
-		explicit operator uint8_t () const override {
+		explicit operator uint8_t () const noexcept(false) override {
             if (mData.size() > 1) throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
 			return mData[0];
 		}
 
-		explicit operator uint16_t() const override {
+		explicit operator uint16_t() const noexcept(false) override {
             if (mData.size() > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
             uint16_t erg = (mData[1] << 8) | mData[0];
             return erg;

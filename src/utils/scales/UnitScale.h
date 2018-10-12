@@ -65,9 +65,10 @@ public:
 
     //template<typename = std::enable_if_t<std::is_arithmetic<TValueType>::value>>
     constexpr TUnitType getActualValue(TValueType value) {
+        static_assert(utils::is_volt<TUnitType>::value || utils::is_duration<TUnitType>::value || std::is_arithmetic<TUnitType>::value, "this type is not allowed");
         if constexpr (utils::is_volt<TUnitType>::value || utils::is_duration<TUnitType>::value) {
             return TUnitType{value * mPrecision.count()};
-        } else if (std::is_arithmetic<TUnitType>::value) {
+        } else {
             return TUnitType{value * mPrecision};
         }
     }
