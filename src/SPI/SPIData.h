@@ -69,11 +69,7 @@ namespace spi {
 			return mData.end();
 		}
 
-        virtual void operator+=(const Data& rhs) = 0;
-
-		virtual void operator+=(const std::vector<uint8_t>&);
-
-        virtual void operator+=(uint8_t data) = 0;
+		virtual void fill(const std::vector<uint8_t>&) = 0;
 
 		virtual explicit operator uint8_t () const = 0;
 
@@ -128,13 +124,34 @@ namespace spi {
             }
 		}
 
+		template<typename T>
+		explicit SPIData(const std::vector<T>& vec) : SPIData() {
+			static_assert(sizeof(T) <= numberOfBytes, "too much bytes for this data type" );
+			static_assert(std::is_integral<T>::value,"the data type have to be a integral type");
+			if(vec.size()* sizeof(T) > numberOfBytes) throw SPI_Exception{"too much data for this data type"};
+			for(auto elem : vec){
+				if constexpr(endian == big_endian)
+					for(uint8_t i = sizeof(T); i > 0; i--)
+						mData.emplace_back(static_cast<uint8_t>(elem >> ((i-1) * 8)));
+				else for(uint8_t i = 0; i < sizeof(T); i++)
+						mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
+			}
+		}
+
 
 		explicit SPIData(const Data& other) : SPIData() {
 			mData.insert(std::end(mData), std::begin(other), std::end(other));
 		}
 
-		explicit SPIData(const std::vector<uint8_t >& other) : SPIData() {
-			mData.insert(std::end(mData), std::begin(other), std::end(other));
+		void fill(const std::vector<uint8_t>& vec) override{
+			if(vec.size()* sizeof(uint8_t) > numberOfBytes) throw SPI_Exception{"too much data for this data type"};
+			for(auto elem : vec){
+				if constexpr(endian == big_endian)
+					for(uint8_t i = sizeof(uint8_t); i > 0; i--)
+						mData.emplace_back(static_cast<uint8_t>(elem >> ((i-1) * 8)));
+				else for(uint8_t i = 0; i < sizeof(uint8_t); i++)
+						mData.emplace_back(static_cast<uint8_t>(elem >> (i * 8)));
+			}
 		}
 
 		inline void swap(Data& other) override{
@@ -147,36 +164,6 @@ namespace spi {
         inline std::unique_ptr<Data> create() const override {
             return std::make_unique<SPIData>();
         }
-
-		inline void operator+=(const Data& rhs) override {
-			for (auto elem : rhs) {
-				if (mData.size() < numberOfBytes) {
-					mData.emplace_back(elem);
-				} else {
-					throw SPI_Exception{"Data Overflow"};
-				}
-			}
-		};
-
-		void operator+=(const std::vector<uint8_t>& vec) override{
-			if constexpr(endian == little_endian){
-				for(auto elem: vec)
-					mData.emplace_back(elem);
-			}
-			else{
-				for(auto i = vec.size()-1;i >= 0; i--){
-					mData.emplace_back(vec[i]);
-				}
-			}
-
-		}
-
-		inline void operator+=(uint8_t data) override{
-			if (mData.size() < numberOfBytes)
-				mData.push_back(data);
-			else
-				throw SPI_Exception{"Data Overflow"};
-		}
 
 
 		explicit operator uint8_t () const override {
@@ -228,12 +215,6 @@ namespace spi {
 		os << std::endl;
 		return os;
 	}
-
-	inline std::unique_ptr<Data> operator+(const Data& lhs,const Data& rhs) {
-	    auto tmp = lhs.clone();
-	    *tmp += rhs;
-		return	tmp;
-	 }
 
 	inline void swap(Data& lhs, Data& rhs) {
 		lhs.swap(rhs);

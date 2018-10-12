@@ -20,9 +20,16 @@ std::unique_ptr<spi::Data> MCP2210::transfer(const spi::Data &input) {
                 i++;
             }
         int32_t error = send(static_cast<uint16_t>(i));
+            std::vector<uint8_t> vec = std::vector<uint8_t>(i);
             for(i = 0; i < input.bytesUsed();i++){
-                *tmp += rxdata[i];
+                vec.emplace_back(rxdata[i]);
             }
+        try {
+            tmp->fill(vec);
+        }
+        catch(std::exception& e){
+            std::cout << e.what() << std::endl;
+        }
         if (error != ERR_NOERR) {
             exceptionHandling(error);
         }

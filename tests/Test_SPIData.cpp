@@ -60,17 +60,9 @@ TEST_CASE("SPIData Literals"){
     REQUIRE((uint64_t)(*d8) == static_cast<uint64_t>(18000000000));
 }
 
-TEST_CASE("SPIData Operator+"){
-    auto d2 = spi::SPIData<2>{static_cast<uint8_t >(42)};
-    using namespace spi::literals;
-    auto d3 = (d2 + *21_spi8);
-    REQUIRE((*d3)[0] == 42);
-    REQUIRE((*d3)[1] == 21);
-}
-
 TEST_CASE("SPIData read"){
     using namespace spi;
-    Data* d = new SPIData<4>(static_cast<uint32_t>(1000000));
+    Data* d = new SPIData<4>(static_cast<uint16_t>(4711));
     //we handle it if we would'nt know the concrete type here
     Data* tmp = d->create().release();
     int i = 1;
@@ -79,7 +71,7 @@ TEST_CASE("SPIData read"){
     for(auto elem : *d){
 #pragma GCC diagnostic pop
         //send elem .......
-        *tmp+= 42/i; //simulate the returned value
+        (*tmp)[i-1] = static_cast<uint8_t>(42/i); //simulate the returned value
         i++;
     }
     REQUIRE((*tmp)[0] == 42); //1st data received
