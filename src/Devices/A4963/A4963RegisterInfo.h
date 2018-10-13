@@ -61,7 +61,7 @@ namespace NS_A4963 {
         static constexpr type value{50.0_mV, 1.55_V, 0.0_mV};
 		template<typename T1, typename T2>
 		static const auto normalizer(T1 input, T2 precision) {
-			return static_cast<type::value_type>(input / precision) - 1;
+			return static_cast<type::value_type>(input / precision);
 		} //= [](auto input, auto precision) { return static_cast<type::value_type>(input / precision); };
     };
 }
