@@ -25,15 +25,15 @@ if(WIN32)
     set(LIBUSB_DOWNLOAD_URL "https://sourceforge.net/projects/libusb/files/libusb-1.0/libusb-${LIBUSB_USE_VERSION}/${LIBUSB_ARCHIVE}/download")
     #set(ZIP_LOCATION, "C:\\Program Files\\7-Zip\\7z.exe")
 
-    file(DOWNLOAD
-            ${LIBUSB_DOWNLOAD_URL}
-            ${CMAKE_BINARY_DIR}/libusb-${LIBUSB_USE_VERSION}.7z
-            SHOW_PROGRESS
-            )
+    #file(DOWNLOAD
+    #        ${LIBUSB_DOWNLOAD_URL}
+    #        ${CMAKE_BINARY_DIR}/libusb-${LIBUSB_USE_VERSION}.7z
+    #        SHOW_PROGRESS
+    #        )
 
-    execute_process(COMMAND "C:\\Program Files\\7-Zip\\7z.exe" x -y libusb-${LIBUSB_USE_VERSION}.7z -olibusb-1.0.20
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            )
+    #execute_process(COMMAND "C:\\Program Files\\7-Zip\\7z.exe" x -y libusb-${LIBUSB_USE_VERSION}.7z -olibusb-${LIBUSB_USE_VERSION}
+    #        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    #        )
 endif()
 
 if (UNIX)
@@ -49,20 +49,28 @@ if (UNIX)
 elseif (WIN32)
     FIND_PATH(LIBUSB_INCLUDE_DIR NAMES libusb.h
             HINTS
-            ${CMAKE_BINARY_DIR}/libusb-${LIBUSB_USE_VERSION}/include
+            #"${CMAKE_BINARY_DIR}/libusb-${LIBUSB_USE_VERSION}/include"
+			"${CMAKE_BINARY_DIR}\\libusb-1.0.20\\include"
             PATH_SUFFIXES libusb-1.0
     )
     set(LIBUSB_NAME libusb-1.0.lib)
     FIND_LIBRARY(LIBUSB_LIBRARY NAMES ${LIBUSB_NAME}
         HINTS
-        "${CMAKE_BINARY_DIR}/libusb-${LIBUSB_USE_VERSION}/MS64/static"
-        "${CMAKE_BINARY_DIR}/MS64/dll"
+        "${CMAKE_BINARY_DIR}\\libusb-1.0.20\\MS64\\static"
     )
     INCLUDE(FindPackageHandleStandardArgs)
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(Libusb DEFAULT_MSG LIBUSB_LIBRARY LIBUSB_INCLUDE_DIR)
 
     MARK_AS_ADVANCED(LIBUSB_INCLUDE_DIR LIBUSB_LIBRARY)
 endif (UNIX)
+
+if (WIN32)
+	set(LEGACY_API_NAME legacy_stdio_definitions.lib)
+	FIND_LIBRARY(LEGACY_API NAMES ${LEGACY_API_NAME})
+	if(NOT LEGACY_API)
+		FATAL_ERROR("NO LEGACY_API FOUND!")
+	endif(NOT LEGACY_API)
+endif (WIN32)
 
 #find udev
 if (UNIX)
@@ -134,7 +142,7 @@ add_subdirectory(src/CustomDataTypes)
 if (UNIX)
     target_link_libraries(hid     src spi usbb inc  utils scales a4963 cdt  ${LIBUSB_LIBRARY})
 elseif (WIN32)
-    target_link_libraries(hid     src spi usbb  utils scales a4963 cdt  ${LIBUSB_LIBRARY})
+    target_link_libraries(hid     src spi usbb  utils scales a4963 cdt ${LEGACY_API}  ${LIBUSB_LIBRARY})
 endif (UNIX)
 
 #add_executable(SPI

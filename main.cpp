@@ -64,6 +64,8 @@ int atmega_main() {
 
         device->show_register();
     }
+	int a;
+	std::cin >> a;
     return 0;
 }
 
