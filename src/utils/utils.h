@@ -146,7 +146,7 @@ namespace utils {
 	};
 
 	//#define minReqS(value) typename utils::minRequired<decltype(value),value>::type
-	template<auto x>
+	/*template<auto x>
 	struct minRequired {
 		using type = typename conditional<x <= INT_MAX,typename details::minRequired<x>::min,void>::type;
 		static_assert(!isEqual<type, void>::value, "signed value is too big to fit to an unsigned type");
@@ -157,7 +157,7 @@ namespace utils {
 	struct minRequiredUnsigned {
 		static_assert(x >= 0, " tried to use unsigned type for negative value");
 		using type = typename details::minRequiredUnsigned<x>::min;
-	};
+	};*/
 
 	template<typename T>
 	struct isUnsigned {

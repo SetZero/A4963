@@ -18,9 +18,11 @@
 #include "src/utils/scales/UnitScale.h"
 
 
-bool reconnect( std::unique_ptr<MCP2210>& ptr);
-int userInput();
-void clearInput();
+#ifdef __linux__
+    bool reconnect( std::unique_ptr<MCP2210>& ptr);
+    int userInput();
+    void clearInput();
+#endif
 
 enum Chips {
     ATMEGA, MCP
@@ -62,6 +64,7 @@ int atmega_main() {
     return 0;
 }
 
+#ifdef __linux__
 int mcp_main(){
     using namespace CustomDataTypes::literals;
     std::cout << "this is sparta!" << std::endl;
@@ -139,6 +142,7 @@ int mcp_main(){
         }
     }
 }
+#endif
 
 int main(int argc, char **argv) {
     constexpr Chips used_chip = Chips::ATMEGA;
@@ -146,11 +150,14 @@ int main(int argc, char **argv) {
     if constexpr (used_chip == Chips::ATMEGA) {
         return atmega_main();
     } else if(used_chip == Chips::MCP) {
-        return mcp_main();
+        #ifdef __linux__
+            return mcp_main();
+        #endif
+
     }
 }
 
-
+#ifdef __linux__
 bool reconnect( std::unique_ptr<MCP2210>& ptr){
     do {
         std::cout << " type sth to attempt a reconnect ('break' for stop trying) " << std::endl;
@@ -182,4 +189,4 @@ void clearInput(){
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
-
+#endif

@@ -40,8 +40,8 @@ public:
     }
 
     //TODO: return ScaleOptional and return if it is too big or too small
-    template<typename T, typename Functor>
-    std::optional<TValueType> convertValue(const T& value, Functor functor) {
+    template<typename T, template<typename> typename Functor, typename T2>
+    std::optional<TValueType> convertValue(const T& value, Functor<T2> functor) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
             return {functor(static_cast<TUnitType>(value), mPrecision)};
@@ -51,8 +51,8 @@ public:
         }
     }
 
-    template<typename Rep, typename Period, typename Functor>
-    std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value, Functor functor) {
+    template<typename Rep, typename Period, template<typename> typename Functor, typename T2>
+    std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value, Functor<T2> functor) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
             auto steps = std::chrono::duration_cast<TUnitType>(value);

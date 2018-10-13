@@ -178,3 +178,5 @@ build/compile_commands\.json
 build/hid
 
 build/test_cases
+
+\.vs/

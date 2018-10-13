@@ -4,10 +4,10 @@
 #include <chrono>
 #include <any>
 #include <src/SPI/SPIDevice.h>
+#include "A4963RegisterInfo.h"
 #include "src/utils/scales/UnitScale.h"
 #include "utils/utils.h"
 #include "SPI/SPIBridge.h"
-#include "A4963RegisterInfo.h"
 
 namespace NS_A4963 {
 
@@ -156,7 +156,7 @@ namespace NS_A4963 {
         std::optional<const E<Rep, Period>>
         insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName) {
             auto scale = getRegisterRange<Name>();
-            if (auto checkedValue = scale.convertValue(time, RegisterValues<Name>::normalizer)) {
+            if (auto checkedValue = scale.convertValue(time, RegisterValues<Name>::normalizer<size_type>)) {
                 A4963::size_type data = createRegisterEntry(*checkedValue, mask);
                 writeRegisterEntry(registerName, mask, data);
                 if constexpr(utils::is_duration<E<Rep, Period>>::value) {

@@ -5,7 +5,13 @@
 #pragma once
 
 #include <memory>
-#include <libusb.h>
+#ifdef __cplusplus
+    extern "C" {
+#endif
+    #include <libusb.h>
+#ifdef __cplusplus
+    };
+#endif
 #include <iostream>
 #include "src/SPI/SPIBridge.h"
 #include "USBUtils.h"

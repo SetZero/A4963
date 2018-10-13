@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <memory>
-#include "src/SPI/mcp2210_hal.h"
+#include "SPI/SPIBridge.h"
 
 class EEPROM : public SPIDevice {
 private:

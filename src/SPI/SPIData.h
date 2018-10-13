@@ -9,9 +9,11 @@
 #include <vector>
 #include <string>
 #include <exception>
-#include <byteswap.h>
 #include <memory>
 #include <iostream>
+#ifdef __linux__
+    #include <byteswap.h>
+#endif
 
 
 namespace spi {

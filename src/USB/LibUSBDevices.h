@@ -6,7 +6,17 @@
 
 #include <vector>
 #include <cstdint>
-#include <libusb.h>
+#ifdef __linux__
+    #include <libusb.h>
+#elif _WIN32
+    #ifdef __cplusplus
+        extern "C" {
+    #endif
+        #include <libusb.h>
+    #ifdef __cplusplus
+        };
+    #endif
+#endif
 #include <optional>
 #include "LibUsbDevice.h"
 #include "HIDevice.h"

@@ -1,7 +1,6 @@
 //
 // Created by sebastian on 03.09.18.
 //
-
 #include "LibUsbDevice.h"
 
 namespace usb {
