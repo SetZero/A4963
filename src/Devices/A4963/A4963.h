@@ -156,7 +156,7 @@ namespace NS_A4963 {
         std::optional<const E<Rep, Period>>
         insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName) {
             auto scale = getRegisterRange<Name>();
-            if (auto checkedValue = scale.convertValue<Name>(time)) {
+            if (auto checkedValue = scale.convertValue<RegisterValues<Name>>(time)) {
                 A4963::size_type data = createRegisterEntry(*checkedValue, mask);
                 writeRegisterEntry(registerName, mask, data);
                 if constexpr(utils::is_duration<E<Rep, Period>>::value) {

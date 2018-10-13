@@ -29,7 +29,7 @@ namespace NS_A4963 {
         using type = UnitScale<std::chrono::duration<long double, std::nano>,  uint16_t >;
         static constexpr type value{400ns, 6us, 0us};
 		template<typename T1, typename T2>
-		static const auto normalizer(T1 input, T2 recision) {
+		static const auto normalizer(T1 input, T2 precision) {
 			return static_cast<type::value_type>(input / precision);
 		}
 			; //= [](auto input, auto precision) { return static_cast<type::value_type>(input / precision); };
@@ -40,7 +40,7 @@ namespace NS_A4963 {
         using type = UnitScale<std::chrono::duration<long double, std::nano>, uint16_t>;
         static constexpr type value{50ns, 3.15us, 100ns};
 		template<typename T1, typename T2>
-		static const auto normalizer(T1 input, T2 recision) {
+		static const auto normalizer(T1 input, T2 precision) {
 			return static_cast<type::value_type>(input / precision);
 		} //= [](auto input, auto precision) { return static_cast<type::value_type>(input / precision); };
     };
@@ -50,7 +50,7 @@ namespace NS_A4963 {
         using type = UnitScale<CustomDataTypes::Electricity::Volt<long double, std::milli>, uint16_t>;
         static constexpr type value{12.5_mV, 200.0_mV, 12.5_mV};
 		template<typename T1, typename T2>
-		static const auto normalizer(T1 input, T2 recision) {
+		static const auto normalizer(T1 input, T2 precision) {
 			return static_cast<type::value_type>(input / precision) - 1;
 		} //= [](auto input, auto precision) { return (static_cast<type::value_type>(input / precision) - 1); };
     };
@@ -60,7 +60,7 @@ namespace NS_A4963 {
         using type = UnitScale<CustomDataTypes::Electricity::Volt<long double, std::milli>, uint16_t>;
         static constexpr type value{50.0_mV, 1.55_V, 0.0_mV};
 		template<typename T1, typename T2>
-		static const auto normalizer(T1 input, T2 recision) {
+		static const auto normalizer(T1 input, T2 precision) {
 			return static_cast<type::value_type>(input / precision) - 1;
 		} //= [](auto input, auto precision) { return static_cast<type::value_type>(input / precision); };
     };

@@ -10,7 +10,6 @@
 #include <optional>
 #include <stdexcept>
 #include "../../CustomDataTypes/Volt.h"
-#include "../../Devices/A4963/A4963RegisterInfo.h"
 #include "utils.h"
 
 template<typename TDuration>
@@ -41,23 +40,23 @@ public:
     }
 
     //TODO: return ScaleOptional and return if it is too big or too small
-    template<typename T, NS_A4963::A4963RegisterNames Reg>
-    std::optional<TValueType> convertValue(const T& value) {
+    template<typename T1, typename T2>
+    std::optional<TValueType> convertValue(const T2& value) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
-            return { NS_A4963::RegisterValues<Reg>::normalizer(static_cast<TUnitType>(value), mPrecision)};
+            return { T1::normalizer(static_cast<TUnitType>(value), mPrecision)};
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
         }
     }
 
-    template<typename Rep, typename Period, NS_A4963::A4963RegisterNames Reg>
+    template<typename T, typename Rep, typename Period>
     std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
             auto steps = std::chrono::duration_cast<TUnitType>(value);
-            return NS_A4963::RegisterValues<Reg>::normalizer(steps, mPrecision);
+            return T::normalizer(steps, mPrecision);
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
