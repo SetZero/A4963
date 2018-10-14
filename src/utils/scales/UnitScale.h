@@ -44,7 +44,7 @@ public:
     std::optional<TValueType> convertValue(const T& value, Functor functor) {
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
-            return {functor(static_cast<TUnitType>(value), mPrecision)};
+            return {functor(static_cast<TUnitType>(value))};
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
@@ -56,13 +56,14 @@ public:
         //TODO: round value up/down
         if(value >= mMinValue && value <= mMaxValue) {
             auto steps = std::chrono::duration_cast<TUnitType>(value);
-            return functor(steps, mPrecision);
+            return functor(steps);
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
         }
     }
 
+    //TODO: This will not work for non linear curves! (unknown precision)
     //template<typename = std::enable_if_t<std::is_arithmetic<TValueType>::value>>
     constexpr TUnitType getActualValue(TValueType value) {
         static_assert(utils::is_volt<TUnitType>::value || utils::is_duration<TUnitType>::value || std::is_arithmetic<TUnitType>::value, "this type is not allowed");
@@ -73,6 +74,7 @@ public:
         }
     }
 
+    //TODO Precision might not be needed at all...
     constexpr TUnitType getPrecision() const {
         return mPrecision;
     }

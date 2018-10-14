@@ -104,6 +104,11 @@ namespace NS_A4963 {
             OverspeedLimitRatio                 = 0b0000000011000000,
             DegaussCompensation                 = 0b0000000000100000,
             FixedPeriod                         = 0b0000000000011111,
+
+            /* Config3 Addresses */
+            PositionControllerIntegralGain      = 0b0000111100000000,
+            PWMDutyCycleHoldTorque              = 0b0000000011110000,
+            HoldTime                            = 0b0000000000001111,
         };
         enum class RegisterCodes : uint8_t {
             Config0     = 0b000,
