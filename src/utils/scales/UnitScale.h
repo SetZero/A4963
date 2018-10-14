@@ -117,7 +117,7 @@ public:
         non_ref_type operator*() const {return functor(num);}
     };
     const const_iterator begin() const { return const_iterator(0); }
-    const const_iterator end() const { return const_iterator(reverse_functor(max + min)); }
+    const const_iterator end() const { return const_iterator(reverse_functor(max)+1); }
 
     template<typename T, typename Functor>
     std::optional<TValueType> convertValue(const T& value, Functor _functor) {
