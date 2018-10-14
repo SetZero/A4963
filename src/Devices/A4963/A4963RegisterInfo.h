@@ -27,6 +27,14 @@ namespace NS_A4963 {
 
     template<>
     struct RegisterValues<A4963RegisterNames::BlankTime> {
+        /*
+         *  Example for new UnitScale
+         *   static constexpr auto min = 400ns;
+         *   static constexpr auto max = 6us;
+         *   static constexpr auto functor = [](auto t1) { return t1 * min; };
+         *   static constexpr auto reverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / min); };
+         *   static constexpr NewUnitScale<min, max, functor, reverse_functor> name{};
+         */
         using type = UnitScale<std::chrono::duration<long double, std::nano>,  uint16_t >;
         static constexpr type value{400ns, 6us, 0us};
         static constexpr auto normalizer = [](auto input) { return static_cast<type::value_type>(input / 400ns); };
