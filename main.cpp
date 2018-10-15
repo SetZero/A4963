@@ -25,6 +25,7 @@ void clearInput();
 enum Chips {
     ATMEGA, MCP
 };
+static constexpr Chips used_chip = Chips::ATMEGA;
 
 int atmega_main() {
     using namespace spi::literals;
@@ -141,8 +142,6 @@ int mcp_main(){
 }
 
 int main(int argc, char **argv) {
-    constexpr Chips used_chip = Chips::ATMEGA;
-
     if constexpr (used_chip == Chips::ATMEGA) {
         return atmega_main();
     } else if(used_chip == Chips::MCP) {

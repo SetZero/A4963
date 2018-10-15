@@ -101,6 +101,12 @@ namespace CustomDataTypes::Electricity {
             return *this;
         }
 
+        template<typename T>
+        Volt<Rep, std::ratio<Num, Denom>>& operator*=(const T& rhs) {
+            internalRepresentation *= rhs;
+            return *this;
+        }
+
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
         Volt<Rep, std::ratio<Num, Denom>>& operator/=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
             internalRepresentation /= convert_value(rhs);
@@ -130,6 +136,18 @@ namespace CustomDataTypes::Electricity {
 
     template<typename Rep, typename Period, typename oRep, typename oPeriod>
     Volt<Rep, Period> operator*( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    template<typename Rep, typename Period, typename T>
+    Volt<Rep, Period> operator*( Volt<Rep, Period> lhs, const T& rhs ) {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    template<typename Rep, typename Period, typename T>
+    Volt<Rep, Period> operator*( const T& rhs, Volt<Rep, Period> lhs ) {
         lhs *= rhs;
         return lhs;
     }

@@ -27,44 +27,47 @@ namespace NS_A4963 {
 
     template<>
     struct RegisterValues<A4963RegisterNames::BlankTime> {
-        /*
-         *  Example for new UnitScale
-         *   static constexpr auto min = 400ns;
-         *   static constexpr auto max = 6us;
-         *   static constexpr auto functor = [](auto t1) { return t1 * min; };
-         *   static constexpr auto reverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / min); };
-         *   static constexpr NewUnitScale<min, max, functor, reverse_functor> name{};
-         */
-        using type = UnitScale<std::chrono::duration<long double, std::nano>,  uint16_t >;
-        static constexpr type value{400ns, 6us, 0us};
-        static constexpr auto normalizer = [](auto input) { return static_cast<type::value_type>(input / 400ns); };
+        static constexpr auto min = 0ns;
+        static constexpr auto max = 6us;
+        static constexpr auto functor = [](auto t1) { return t1 * 400ns; };
+        static constexpr auto reverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 400ns); };
+        static constexpr NewUnitScale<min, max, functor, reverse_functor> value{};
+
     };
 
     template<>
     struct RegisterValues<A4963RegisterNames::DeadTime> {
-        using type = UnitScale<std::chrono::duration<long double, std::nano>, uint16_t>;
-        static constexpr type value{50ns, 3.15us, 100ns};
-        static constexpr auto normalizer = [](auto input) { return static_cast<type::value_type>(input / 50ns); };
+        static constexpr auto min = 100ns;
+        static constexpr auto max = 3.15us;
+        static constexpr auto functor = [](auto t1) { return t1 * 50ns; };
+        static constexpr auto reverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 50ns); };
+        static constexpr NewUnitScale<min, max, functor, reverse_functor> value{};
     };
 
     template<>
     struct RegisterValues<A4963RegisterNames::CurrentSenseThresholdVoltage> {
-        using type = UnitScale<CustomDataTypes::Electricity::Volt<long double, std::milli>, uint16_t>;
-        static constexpr type value{12.5_mV, 200.0_mV, 12.5_mV};
-        static constexpr auto normalizer = [](auto input) { return (static_cast<type::value_type>(input / 12.5_mV) - 1); };
+        static constexpr auto min = 12.5_mV;
+        static constexpr auto max = 200.0_mV;
+        static constexpr auto functor = [](auto t1) { return (t1 + 1) * 12.5_mV; };
+        static constexpr auto reverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 12.5_mV) - 1; };
+        static constexpr NewUnitScale<min, max, functor, reverse_functor> value{};
     };
 
     template<>
     struct RegisterValues<A4963RegisterNames::VDSThreshold> {
-        using type = UnitScale<CustomDataTypes::Electricity::Volt<long double, std::milli>, uint16_t>;
-        static constexpr type value{50.0_mV, 1.55_V, 0.0_mV};
-        static constexpr auto normalizer = [](auto input) { return static_cast<type::value_type>(input / 50.0_mV); };
+        static constexpr auto min = 0.0_mV;
+        static constexpr auto max = 1.55_V;
+        static constexpr auto functor = [](auto t1) { return t1 * 50.0_mV; };
+        static constexpr auto reverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 50.0_mV); };
+        static constexpr NewUnitScale<min, max, functor, reverse_functor> value{};
     };
 
     template<>
     struct RegisterValues<A4963RegisterNames::PositionControllerProportionalGain> {
-        using type = UnitScale<double, uint16_t>;
-        static constexpr type value{0.0, 1.0/128, 256};
-        static constexpr auto normalizer = [](auto input) { return static_cast<type::value_type>(std::log2(input) + 7); };
+        static constexpr auto min = 1.0/128;
+        static constexpr auto max = 256;
+        static constexpr auto functor = [](auto t1) { return std::exp(2, t1 + 7); };
+        static constexpr auto reverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
+        static constexpr NewUnitScale<min, max, functor, reverse_functor> value{};
     };
 }
