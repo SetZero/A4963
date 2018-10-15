@@ -12,7 +12,7 @@
 #include "../../CustomDataTypes/Volt.h"
 #include "utils.h"
 
-template<auto& min, auto& max, auto& functor, auto& reverse_functor, typename TValueType = uint16_t>
+template<auto& min, auto& max, auto& functor, auto& inverse_functor, typename TValueType = uint16_t>
 class NewUnitScale {
 private:
     using non_ref_type = std::remove_const_t<std::remove_reference_t<decltype(min)>>;
@@ -35,13 +35,13 @@ public:
         non_ref_type operator*() const {return functor(num);}
     };
     const const_iterator begin() const { return const_iterator(0); }
-    const const_iterator end() const { return const_iterator(reverse_functor(max)+1); }
+    const const_iterator end() const { return const_iterator(inverse_functor(max)+1); }
 
     template<typename T>
     constexpr std::optional<TValueType> convertValue(const T& value) const {
         //TODO: round value up/down
         if(value >= min && value <= max) {
-            return {reverse_functor(static_cast<non_ref_type>(value))};
+            return {inverse_functor(static_cast<non_ref_type>(value))};
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
@@ -53,7 +53,7 @@ public:
         //TODO: round value up/down
         if(value >= min && value <= max) {
             auto steps = std::chrono::duration_cast<non_ref_type>(value);
-            return reverse_functor(steps);
+            return inverse_functor(steps);
         } else {
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
