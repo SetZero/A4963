@@ -78,6 +78,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config0;
         static constexpr auto min = 0ns;
         static constexpr auto max = 6us;
+        using used_type = decltype(min);
         static constexpr auto functor = [](auto t1) { return t1 * 400ns; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 400ns); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
@@ -89,6 +90,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = true;
         static constexpr auto min = 100ns;
         static constexpr auto max = 3.15us;
+        using used_type = decltype(min);
         static constexpr auto functor = [](auto t1) { return t1 * 50ns; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 50ns); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
@@ -99,6 +101,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = true;
         static constexpr auto min = 12.5_mV;
         static constexpr auto max = 200.0_mV;
+        using used_type = decltype(min);
         static constexpr auto functor = [](auto t1) { return (t1 + 1) * 12.5_mV; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 12.5_mV) - 1; };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
@@ -109,6 +112,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = true;
         static constexpr auto min = 0.0_mV;
         static constexpr auto max = 1.55_V;
+        using used_type = decltype(min);
         static constexpr auto functor = [](auto t1) { return t1 * 50.0_mV; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 50.0_mV); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
@@ -119,6 +123,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = true;
         static constexpr auto min = 1.0/128;
         static constexpr auto max = 256.0;
+        using used_type = decltype(min);
         static constexpr auto functor = [](auto t1) { return std::exp(2, t1 + 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
@@ -126,9 +131,13 @@ namespace NS_A4963 {
 
     template<>
     struct RegisterValues<A4963RegisterNames::proto> {
+        //TODO: remove -> test
         static inline constexpr bool isRanged = false;
-        enum values {
+        static constexpr auto mask = RegisterMask::BlankTimeAddress;
+        static constexpr auto code = RegisterCodes::Config0;
+        enum class values : uint16_t {
             val1 = 23, val2 = 24
         };
+        using used_type = values;
     };
 }

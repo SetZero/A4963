@@ -70,15 +70,11 @@ namespace NS_A4963 {
         }
 
         template< A4963RegisterNames toSet>
-        auto Set(decltype(RegisterValues<toSet>::min) value){
-            static_assert(RegisterValues<toSet>::isRanged, "no unchecked allowed");
-            return insertCheckedValue<toSet>(value, RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
-        }
-
-        template< A4963RegisterNames toSet>
-        auto SetUncheck(decltype(RegisterValues<toSet>::values) value){
-            static_assert(!RegisterValues<toSet>::isRanged, "no checked allowed");
-            return (value,RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
+        auto Set(typename RegisterValues<toSet>::used_type value){
+            if constexpr(RegisterValues<toSet>::isRanged)
+                return insertCheckedValue<toSet>(value, RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
+            else
+                return setRegisterEntry(static_cast<size_type>(value),RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
         }
 
     private:
@@ -108,17 +104,14 @@ namespace NS_A4963 {
 
         std::unique_ptr<spi::Data> send16bitRegister(size_type address);
 
-        template<typename T>
-        size_type createRegisterEntry(T data, const RegisterMask &mask);
+
+        void setRegisterEntry(size_type data, const RegisterMask &mask, const RegisterCodes& registerEntry);
+
+        size_type createRegisterEntry(size_type data, const RegisterMask &mask);
 
         size_type getRegisterEntry(const RegisterCodes &registerEntry, const RegisterMask &mask);
 
-
-
         void commit(const RegisterCodes &registerCodes);
-
-        template<typename T>
-        void setRegisterEntry(T data, const RegisterMask &mask, const RegisterCodes& registerEntry);
 
         size_type readRegister(const RegisterCodes &registerCodes, bool forceNoReload = false);
 
@@ -138,5 +131,10 @@ namespace NS_A4963 {
             }
             return std::nullopt;
         }
+    };
+    template< A4963RegisterNames toSet>
+    struct possibleValues {
+        static_assert(!RegisterValues<toSet>::isRanged, "here is no checked type allowed");
+        using values = typename RegisterValues<toSet>::values;
     };
 }

@@ -33,23 +33,22 @@ namespace NS_A4963 {
         clearRegister(reg, RegisterMask::RegisterAndWriteAddress);
         clearRegister(reg, mask);
 
-        mRegisterData[reg].data |= createRegisterEntry(reg, RegisterMask::RegisterAddress);
-        mRegisterData[reg].data |= createRegisterEntry(WriteBit::Write, RegisterMask::WriteAddress);
+        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), RegisterMask::RegisterAddress);
+        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Write), RegisterMask::WriteAddress);
         mRegisterData[reg].data |= createRegisterEntry(data, RegisterMask::GeneralData);
         mRegisterData[reg].dirty = true;
     }
 
     void A4963::markRegisterForReload(const detail::RegisterCodes &reg) {
         clearRegister(reg);
-        mRegisterData[reg].data |= createRegisterEntry(reg, RegisterMask::RegisterAddress);
-        mRegisterData[reg].data |= createRegisterEntry(WriteBit::Read, RegisterMask::WriteAddress);
+        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), RegisterMask::RegisterAddress);
+        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Read), RegisterMask::WriteAddress);
         mRegisterData[reg].dirty = true;
     }
 
-    template<typename T>
-    A4963::size_type A4963::createRegisterEntry(T data, const detail::RegisterMask &mask) {
+    A4963::size_type A4963::createRegisterEntry(size_type data, const detail::RegisterMask &mask) {
         A4963::size_type registerData = 0;
-        registerData = (static_cast<size_type>(data) << utils::getFirstSetBitPos(static_cast<size_type>(mask))) &
+        registerData = (data << utils::getFirstSetBitPos(static_cast<size_type>(mask))) &
                        static_cast<size_type>(mask);
         return registerData;
     }
@@ -75,7 +74,7 @@ namespace NS_A4963 {
             if (getRegisterEntry(registerCodes, RegisterMask::WriteAddress) ==
                 static_cast<A4963::size_type>(WriteBit::Read))
             {
-                mRegisterData[registerCodes].data = createRegisterEntry(registerCodes, RegisterMask::RegisterAddress) |
+                mRegisterData[registerCodes].data = createRegisterEntry(static_cast<size_type>(registerCodes), RegisterMask::RegisterAddress) |
                                                     (static_cast<A4963::size_type>(*send16bitRegister(
                                                             mRegisterData[registerCodes].data)) &
                                                      static_cast<A4963::size_type>(RegisterMask::GeneralData));
@@ -103,24 +102,23 @@ namespace NS_A4963 {
     }
 
     void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
-        setRegisterEntry(type,RegisterMask::RecirculationModeAddress,RegisterCodes::Config0);
+        setRegisterEntry(static_cast<size_type>(type),RegisterMask::RecirculationModeAddress,RegisterCodes::Config0);
     }
 
     void A4963::setPercentFastDecay(const A4963::PercentFastDecayTypes &type) {
-        setRegisterEntry(type,RegisterMask::PercentFastDecayAddress,RegisterCodes::Config1);
+        setRegisterEntry(static_cast<size_type>(type),RegisterMask::PercentFastDecayAddress,RegisterCodes::Config1);
     }
 
     void A4963::invertPWMInput(const A4963::InvertPWMInputTypes &type) {
-        setRegisterEntry(type,RegisterMask::InvertPWMInputAddress,RegisterCodes::Config1);
+        setRegisterEntry(static_cast<size_type>(type),RegisterMask::InvertPWMInputAddress,RegisterCodes::Config1);
     }
 
     void A4963::setBemfTimeQualifier(const A4963::BemfTimeQualifier &type) {
-        setRegisterEntry(type,RegisterMask::BemfTimeQualifierAddress,RegisterCodes::Config1);
+        setRegisterEntry(static_cast<size_type>(type),RegisterMask::BemfTimeQualifierAddress,RegisterCodes::Config1);
     }
 
-    template<typename T>
     void
-    A4963::setRegisterEntry(T data, const detail::RegisterMask &mask, const detail::RegisterCodes &registerEntry) {
+    A4963::setRegisterEntry(size_type data, const detail::RegisterMask &mask, const detail::RegisterCodes &registerEntry) {
         auto val = createRegisterEntry(data,mask);
         writeRegisterEntry(registerEntry,mask,val);
     }

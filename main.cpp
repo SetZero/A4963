@@ -30,6 +30,7 @@ static constexpr Chips used_chip = Chips::ATMEGA;
 int atmega_main() {
     using namespace spi::literals;
     using namespace std::chrono_literals;
+    using namespace NS_A4963;
 
     std::cout << "Starting Atmega32u4..." << std::endl;
     usb::LibUSBDeviceList deviceList;
@@ -40,9 +41,11 @@ int atmega_main() {
         auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
 
-        device->setRecirculationMode(NS_A4963::A4963::RecirculationModeTypes::Off);
-        //NS_A4963::RegisterValues<NS_A4963::A4963RegisterNames::BlankTime> deadTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
-        device->Set<NS_A4963::A4963RegisterNames::BlankTime>(0ns);
+        device->setRecirculationMode(A4963::RecirculationModeTypes::Off);
+        auto deadTimeRange = device->getRegisterRange<A4963RegisterNames::BlankTime>();
+        device->Set<NS_A4963::A4963RegisterNames::BlankTime>(42ns);
+        constexpr auto proto = A4963RegisterNames::proto;
+        device->Set<proto>(possibleValues<proto>::values::val1);
 /*
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
         device->setBlankTime(blankTimeRange.getMinValue());
