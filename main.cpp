@@ -41,9 +41,9 @@ int atmega_main() {
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
 
         device->setRecirculationMode(NS_A4963::A4963::RecirculationModeTypes::Off);
-        auto deadTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
-        device->setDeadTime(deadTimeRange.getMinValue());
-
+        //NS_A4963::RegisterValues<NS_A4963::A4963RegisterNames::BlankTime> deadTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
+        device->Set<NS_A4963::A4963RegisterNames::BlankTime>(0ns);
+/*
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
         device->setBlankTime(blankTimeRange.getMinValue());
 
@@ -58,7 +58,7 @@ int atmega_main() {
         device->setVDSThreshold(vdsThresholdVoltage.getMaxValue());
         device->commit();
 
-        device->show_register();
+        device->show_register();*/
     }
     return 0;
 }

@@ -15,6 +15,7 @@ namespace NS_A4963 {
     using namespace CustomDataTypes::Electricity::literals;
 
     class A4963 : public SPIDevice {
+
     public:
         using size_type = uint16_t;
 
@@ -54,73 +55,35 @@ namespace NS_A4963 {
         //Config0
         void setRecirculationMode(const RecirculationModeTypes &type);
 
-        template<typename Rep, typename Period>
-        auto setBlankTime(const std::chrono::duration<Rep, Period> &time);
-
-        template<typename Rep, typename Period>
-        auto setDeadTime(const std::chrono::duration<Rep, Period> &time);
-
         //Config1
         void setPercentFastDecay(const PercentFastDecayTypes &type);
 
         void invertPWMInput(const InvertPWMInputTypes &type);
 
-        template<typename Rep, typename Period>
-        auto setCurrentSenseThresholdVoltage(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
 
         void setBemfTimeQualifier(const BemfTimeQualifier &type);
 
-        template<typename Rep, typename Period>
-        auto setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage);
 
         template<A4963RegisterNames reg>
         auto getRegisterRange() const {
             return RegisterValues<reg>::value;
         }
+
+        template< A4963RegisterNames toSet>
+        auto Set(decltype(RegisterValues<toSet>::min) value){
+            static_assert(RegisterValues<toSet>::isRanged, "no unchecked allowed");
+            return insertCheckedValue<toSet>(value, RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
+        }
+
+        template< A4963RegisterNames toSet>
+        auto SetUncheck(decltype(RegisterValues<toSet>::values) value){
+            static_assert(!RegisterValues<toSet>::isRanged, "no checked allowed");
+            return (value,RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
+        }
+
     private:
 
         std::shared_ptr<spi::SPIBridge> mBridge;
-        enum class RegisterMask : size_type {
-            /* Common Addresses */
-            RegisterAddress                     = 0b1110000000000000,
-            WriteAddress                        = 0b0001000000000000,
-            RegisterAndWriteAddress             = 0b1111000000000000,
-            GeneralData                         = 0b0000111111111111,
-
-            /* Config0 Addresses */
-            RecirculationModeAddress            = 0b0000110000000000,
-            BlankTimeAddress                    = 0b0000001111000000,
-            DeadTimeAddress                     = 0b0000000000111111,
-
-            /* Config1 Addresses */
-            PercentFastDecayAddress             = 0b0000100000000000,
-            InvertPWMInputAddress               = 0b0000010000000000,
-            CurrentSenseThresholdVoltageAddress = 0b0000001111000000,
-            BemfTimeQualifierAddress            = 0b0000000000100000,
-            VDSThresholdAddress                 = 0b0000000000011111,
-
-            /* Config2 Addresses */
-            PositionControllerProportionalGain  = 0b0000111100000000,
-            OverspeedLimitRatio                 = 0b0000000011000000,
-            DegaussCompensation                 = 0b0000000000100000,
-            FixedPeriod                         = 0b0000000000011111,
-
-            /* Config3 Addresses */
-            PositionControllerIntegralGain      = 0b0000111100000000,
-            PWMDutyCycleHoldTorque              = 0b0000000011110000,
-            HoldTime                            = 0b0000000000001111,
-        };
-        enum class RegisterCodes : uint8_t {
-            Config0     = 0b000,
-            Config1     = 0b001,
-            Config2     = 0b010,
-            Config3     = 0b011,
-            Config4     = 0b100,
-            Config5     = 0b101,
-            Mask        = 0b110,
-            Run         = 0b111,
-            Diagnostic  = 0b110
-        };
 
         enum class WriteBit : uint8_t {
             Write = 1,
@@ -137,9 +100,9 @@ namespace NS_A4963 {
 
         void clearRegister(const RegisterCodes &reg);
 
-        void clearRegister(const RegisterCodes &reg, const A4963::RegisterMask &mask);
+        void clearRegister(const RegisterCodes &reg, const detail::RegisterMask &mask);
 
-        void writeRegisterEntry(const RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data);
+        void writeRegisterEntry(const RegisterCodes &reg, const detail::RegisterMask &mask, size_type data);
 
         void markRegisterForReload(const RegisterCodes &reg);
 
@@ -150,12 +113,14 @@ namespace NS_A4963 {
 
         size_type getRegisterEntry(const RegisterCodes &registerEntry, const RegisterMask &mask);
 
+
+
+        void commit(const RegisterCodes &registerCodes);
+
         template<typename T>
         void setRegisterEntry(T data, const RegisterMask &mask, const RegisterCodes& registerEntry);
 
         size_type readRegister(const RegisterCodes &registerCodes, bool forceNoReload = false);
-
-        void commit(const RegisterCodes &registerCodes);
 
         template<A4963RegisterNames Name, template<typename, typename> typename E, typename Rep, typename Period>
         std::optional<const E<Rep, Period>>
@@ -174,25 +139,4 @@ namespace NS_A4963 {
             return std::nullopt;
         }
     };
-
-    template<typename Rep, typename Period>
-    auto A4963::setBlankTime(const std::chrono::duration<Rep, Period> &time) {
-        return insertCheckedValue<A4963RegisterNames::BlankTime>(time, RegisterMask::BlankTimeAddress, RegisterCodes::Config0);
-    }
-
-    template<typename Rep, typename Period>
-    auto A4963::setDeadTime(const std::chrono::duration<Rep, Period> &time) {
-        return insertCheckedValue<A4963RegisterNames::DeadTime>(time, RegisterMask::DeadTimeAddress, RegisterCodes::Config0);
-    }
-
-    template<typename Rep, typename Period>
-    auto A4963::setCurrentSenseThresholdVoltage(
-            const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
-        return insertCheckedValue<A4963RegisterNames::CurrentSenseThresholdVoltage>(voltage, RegisterMask::CurrentSenseThresholdVoltageAddress, RegisterCodes::Config1);
-    }
-
-    template<typename Rep, typename Period>
-    auto A4963::setVDSThreshold(const CustomDataTypes::Electricity::Volt<Rep, Period> &voltage) {
-        return insertCheckedValue<A4963RegisterNames::VDSThreshold>(voltage, RegisterMask::VDSThresholdAddress, RegisterCodes::Config1);
-    }
 }

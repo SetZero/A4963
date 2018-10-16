@@ -12,7 +12,7 @@
 #include "../../CustomDataTypes/Volt.h"
 #include "utils.h"
 
-template<auto& min, auto& max, auto& functor, auto& inverse_functor, typename TValueType = uint16_t>
+template<auto& min, auto& max, auto& functor, auto& inverse_functor, typename TValueType = uint16_t, TValueType stepsize = 1>
 class NewUnitScale {
 private:
     using non_ref_type = std::remove_const_t<std::remove_reference_t<decltype(min)>>;
@@ -28,7 +28,7 @@ public:
         size_t num;
     public:
         explicit const_iterator(unsigned long _num = 0) : num(_num) {}
-        const const_iterator& operator++() const {num = num + 1; return *this;}
+        const const_iterator& operator++() const {num = num + stepsize; return *this;}
         const const_iterator operator++(int) const {const_iterator retval = *this; ++(*this); return retval;}
         bool operator==(const_iterator other) const {return num == other.num;}
         bool operator!=(const_iterator other) const {return !(*this == other);}

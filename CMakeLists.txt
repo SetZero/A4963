@@ -8,7 +8,7 @@ include_directories(.)
 include_directories(inc)
 include_directories(src)
 
-add_executable(test_cases tests/Test_SPIData.cpp tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp tests/Test_src_scales_RangedUnit.cpp tests/UnitScale.cpp tests/UnitScale.h)
+add_executable(test_cases tests/Test_SPIData.cpp tests/Test_src_CustomDataTypes_Volt.cpp tests/Test_utils_getFirstSetBitPos.cpp tests/Test_src_scales_RangedUnit.cpp tests/UnitScale.cpp)
 add_executable(hid main.cpp)
 
 

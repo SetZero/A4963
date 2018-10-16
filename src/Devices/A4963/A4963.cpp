@@ -4,12 +4,12 @@
 #include "A4963.h"
 
 namespace NS_A4963 {
-    void A4963::clearRegister(const A4963::RegisterCodes &reg) {
+    void A4963::clearRegister(const detail::RegisterCodes &reg) {
         mRegisterData[reg].data = 0;
     }
 
 
-    void A4963::clearRegister(const A4963::RegisterCodes &reg, const A4963::RegisterMask &mask) {
+    void A4963::clearRegister(const detail::RegisterCodes &reg, const detail::RegisterMask &mask) {
         mRegisterData[reg].data &= ~(static_cast<A4963::size_type>(mask));
     }
 
@@ -19,17 +19,17 @@ namespace NS_A4963 {
 
     A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {
         //reload all register
-        markRegisterForReload(A4963::RegisterCodes::Config0);
-        markRegisterForReload(A4963::RegisterCodes::Config1);
-        markRegisterForReload(A4963::RegisterCodes::Config2);
-        markRegisterForReload(A4963::RegisterCodes::Config3);
-        markRegisterForReload(A4963::RegisterCodes::Config4);
-        markRegisterForReload(A4963::RegisterCodes::Config5);
-        markRegisterForReload(A4963::RegisterCodes::Mask);
-        markRegisterForReload(A4963::RegisterCodes::Run);
+        markRegisterForReload(detail::RegisterCodes::Config0);
+        markRegisterForReload(detail::RegisterCodes::Config1);
+        markRegisterForReload(detail::RegisterCodes::Config2);
+        markRegisterForReload(detail::RegisterCodes::Config3);
+        markRegisterForReload(detail::RegisterCodes::Config4);
+        markRegisterForReload(detail::RegisterCodes::Config5);
+        markRegisterForReload(detail::RegisterCodes::Mask);
+        markRegisterForReload(detail::RegisterCodes::Run);
     }
 
-    void A4963::writeRegisterEntry(const A4963::RegisterCodes &reg, const A4963::RegisterMask &mask, size_type data) {
+    void A4963::writeRegisterEntry(const detail::RegisterCodes &reg, const detail::RegisterMask &mask, size_type data) {
         clearRegister(reg, RegisterMask::RegisterAndWriteAddress);
         clearRegister(reg, mask);
 
@@ -39,7 +39,7 @@ namespace NS_A4963 {
         mRegisterData[reg].dirty = true;
     }
 
-    void A4963::markRegisterForReload(const A4963::RegisterCodes &reg) {
+    void A4963::markRegisterForReload(const detail::RegisterCodes &reg) {
         clearRegister(reg);
         mRegisterData[reg].data |= createRegisterEntry(reg, RegisterMask::RegisterAddress);
         mRegisterData[reg].data |= createRegisterEntry(WriteBit::Read, RegisterMask::WriteAddress);
@@ -47,7 +47,7 @@ namespace NS_A4963 {
     }
 
     template<typename T>
-    A4963::size_type A4963::createRegisterEntry(T data, const A4963::RegisterMask &mask) {
+    A4963::size_type A4963::createRegisterEntry(T data, const detail::RegisterMask &mask) {
         A4963::size_type registerData = 0;
         registerData = (static_cast<size_type>(data) << utils::getFirstSetBitPos(static_cast<size_type>(mask))) &
                        static_cast<size_type>(mask);
@@ -56,7 +56,7 @@ namespace NS_A4963 {
 
 
     A4963::size_type
-    A4963::getRegisterEntry(const A4963::RegisterCodes &registerEntry, const A4963::RegisterMask &mask) {
+    A4963::getRegisterEntry(const detail::RegisterCodes &registerEntry, const detail::RegisterMask &mask) {
         A4963::size_type registerData = 0;
         registerData = (mRegisterData[registerEntry].data & static_cast<size_type>(mask))
                 >> utils::getFirstSetBitPos(static_cast<size_type>(mask));
@@ -69,7 +69,7 @@ namespace NS_A4963 {
         }
     }
 
-    void A4963::commit(const A4963::RegisterCodes &registerCodes) {
+    void A4963::commit(const detail::RegisterCodes &registerCodes) {
         if (mRegisterData[registerCodes].dirty) {
             mBridge->slaveSelect(shared_from_this());
             if (getRegisterEntry(registerCodes, RegisterMask::WriteAddress) ==
@@ -95,7 +95,7 @@ namespace NS_A4963 {
         }
     }
 
-    A4963::size_type A4963::readRegister(const A4963::RegisterCodes &registerCodes, bool forceNoReload) {
+    A4963::size_type A4963::readRegister(const detail::RegisterCodes &registerCodes, bool forceNoReload) {
         if (!forceNoReload && mRegisterData[registerCodes].dirty) {
             commit(registerCodes);
         }
@@ -120,7 +120,7 @@ namespace NS_A4963 {
 
     template<typename T>
     void
-    A4963::setRegisterEntry(T data, const A4963::RegisterMask &mask, const A4963::RegisterCodes &registerEntry) {
+    A4963::setRegisterEntry(T data, const detail::RegisterMask &mask, const detail::RegisterCodes &registerEntry) {
         auto val = createRegisterEntry(data,mask);
         writeRegisterEntry(registerEntry,mask,val);
     }
