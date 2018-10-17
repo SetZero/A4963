@@ -32,9 +32,9 @@ namespace NS_A4963 {
         }
 
         template< A4963RegisterNames toGet>
-        auto getRegEntry(){
+        auto getRegEntry() {
             if constexpr(RegisterValues<toGet>::isRanged)
-                return getCheckedValue<toGet>(readRegister(RegisterValues<toGet>::code));
+                return getCheckedValue<toGet>(RegisterValues<toGet>::code, RegisterValues<toGet>::mask);
             else
                 return static_cast<typename RegisterValues<toGet>::values>(readRegister(RegisterValues<toGet>::code) & static_cast<size_type>(RegisterValues<toGet>::mask));
         }
@@ -87,6 +87,8 @@ namespace NS_A4963 {
 
         size_type readRegister(const RegisterCodes &registerCodes, bool forceNoReload = false);
 
+        size_type extractRegisterValue(size_t registerValue, RegisterMask registerName);
+
         template<A4963RegisterNames Name, typename T>
         std::optional<const T>
         insertCheckedValue(const T& value, const RegisterMask& mask, const RegisterCodes& registerName) {
@@ -107,10 +109,11 @@ namespace NS_A4963 {
 
         //TODO:
         template<A4963RegisterNames Name>
-        auto
-        getCheckedValue(const size_type& data) {
+        auto getCheckedValue(const RegisterCodes& registerCode, const RegisterMask& mask) {
+            auto value = readRegister(registerCode);
+            value = extractRegisterValue(value, mask);
             auto scale = getRegisterRange<Name>();
-            return scale.getActualValue(data);
+            return scale.getActualValue(value);
         }
     };
 

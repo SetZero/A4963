@@ -8,6 +8,7 @@
 #include <limits>
 #include <stdexcept>
 #include <iostream>
+#include "../utils/RatioLookup.h"
 
 namespace CustomDataTypes::Electricity {
     template<typename Rep, typename Period = std::ratio<1> >
@@ -40,7 +41,8 @@ namespace CustomDataTypes::Electricity {
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
         constexpr operator Volt<oRep, std::ratio<oNum, oDenom>>() const {
-            //TODO: This is currently causing issues if the result needs floating rep, but the first type is int rep
+            static_assert((std::is_floating_point_v<oRep> && std::is_floating_point_v<Rep>) ||
+                                  (std::is_integral_v<oRep> && std::is_integral_v<Rep>));
             return Volt<oRep, std::ratio<oNum, oDenom>>{(internalRepresentation * Num * oDenom) / (oNum * Denom)};
         }
 
@@ -112,6 +114,9 @@ namespace CustomDataTypes::Electricity {
             internalRepresentation /= convert_value(rhs);
             return *this;
         }
+
+        //friend std::ostream &operator<<(std::ostream &os, const Volt<Rep, std::ratio<Num, Denom>> &volt);
+
     private:
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
         constexpr Rep convert_value(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) const {
@@ -212,6 +217,12 @@ namespace CustomDataTypes::Electricity {
         constexpr Volt<long double, std::mega> operator ""_MV(long double element) {
             return Volt<long double, std::mega>(element);
         }
+    }
+
+    template<typename Rep, std::intmax_t Num, std::intmax_t Denom>
+    std::ostream &operator<<(std::ostream &os, const Volt<Rep, std::ratio<Num, Denom>> &volt) {
+        os << volt.count() << " " << utils::ratio_lookup<std::ratio<Num, Denom>>::abr_value << "V";
+        return os;
     }
 }
 

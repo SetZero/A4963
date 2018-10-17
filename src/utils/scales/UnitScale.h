@@ -55,6 +55,7 @@ public:
             auto steps = std::chrono::duration_cast<non_ref_type>(value);
             return inverse_functor(steps);
         } else {
+            std::cerr << "Maximum: " << max.count() << ", Minimum: " << min.count() << ", Given: " << value.count() << std::endl;
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
         }
