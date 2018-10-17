@@ -194,7 +194,7 @@ void MCP2210::exceptionHandling(int32_t errorCode) const{
             break;
         }
         case (120): {
-            std::cout << " Set Settings Error " << std::endl;
+            std::cout << " set Settings Error " << std::endl;
             break;
         }
         case (130): {
@@ -202,7 +202,7 @@ void MCP2210::exceptionHandling(int32_t errorCode) const{
             break;
         }
         case (140): {
-            std::cout << " Set SPI Settings Error " << std::endl;
+            std::cout << " set SPI Settings Error " << std::endl;
             break;
         }
         case (150): {
@@ -222,7 +222,7 @@ void MCP2210::exceptionHandling(int32_t errorCode) const{
             break;
         }
         case (190): {
-            std::cout << " Set GPIO direction Error " << std::endl;
+            std::cout << " set GPIO direction Error " << std::endl;
             break;
         }
         default: {

@@ -7903,7 +7903,7 @@ namespace Catch {
 
     void FatalConditionHandler::reset() {
         if( isSet ) {
-            // Set signals back to previous values -- hopefully nobody overwrote them in the meantime
+            // set signals back to previous values -- hopefully nobody overwrote them in the meantime
             for( std::size_t i = 0; i < sizeof(signalDefs)/sizeof(SignalDefs); ++i ) {
                 sigaction(signalDefs[i].id, &oldSigActions[i], nullptr);
             }

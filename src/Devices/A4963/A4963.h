@@ -31,13 +31,21 @@ namespace NS_A4963 {
             return RegisterValues<reg>::value;
         }
 
+        template< A4963RegisterNames toGet>
+        auto getRegEntry(){
+            if constexpr(RegisterValues<toGet>::isRanged)
+                return getCheckedValue<toGet>(RegisterValues<toGet>::code);
+            else
+                return readRegister(RegisterValues<toGet>::code);
+        }
+
         template< A4963RegisterNames toSet, typename = std::enable_if_t<RegisterValues<toSet>::isRanged>>
-        auto Set(decltype(RegisterValues<toSet>::min) value){
+        auto set(decltype(RegisterValues<toSet>::min) value){
             return insertCheckedValue<toSet>(value, RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
         }
 
         template< A4963RegisterNames toSet, typename = std::enable_if_t<(!RegisterValues<toSet>::isRanged)>>
-        auto Set(typename RegisterValues<toSet>::values  value){
+        auto set(typename RegisterValues<toSet>::values  value){
             return setRegisterEntry(static_cast<size_type>(value),RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
         }
 
@@ -79,23 +87,33 @@ namespace NS_A4963 {
 
         size_type readRegister(const RegisterCodes &registerCodes, bool forceNoReload = false);
 
-        template<A4963RegisterNames Name, template<typename, typename> typename E, typename Rep, typename Period>
-        std::optional<const E<Rep, Period>>
-        insertCheckedValue(const E<Rep, Period>& time, const RegisterMask& mask, const RegisterCodes& registerName) {
+        template<A4963RegisterNames Name, typename T>
+        std::optional<const T>
+        insertCheckedValue(const T& value, const RegisterMask& mask, const RegisterCodes& registerName) {
             auto scale = getRegisterRange<Name>();
-            if (auto checkedValue = scale.convertValue(time)) {
+            if (auto checkedValue = scale.convertValue(value)) {
                 A4963::size_type data = createRegisterEntry(*checkedValue, mask);
                 writeRegisterEntry(registerName, mask, data);
-                if constexpr(utils::is_duration<E<Rep, Period>>::value) {
-                    return {std::chrono::duration_cast<E<Rep, Period>>(
+                if constexpr(utils::is_duration<T>::value) {
+                    return {std::chrono::duration_cast<T>(
                             scale.getActualValue(*checkedValue))};
                 } else {
-                    return {static_cast<E<Rep, Period>>(scale.getActualValue(*checkedValue))};
+                    return {static_cast<T>(scale.getActualValue(*checkedValue))};
                 }
             }
             return std::nullopt;
         }
+
+
+        //TODO:
+        template<A4963RegisterNames Name>
+        auto
+        getCheckedValue(const RegisterCodes& registerName) {
+            auto scale = getRegisterRange<Name>();
+            return scale.getActualValue(readRegister(registerName));
+        }
     };
+
     template< A4963RegisterNames toSet>
     struct possibleValues {
         static_assert(!RegisterValues<toSet>::isRanged, "here is no checked type allowed");
