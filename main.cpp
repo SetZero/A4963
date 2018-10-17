@@ -43,6 +43,7 @@ int atmega_main() {
         device->set<proto>(possibleValues<proto>::values::Off);
         device->set<NS_A4963::A4963RegisterNames::BlankTime>(42ns);
         decltype(10ns) test = device->getRegEntry<NS_A4963::A4963RegisterNames::BlankTime>();
+        RegisterValues<proto>::values typ = device->getRegEntry<proto>();
 /*
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
         device->setBlankTime(blankTimeRange.getMinValue());

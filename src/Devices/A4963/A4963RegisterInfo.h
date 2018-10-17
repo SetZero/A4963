@@ -139,7 +139,7 @@ namespace NS_A4963 {
         static constexpr auto mask = RegisterMask::RecirculationModeAddress;
         static constexpr auto code = RegisterCodes::Config0;
 
-        enum class values : uint8_t {
+        enum class values : uint16_t {
             Auto = 0b00,
             High = 0b01,
             Low = 0b10,
@@ -153,7 +153,7 @@ namespace NS_A4963 {
         static constexpr auto mask = RegisterMask::BemfTimeQualifierAddress;
         static constexpr auto code = RegisterCodes::Config1;
 
-        enum class values : uint8_t {
+        enum class values : uint16_t {
             DebounceTimer = 0,
             WindowTimer = 1
         };
@@ -165,7 +165,7 @@ namespace NS_A4963 {
         static constexpr auto mask = RegisterMask::InvertPWMInputAddress;
         static constexpr auto code = RegisterCodes::Config1;
 
-        enum class values : uint8_t {
+        enum class values : uint16_t {
             NormalTrueLogic = 0,
             InverterLogic = 1
         };
@@ -177,7 +177,7 @@ namespace NS_A4963 {
         static constexpr auto mask = RegisterMask::PercentFastDecayAddress;
         static constexpr auto code = RegisterCodes::Config1;
 
-        enum class values : uint8_t {
+        enum class values : uint16_t {
             T12_5Percent = 0,
             T25Percent = 1
         };

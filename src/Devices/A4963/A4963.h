@@ -36,7 +36,7 @@ namespace NS_A4963 {
             if constexpr(RegisterValues<toGet>::isRanged)
                 return getCheckedValue<toGet>(readRegister(RegisterValues<toGet>::code));
             else
-                return readRegister(RegisterValues<toGet>::code);
+                return static_cast<typename RegisterValues<toGet>::values>(readRegister(RegisterValues<toGet>::code) & static_cast<size_type>(RegisterValues<toGet>::mask));
         }
 
         template< A4963RegisterNames toSet, typename = std::enable_if_t<RegisterValues<toSet>::isRanged>>
