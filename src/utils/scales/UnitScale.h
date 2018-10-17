@@ -14,9 +14,14 @@
 
 template<auto& min, auto& max, auto& functor, auto& inverse_functor, typename TValueType = uint16_t, TValueType stepsize = 1>
 class NewUnitScale {
+    static_assert(std::is_invocable_v<decltype(functor), TValueType>);
+    static_assert(std::is_invocable_v<decltype(inverse_functor), decltype(min)>);
+    static_assert(min <= max);
+    static_assert(std::is_arithmetic_v<TValueType>);
+    static_assert(stepsize > 0);
+
 private:
     using non_ref_type = std::remove_const_t<std::remove_reference_t<decltype(min)>>;
-    static_assert(min <= max);
 public:
     class const_iterator: public std::iterator<std::input_iterator_tag,
             non_ref_type,
@@ -62,7 +67,6 @@ public:
     }
 
     constexpr non_ref_type getActualValue(TValueType value) const {
-        static_assert(utils::is_volt<non_ref_type>::value || utils::is_duration<non_ref_type>::value || std::is_arithmetic<non_ref_type>::value, "this type is not allowed");
         return non_ref_type{functor(value)};
     }
 

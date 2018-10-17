@@ -132,7 +132,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = true;
         static constexpr auto min = 1.0/128;
         static constexpr auto max = 256.0;
-        static constexpr auto functor = [](auto t1) { return std::exp(2, t1 + 7); };
+        static constexpr auto functor = [](auto t1) { return std::pow(2, t1 + 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
