@@ -109,7 +109,7 @@ namespace utils {
 
     template<>
     struct ratio_lookup<std::ratio<1000000000000000000, 1>> {
-        static constexpr char abr_value = 'Z';
-        static constexpr std::string_view value = "zetta";
+        static constexpr char abr_value = 'E';
+        static constexpr std::string_view value = "exa";
     };
 }
