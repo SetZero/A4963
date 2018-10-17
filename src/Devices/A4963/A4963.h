@@ -19,49 +19,11 @@ namespace NS_A4963 {
     public:
         using size_type = uint16_t;
 
-        enum class ScalableRegisterEntries : uint8_t {
-            DeadTime,
-            BlankTime
-        };
-
-        enum class RecirculationModeTypes : uint8_t {
-            Auto = 0b00,
-            High = 0b01,
-            Low = 0b10,
-            Off = 0b11
-        };
-
-        enum class PercentFastDecayTypes : uint8_t {
-            T12_5Percent = 0,
-            T25Percent = 1
-        };
-
-        enum class InvertPWMInputTypes : uint8_t {
-            NormalTrueLogic = 0,
-            InverterLogic = 1
-        };
-
-        enum class BemfTimeQualifier : uint8_t {
-            DebounceTimer = 0,
-            WindowTimer = 1
-        };
-
         explicit A4963(std::shared_ptr<spi::SPIBridge> mBridge);
 
         void commit();
 
         void show_register();
-
-        //Config0
-        void setRecirculationMode(const RecirculationModeTypes &type);
-
-        //Config1
-        void setPercentFastDecay(const PercentFastDecayTypes &type);
-
-        void invertPWMInput(const InvertPWMInputTypes &type);
-
-
-        void setBemfTimeQualifier(const BemfTimeQualifier &type);
 
 
         template<A4963RegisterNames reg>
@@ -69,12 +31,14 @@ namespace NS_A4963 {
             return RegisterValues<reg>::value;
         }
 
-        template< A4963RegisterNames toSet>
-        auto Set(typename RegisterValues<toSet>::used_type value){
-            if constexpr(RegisterValues<toSet>::isRanged)
-                return insertCheckedValue<toSet>(value, RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
-            else
-                return setRegisterEntry(static_cast<size_type>(value),RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
+        template< A4963RegisterNames toSet, typename = std::enable_if_t<RegisterValues<toSet>::isRanged>>
+        auto Set(decltype(RegisterValues<toSet>::min) value){
+            return insertCheckedValue<toSet>(value, RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
+        }
+
+        template< A4963RegisterNames toSet, typename = std::enable_if_t<(!RegisterValues<toSet>::isRanged)>>
+        auto Set(typename RegisterValues<toSet>::values  value){
+            return setRegisterEntry(static_cast<size_type>(value),RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
         }
 
     private:

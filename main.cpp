@@ -40,12 +40,10 @@ int atmega_main() {
         auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
         auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
-
-        device->setRecirculationMode(A4963::RecirculationModeTypes::Off);
-        auto deadTimeRange = device->getRegisterRange<A4963RegisterNames::BlankTime>();
+        constexpr auto proto = A4963RegisterNames::RecirculationMode;
+        device->Set<proto>(possibleValues<proto>::values::Off);
         device->Set<NS_A4963::A4963RegisterNames::BlankTime>(42ns);
-        constexpr auto proto = A4963RegisterNames::proto;
-        device->Set<proto>(possibleValues<proto>::values::val1);
+
 /*
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
         device->setBlankTime(blankTimeRange.getMinValue());
@@ -144,7 +142,8 @@ int mcp_main(){
     }
 }
 
-int main(int argc, char **argv) {
+//int argc, char **argv
+int main() {
     if constexpr (used_chip == Chips::ATMEGA) {
         return atmega_main();
     } else if(used_chip == Chips::MCP) {
@@ -184,4 +183,3 @@ void clearInput(){
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
-

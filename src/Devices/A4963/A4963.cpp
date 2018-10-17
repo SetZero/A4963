@@ -101,22 +101,6 @@ namespace NS_A4963 {
         return mRegisterData[registerCodes].data;
     }
 
-    void A4963::setRecirculationMode(const A4963::RecirculationModeTypes &type) {
-        setRegisterEntry(static_cast<size_type>(type),RegisterMask::RecirculationModeAddress,RegisterCodes::Config0);
-    }
-
-    void A4963::setPercentFastDecay(const A4963::PercentFastDecayTypes &type) {
-        setRegisterEntry(static_cast<size_type>(type),RegisterMask::PercentFastDecayAddress,RegisterCodes::Config1);
-    }
-
-    void A4963::invertPWMInput(const A4963::InvertPWMInputTypes &type) {
-        setRegisterEntry(static_cast<size_type>(type),RegisterMask::InvertPWMInputAddress,RegisterCodes::Config1);
-    }
-
-    void A4963::setBemfTimeQualifier(const A4963::BemfTimeQualifier &type) {
-        setRegisterEntry(static_cast<size_type>(type),RegisterMask::BemfTimeQualifierAddress,RegisterCodes::Config1);
-    }
-
     void
     A4963::setRegisterEntry(size_type data, const detail::RegisterMask &mask, const detail::RegisterCodes &registerEntry) {
         auto val = createRegisterEntry(data,mask);
