@@ -14,7 +14,8 @@ namespace NS_A4963 {
     }
 
     std::unique_ptr<spi::Data> A4963::send16bitRegister(size_type address) {
-        return mBridge->transfer(spi::SPIData<sizeof(size_type),spi::big_endian>{address});
+         auto t = mBridge->transfer(spi::SPIData<sizeof(size_type),spi::big_endian>{address});
+         return t;
     }
 
     A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {
@@ -33,16 +34,16 @@ namespace NS_A4963 {
         clearRegister(reg, RegisterMask::RegisterAndWriteAddress);
         clearRegister(reg, mask);
 
-        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), RegisterMask::RegisterAddress);
-        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Write), RegisterMask::WriteAddress);
-        mRegisterData[reg].data |= createRegisterEntry(data, RegisterMask::GeneralData);
+        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), detail::RegisterMask::RegisterAddress);
+        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Write), detail::RegisterMask::WriteAddress);
+        mRegisterData[reg].data |= createRegisterEntry(data, detail::RegisterMask::GeneralData);
         mRegisterData[reg].dirty = true;
     }
 
     void A4963::markRegisterForReload(const detail::RegisterCodes &reg) {
         clearRegister(reg);
-        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), RegisterMask::RegisterAddress);
-        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Read), RegisterMask::WriteAddress);
+        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), detail::RegisterMask::RegisterAddress);
+        mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Read), detail::RegisterMask::WriteAddress);
         mRegisterData[reg].dirty = true;
     }
 
@@ -71,16 +72,15 @@ namespace NS_A4963 {
     void A4963::commit(const detail::RegisterCodes &registerCodes) {
         if (mRegisterData[registerCodes].dirty) {
             mBridge->slaveSelect(shared_from_this());
-            if (getRegisterEntry(registerCodes, RegisterMask::WriteAddress) ==
+            if (getRegisterEntry(registerCodes, detail::RegisterMask::WriteAddress) ==
                 static_cast<A4963::size_type>(WriteBit::Read))
             {
-                mRegisterData[registerCodes].data = createRegisterEntry(static_cast<size_type>(registerCodes), RegisterMask::RegisterAddress) |
-                                                    (static_cast<A4963::size_type>(*send16bitRegister(
-                                                            mRegisterData[registerCodes].data)) &
+                mRegisterData[registerCodes].data = createRegisterEntry(static_cast<size_type>(registerCodes), detail::RegisterMask::RegisterAddress) |
+                                                    ( static_cast<A4963::size_type>(*send16bitRegister(mRegisterData[registerCodes].data)) &
                                                      static_cast<A4963::size_type>(RegisterMask::GeneralData));
             } else {
                 send16bitRegister(mRegisterData[registerCodes].data);
-                mRegisterData[registerCodes].data &= ~(1 << utils::getFirstSetBitPos(static_cast<size_type>(RegisterMask::WriteAddress)));
+                mRegisterData[registerCodes].data &= ~(1 << utils::getFirstSetBitPos(static_cast<size_type>(detail::RegisterMask::WriteAddress)));
             }
             mBridge->slaveDeselect(shared_from_this());
             mRegisterData[registerCodes].dirty = false;

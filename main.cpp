@@ -39,10 +39,15 @@ int atmega_main() {
         auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
         auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
-        constexpr auto proto = A4963RegisterNames::RecirculationMode;
-        device->set<proto>(possibleValues<proto>::values::Off);
-        device->set<NS_A4963::A4963RegisterNames::BlankTime>(42ns);
-        decltype(10ns) test = device->getRegEntry<NS_A4963::A4963RegisterNames::BlankTime>();
+        constexpr auto recirculationMode = A4963RegisterNames::RecirculationMode;
+        device->set<recirculationMode>(possibleValues<recirculationMode>::values::Off);
+        auto blankTime = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
+        device->set<NS_A4963::A4963RegisterNames::BlankTime>(blankTime.getMaxValue());
+        auto deadTime = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
+        device->set<NS_A4963::A4963RegisterNames::DeadTime>(deadTime.getMaxValue());
+        device->commit();
+        //auto test = device->getRegEntry<NS_A4963::A4963RegisterNames::BlankTime>();
+        device->show_register();
 /*
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
         device->setBlankTime(blankTimeRange.getMinValue());

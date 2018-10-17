@@ -57,14 +57,14 @@ namespace spi {
     }
 
     std::unique_ptr<Data> ATmega32u4SPI::transfer(const Data &spiData) {
-        std::unique_ptr<Data> tmp = spiData.create();
+        std::vector<uint8_t> tmpData;
         for(auto elem : spiData){
             std::vector<uint8_t> dataVector;
             dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
             dataVector.push_back(1);
             //TODO: maybe put in LibUsbDevice implentions
             //dataVector.push_back((uint8_t) spiData);
-                dataVector.push_back(elem);
+            dataVector.push_back(elem);
 
             auto data = mDevice.get()->sendData(dataVector);
             if(data.empty()) {
@@ -75,7 +75,7 @@ namespace spi {
                 } else {
                     data.erase(std::begin(data));
                     try {
-                        (*tmp).fill(data);
+                        tmpData.insert(std::begin(tmpData), std::begin(data), std::end(data));
                     }
                     catch(std::exception& e){
                        std::cout << e.what() << std::endl;
@@ -83,6 +83,8 @@ namespace spi {
                 }
             }
         }
+        std::unique_ptr<Data> tmp = spiData.create();
+        tmp->fill(tmpData);
         return tmp;
     }
 

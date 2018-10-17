@@ -96,10 +96,12 @@ namespace NS_A4963 {
     template<>
     struct RegisterValues<A4963RegisterNames::DeadTime> {
         static inline constexpr bool isRanged = true;
-        static constexpr auto min = 100ns;
+        static constexpr auto mask = RegisterMask::DeadTimeAddress;
+        static constexpr auto code = RegisterCodes::Config0;
+        static constexpr auto min = 100.0ns;
         static constexpr auto max = 3.15us;
-        static constexpr auto functor = [](auto t1) { return t1 * 50ns; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 50ns); };
+        static constexpr auto functor = [](auto t1) { return t1 * 50.0ns; };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 50.0ns); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
 
