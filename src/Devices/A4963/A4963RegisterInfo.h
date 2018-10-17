@@ -108,6 +108,8 @@ namespace NS_A4963 {
     template<>
     struct RegisterValues<A4963RegisterNames::CurrentSenseThresholdVoltage> {
         static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::CurrentSenseThresholdVoltageAddress;
+        static constexpr auto code = RegisterCodes::Config1;
         static constexpr auto min = 12.5_mV;
         static constexpr auto max = 200.0_mV;
         static constexpr auto functor = [](auto t1) { return (t1 + 1) * 12.5_mV; };
