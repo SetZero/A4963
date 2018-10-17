@@ -33,10 +33,12 @@ namespace NS_A4963 {
 
         template< A4963RegisterNames toGet>
         auto getRegEntry() {
-            if constexpr(RegisterValues<toGet>::isRanged)
+            if constexpr(RegisterValues<toGet>::isRanged) {
                 return getCheckedValue<toGet>(RegisterValues<toGet>::code, RegisterValues<toGet>::mask);
-            else
-                return static_cast<typename RegisterValues<toGet>::values>(readRegister(RegisterValues<toGet>::code) & static_cast<size_type>(RegisterValues<toGet>::mask));
+            } else {
+                return static_cast<typename RegisterValues<toGet>::values>(extractRegisterValue(readRegister(RegisterValues<toGet>::code),
+                        RegisterValues<toGet>::mask));
+            }
         }
 
         template< A4963RegisterNames toSet, typename = std::enable_if_t<RegisterValues<toSet>::isRanged>>

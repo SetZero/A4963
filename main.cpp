@@ -46,8 +46,11 @@ int atmega_main() {
         auto deadTime = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
         device->set<NS_A4963::A4963RegisterNames::DeadTime>(deadTime.getMaxValue());
         device->commit();
-        auto test = device->getRegEntry<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
-        std::cout << "Current Sense Threshold: " << test << std::endl;
+        auto cstv = device->getRegEntry<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
+        std::cout << "Current Sense Threshold: " << cstv << std::endl;
+
+        auto rcn = device->getRegEntry<NS_A4963::A4963RegisterNames::RecirculationMode>();
+        std::cout << "Recirculation Mode: " << static_cast<int>(rcn) << std::endl;
         device->show_register();
 /*
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
