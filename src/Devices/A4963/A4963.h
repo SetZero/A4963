@@ -34,7 +34,7 @@ namespace NS_A4963 {
         template< A4963RegisterNames toGet>
         auto getRegEntry(){
             if constexpr(RegisterValues<toGet>::isRanged)
-                return getCheckedValue<toGet>(RegisterValues<toGet>::code);
+                return getCheckedValue<toGet>(readRegister(RegisterValues<toGet>::code));
             else
                 return readRegister(RegisterValues<toGet>::code);
         }
@@ -108,9 +108,9 @@ namespace NS_A4963 {
         //TODO:
         template<A4963RegisterNames Name>
         auto
-        getCheckedValue(const RegisterCodes& registerName) {
+        getCheckedValue(const size_type& data) {
             auto scale = getRegisterRange<Name>();
-            return scale.getActualValue(readRegister(registerName));
+            return scale.getActualValue(data);
         }
     };
 
