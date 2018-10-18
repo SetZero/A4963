@@ -23,7 +23,7 @@ namespace CustomDataTypes {
         constexpr explicit operator accuracy() const {
             return mPercentage;
         }
-        constexpr Percentage& set(accuracy percent){mPercentage = percent;};
+        constexpr Percentage& set(accuracy percent){mPercentage = percent; return *this;};
         constexpr Percentage& operator+=(const Percentage& other){
             this->mPercentage += other.mPercentage;
             return *this;
@@ -92,6 +92,21 @@ namespace CustomDataTypes {
         Percentage<accuracy> temp{rhs};
         temp*=lhs;
         return temp;
+    }
+
+    template<typename accuracy>
+    constexpr bool operator==(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
+        return std::abs(lhs.getPercent() - rhs.getPercent()) < std::numeric_limits<accuracy>::epsilon();
+    }
+
+    template<typename accuracy>
+    constexpr bool operator<=(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
+        return lhs.getPercent() < rhs.getPercent() || lhs == rhs;
+    }
+
+    template<typename accuracy>
+    constexpr bool operator>=(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
+        return lhs.getPercent() > rhs.getPercent() || lhs == rhs;
     }
     template<typename accuracy>
     constexpr Percentage<accuracy> operator/(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){

@@ -5,7 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <thread>
-#include <src/Percentage.h>
+#include <src/CustomDataTypes/Percentage.h>
 #include "LibUSBDevices.h"
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
