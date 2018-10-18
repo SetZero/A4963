@@ -178,7 +178,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config2;
         static constexpr auto min = 1.0/128;
         static constexpr auto max = 256.0;
-        static constexpr auto functor = [](auto t1) { return std::exp(2, t1 - 7); };
+        static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
@@ -240,7 +240,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config3;
         static constexpr auto min = 1.0/128;
         static constexpr auto max = 256.0;
-        static constexpr auto functor = [](auto t1) { return std::exp(2, t1 - 7); };
+        static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
@@ -291,7 +291,7 @@ namespace NS_A4963 {
         static constexpr auto min = 6.25_perc;
         static constexpr auto max = 100.0_perc;
         static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min)-1); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min).getPercent()-1); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
 
@@ -314,7 +314,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config4;
         static constexpr auto min = 1/128.0;
         static constexpr auto max = 256.0;
-        static constexpr auto functor = [](auto t1) { return std::exp(2, t1 - 7); };
+        static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
@@ -327,7 +327,7 @@ namespace NS_A4963 {
         static constexpr auto min = 6.25_perc;
         static constexpr auto max = 100.0_perc;
         static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min)-1); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min).getPercent()-1); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
 
@@ -350,7 +350,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config5;
         static constexpr auto min = 1/128.0;
         static constexpr auto max = 256.0;
-        static constexpr auto functor = [](auto t1) { return std::exp(2, t1 - 7); };
+        static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
@@ -374,7 +374,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config5;
         static constexpr auto min = 25.5; //TODO: Hz
         static constexpr auto max = 3276.7;
-        static constexpr auto functor = [](auto t1) { return (std::exp(2, 8+t1)-1)*0,1; }; //TODO: 0,1 Hz
+        static constexpr auto functor = [](auto t1) { return (std::exp2(8+t1)-1)*0.1; }; //TODO: 0,1 Hz
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1*10+1)-8 ); }; //TODO: 10 Hz
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
@@ -424,7 +424,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Run;
         static constexpr auto min = 10.0_perc;
         static constexpr auto max = 100.0_perc;
-        static constexpr auto functor = [](auto t1) { return 7.0_perc+Percent(t1*3.0); };
+        static constexpr auto functor = [](auto t1) { return 7.0_perc+CustomDataTypes::Percentage(t1*3.0); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1 -7.0_perc)/3.0); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
@@ -476,7 +476,41 @@ namespace NS_A4963 {
             StartAndRunMotor = 1
         };
     };
+    struct Mask {
+        uint16_t
+        PhaseCLowSideVDS : 1,
+        PhaseCHighSideVDS : 1,
+        PhaseBLowSideVDS : 1,
+        PhaseBHighSideVDS :1,
+        PhaseALowSideVDS : 1,
+        PhaseAHighSideVDS : 1,
+        UndefinedBit1 : 1,
+        VBBUndervoltage : 1,
+        UndefinedBit2 : 1,
+        LossOfBemfSynchronization : 1,
+        OverTemperature : 1,
+        TemperatureWarning : 1;
+    };
 
+    struct Diagnostic {
+        uint16_t
+                PhaseCLowSideVDS : 1,
+                PhaseCHighSideVDS : 1,
+                PhaseBLowSideVDS : 1,
+                PhaseBHighSideVDS :1,
+                PhaseALowSideVDS : 1,
+                PhaseAHighSideVDS : 1,
+                UndefinedBit1 : 1,
+                VBBUndervoltage : 1,
+                UndefinedBit2 : 1,
+                LossOfBemfSynchronization : 1,
+                OverTemperature : 1,
+                HighTemperature : 1,
+                UndefinedBit3 : 1,
+                SerialTransferError : 1,
+                PowerOnReset : 1,
+                DiagnosticRegisterFlag : 1;
+    };
 }
 
 #ifdef debug

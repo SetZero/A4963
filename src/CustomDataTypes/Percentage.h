@@ -17,12 +17,19 @@ namespace CustomDataTypes {
     public:
         constexpr inline Percentage() = default;
         constexpr inline explicit Percentage(accuracy percent) : mPercentage(percent){};
-        constexpr inline Percentage(Percentage&& other) noexcept : Percentage() { this->swap(other);};
+        constexpr Percentage(Percentage&& other) noexcept : Percentage() { this->swap(other);};
         constexpr inline Percentage(const Percentage& other) : mPercentage(other.mPercentage) {};
         constexpr inline accuracy getPercent() const { return mPercentage; };
         constexpr explicit operator accuracy() const {
             return mPercentage;
         }
+
+        template<typename T>
+        constexpr explicit operator T() const {
+            static_assert(std::is_arithmetic<T>(), "cannot cast to a non arithmetic type");
+            return (T)mPercentage;
+        }
+
         constexpr Percentage& set(accuracy percent){mPercentage = percent; return *this;};
         constexpr Percentage& operator+=(const Percentage& other){
             this->mPercentage += other.mPercentage;
@@ -32,7 +39,9 @@ namespace CustomDataTypes {
             this->mPercentage = (this->mPercentage*other.mPercentage)/100;
             return *this;
         }
-        constexpr Percentage& operator*=(const accuracy skalar){
+        template<typename Skalar>
+        constexpr Percentage& operator*=(const Skalar skalar){
+            static_assert(std::is_arithmetic<Skalar>(), "cannot multiplicate from a non arithmetic type");
             if(skalar >= 0)
                 this->mPercentage = mPercentage/100 * skalar;
             else
@@ -49,7 +58,9 @@ namespace CustomDataTypes {
             this->mPercentage = (this->mPercentage/other.mPercentage)/100;
             return *this;
         }
-        constexpr Percentage& operator/=(const accuracy skalar){
+        template<typename Skalar>
+        constexpr Percentage& operator/=(const Skalar skalar){
+            static_assert(std::is_arithmetic<Skalar>(), "cannot divide by a non arithmetic type");
             this->mPercentage = mPercentage/100/skalar;
             return *this;
         }
@@ -57,15 +68,17 @@ namespace CustomDataTypes {
         constexpr Percentage& operator~()=delete;
 
         constexpr inline Percentage& swap(Percentage& other){
-            using namespace std;
-            swap(other.mPercentage, this->mPercentage);
+            std::swap(other.mPercentage, this->mPercentage);
             return *this;
         }
     };
 
     namespace literals {
-        constexpr auto operator"" _perc(long double percent){
+        constexpr auto operator"" _percLd(long double percent){
             return Percentage<long double>(percent);
+        }
+        constexpr auto operator"" _perc(long double percent){
+            return Percentage<double>(percent);
         }
     }
 
@@ -81,14 +94,15 @@ namespace CustomDataTypes {
         temp*=rhs;
         return temp;
     }
-    template<typename accuracy>
-    constexpr Percentage<accuracy> operator*(const Percentage<accuracy>& lhs, const accuracy& rhs){
+    template<typename Skalar, typename accuracy>
+    constexpr Percentage<accuracy> operator*(const Percentage<accuracy>& lhs, const Skalar& rhs){
         Percentage<accuracy> temp{lhs};
         temp*=rhs;
         return temp;
     }
-    template<typename accuracy>
-    constexpr Percentage<accuracy> operator*(const accuracy& lhs, const Percentage<accuracy>& rhs){
+
+    template<typename Skalar, typename accuracy>
+    constexpr Percentage<accuracy> operator*(const Skalar& lhs, const Percentage<accuracy>& rhs){
         Percentage<accuracy> temp{rhs};
         temp*=lhs;
         return temp;
@@ -114,14 +128,14 @@ namespace CustomDataTypes {
         temp/=rhs;
         return temp;
     }
-    template<typename accuracy>
-    constexpr Percentage<accuracy> operator/(const Percentage<accuracy>& lhs, const accuracy rhs){
+    template<typename Skalar, typename accuracy>
+    constexpr Percentage<accuracy> operator/(const Percentage<accuracy>& lhs, const Skalar rhs){
         Percentage<accuracy> temp{lhs};
         temp/=rhs;
         return temp;
     }
-    template<typename accuracy>
-    constexpr Percentage<accuracy> operator/(const accuracy lhs, const Percentage<accuracy>& rhs){
+    template<typename Skalar, typename accuracy>
+    constexpr Percentage<accuracy> operator/(const Skalar lhs, const Percentage<accuracy>& rhs){
         Percentage<accuracy> temp{lhs};
         temp/=(accuracy) rhs;
         return temp;
