@@ -9,159 +9,18 @@
 #include <stdexcept>
 #include <iostream>
 #include "../utils/RatioLookup.h"
+#include "SIUnit.h"
 
-namespace OldCustomDataTypes::Electricity {
+namespace CustomDataTypes::Electricity {
+
     template<typename Rep, typename Period = std::ratio<1> >
-    class Volt;
-
-    template<typename Rep, std::intmax_t Num, std::intmax_t Denom>
-    class Volt<Rep, std::ratio<Num, Denom>> {
+    class Volt : public SIUnit<Volt<Rep, Period>, Rep, Period> {
+        using parent_type = SIUnit<Volt<Rep, Period>, Rep, Period>;
     public:
-        constexpr Volt() = default;
-
-        constexpr Volt(const Volt& v) : internalRepresentation(v.internalRepresentation) {}
-
-        constexpr Volt(Volt&& v) noexcept : internalRepresentation(std::move(v.internalRepresentation)) { }
-
-        constexpr explicit Volt(Rep input) : internalRepresentation{input} { }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr explicit Volt(Volt<oRep, std::ratio<oNum, oDenom>> &volt) : internalRepresentation(convert_value(volt)){ }
-
-        ~Volt() = default;
-
-        constexpr Volt& operator=(Volt other) {
-            std::swap(internalRepresentation, other.internalRepresentation);
-            return *this;
-        }
-
-        constexpr Rep count() const { return internalRepresentation; }
-
-        constexpr Volt operator+() const { return *this; }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr operator Volt<oRep, std::ratio<oNum, oDenom>>() const {
-            static_assert((std::is_floating_point_v<oRep> && std::is_floating_point_v<Rep>) ||
-                                  (std::is_integral_v<oRep> && std::is_integral_v<Rep>));
-            return Volt<oRep, std::ratio<oNum, oDenom>>{(internalRepresentation * Num * oDenom) / (oNum * Denom)};
-        }
-
-        template<typename Number, typename = std::enable_if_t<std::is_arithmetic<Number>::value>>
-        constexpr explicit operator Number() const {
-            if(internalRepresentation < std::numeric_limits<Number>::max()) {
-                return count();
-            } else {
-                throw std::overflow_error("Invalid cast of Volt type!");
-            }
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr bool operator==(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
-            return internalRepresentation == convert_value(rhs);
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr bool operator!=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
-            return !(rhs == *this);
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr bool operator<(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
-            return internalRepresentation < convert_value(rhs);
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr bool operator>(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
-            return rhs < *this;
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr bool operator<=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
-            return !(rhs < *this);
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr bool operator>=(const Volt<oRep, std::ratio<oNum, oDenom>> &rhs) const {
-            return !(*this < rhs);
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        Volt<Rep, std::ratio<Num, Denom>>& operator+=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
-            internalRepresentation += convert_value(rhs);
-            return *this;
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        Volt<Rep, std::ratio<Num, Denom>>& operator-=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
-            internalRepresentation -= convert_value(rhs);
-            return *this;
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        Volt<Rep, std::ratio<Num, Denom>>& operator*=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
-            internalRepresentation *= convert_value(rhs);
-            return *this;
-        }
-
-        template<typename T>
-        Volt<Rep, std::ratio<Num, Denom>>& operator*=(const T& rhs) {
-            internalRepresentation *= rhs;
-            return *this;
-        }
-
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        Volt<Rep, std::ratio<Num, Denom>>& operator/=(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) {
-            internalRepresentation /= convert_value(rhs);
-            return *this;
-        }
-
-        //friend std::ostream &operator<<(std::ostream &os, const Volt<Rep, std::ratio<Num, Denom>> &volt);
-
-    private:
-        template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr Rep convert_value(const Volt<oRep, std::ratio<oNum, oDenom>>& rhs) const {
-            return ((rhs.count() * oNum * Denom) / (Num * oDenom));
-        }
-        template<typename oRep, typename oPeriod>
-        friend class Volt;
-        Rep internalRepresentation;
+        static constexpr std::string_view abr_value = "V";
+        constexpr explicit Volt(Rep input) : parent_type{input} {}
     };
 
-    template<typename Rep, typename Period, typename oRep, typename oPeriod>
-    Volt<Rep, Period> operator+( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
-        lhs += rhs;
-        return lhs;
-    }
-
-    template<typename Rep, typename Period, typename oRep, typename oPeriod>
-    Volt<Rep, Period> operator-( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
-        lhs -= rhs;
-        return lhs;
-    }
-
-    template<typename Rep, typename Period, typename oRep, typename oPeriod>
-    Volt<Rep, Period> operator*( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
-        lhs *= rhs;
-        return lhs;
-    }
-
-    template<typename Rep, typename Period, typename T>
-    Volt<Rep, Period> operator*( Volt<Rep, Period> lhs, const T& rhs ) {
-        lhs *= rhs;
-        return lhs;
-    }
-
-    template<typename Rep, typename Period, typename T>
-    Volt<Rep, Period> operator*( const T& rhs, Volt<Rep, Period> lhs ) {
-        lhs *= rhs;
-        return lhs;
-    }
-
-    template<typename Rep, typename Period, typename oRep, typename oPeriod>
-    Volt<Rep, Period> operator/( Volt<Rep, Period> lhs, const Volt<oRep, oPeriod>& rhs ) {
-        lhs /= rhs;
-        return lhs;
-    }
     using nanovolt  = Volt<std::intmax_t, std::nano>;
     using microvolt = Volt<std::intmax_t, std::micro>;
     using millivolt = Volt<std::intmax_t, std::milli>;
@@ -217,12 +76,6 @@ namespace OldCustomDataTypes::Electricity {
         constexpr Volt<long double, std::mega> operator ""_MV(long double element) {
             return Volt<long double, std::mega>(element);
         }
-    }
-
-    template<typename Rep, std::intmax_t Num, std::intmax_t Denom>
-    std::ostream &operator<<(std::ostream &os, const Volt<Rep, std::ratio<Num, Denom>> &volt) {
-        os << volt.count() << " " << utils::ratio_lookup<std::ratio<Num, Denom>>::abr_value << "V";
-        return os;
     }
 }
 

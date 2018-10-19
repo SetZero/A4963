@@ -8,6 +8,7 @@
 #include <cmath>
 #include "../../utils/scales/UnitScale.h"
 #include "../../CustomDataTypes/SIUnit.h"
+#include "../../CustomDataTypes/Volt.h"
 #include "../../CustomDataTypes/Percentage.h"
 
 #ifdef debug

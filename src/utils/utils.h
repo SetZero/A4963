@@ -266,7 +266,7 @@ namespace utils {
     struct is_volt : std::false_type {};
 
     template<class Rep, class Period>
-    struct is_volt<OldCustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
+    struct is_volt<CustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
 
 
     template <typename T, typename U>
