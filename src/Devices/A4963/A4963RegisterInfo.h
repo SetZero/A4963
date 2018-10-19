@@ -7,7 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include "../../utils/scales/UnitScale.h"
-#include "../../CustomDataTypes/Volt.h"
+#include "../../CustomDataTypes/SIUnit.h"
 
 #ifdef debug
     #pragma GCC diagnostic push

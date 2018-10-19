@@ -4,7 +4,7 @@
 
 #include "catch.hpp"
 #include "../src/utils/scales/UnitScale.h"
-#include "Volt.h"
+#include "SIUnit.h"
 
 using namespace CustomDataTypes::Electricity::literals;
 struct Test {

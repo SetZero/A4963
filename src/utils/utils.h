@@ -266,5 +266,15 @@ namespace utils {
     struct is_volt : std::false_type {};
 
     template<class Rep, class Period>
-    struct is_volt<CustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
+    struct is_volt<OldCustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
+
+
+    template <typename T, typename U>
+    struct is_template_same : std::false_type {};
+
+    template <template<typename, typename> typename T, typename Rep, typename Period, typename oRep, typename oPeriod>
+    struct is_template_same<T<Rep, Period>, T<oRep, oPeriod>> : std::true_type {};
+
+    template <typename T, typename U>
+    inline constexpr bool is_template_same_v = is_template_same<T, U>::value;
 }

@@ -10,7 +10,7 @@
 #include <iostream>
 #include "../utils/RatioLookup.h"
 
-namespace CustomDataTypes::Electricity {
+namespace OldCustomDataTypes::Electricity {
     template<typename Rep, typename Period = std::ratio<1> >
     class Volt;
 
