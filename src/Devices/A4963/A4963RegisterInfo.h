@@ -8,6 +8,7 @@
 #include <cmath>
 #include "../../utils/scales/UnitScale.h"
 #include "../../CustomDataTypes/SIUnit.h"
+#include "../../CustomDataTypes/Percentage.h"
 
 #ifdef debug
     #pragma GCC diagnostic push
@@ -48,6 +49,26 @@ namespace NS_A4963 {
             PositionControllerIntegralGain      = 0b0000111100000000,
             PWMDutyCycleHoldTorque              = 0b0000000011110000,
             HoldTime                            = 0b0000000000001111,
+
+            /* Config4 Addresses */
+            PIControllerProportionalGain        = 0b0000111100000000,
+            PWMDutyCycleTorqueStartup           = 0b0000000011110000,
+            StartSpeed                          = 0b0000000000001111,
+
+            /* Config5 Addresses */
+            PIControllerIntegralGain            = 0b0000111100000000,
+            SpeedOutputSelection                = 0b0000000010000000,
+            MaximumSpeedSetting                 = 0b0000000001110000,
+            PhaseAdvance                        = 0b0000000000001111,
+
+            /* Run register Addresses */
+            MotorControlMode                    = 0b0000110000000000,
+            EnableStopOnFail                    = 0b0000001000000000,
+            DutyCycleControl                    = 0b0000000111110000,
+            RestartControl                      = 0b0000000000001000,
+            Brake                               = 0b0000000000000100,
+            DirectionOfRotation                 = 0b0000000000000010,
+            Run                                 = 0b0000000000000001
         };
         enum class RegisterCodes : uint8_t {
             Config0     = 0b000,
@@ -63,6 +84,7 @@ namespace NS_A4963 {
     }
     using namespace std::literals::chrono_literals;
     using namespace CustomDataTypes::Electricity::literals;
+    using namespace CustomDataTypes::literals;
     using namespace detail;
 
     enum class A4963RegisterNames {
@@ -75,6 +97,26 @@ namespace NS_A4963 {
         PercentFastDecay,
         InvertPWMInput,
         BemfTimeQualifier,
+        OverspeedLimitRatio,
+        DegaussCompensation,
+        FixedPeriod,
+        PositionControllerIntegralGain,
+        PWMDutyCycleHoldTorque,
+        HoldTime,
+        PIControllerProportionalGain,
+        PWMDutyCycleTorqueStartup,
+        StartSpeed,
+        PIControllerIntegralGain,
+        SpeedOutputSelection,
+        MaximumSpeedSetting,
+        PhaseAdvance,
+        MotorControlMode,
+        EnableStopOnFail,
+        DutyCycleControl,
+        RestartControl,
+        Brake,
+        DirectionOfRotation,
+        Run
     };
 
     template<A4963RegisterNames reg>
@@ -112,14 +154,16 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config1;
         static constexpr auto min = 12.5_mV;
         static constexpr auto max = 200.0_mV;
-        static constexpr auto functor = [](auto t1) { return (t1 + 1) * 12.5_mV; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 12.5_mV) - 1; };
+        static constexpr auto functor = [](auto t1) { return (t1 + 1) * min; };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / min) - 1; };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
 
     template<>
     struct RegisterValues<A4963RegisterNames::VDSThreshold> {
         static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::VDSThresholdAddress;
+        static constexpr auto code = RegisterCodes::Config1;
         static constexpr auto min = 0.0_mV;
         static constexpr auto max = 1.55_V;
         static constexpr auto functor = [](auto t1) { return t1 * 50.0_mV; };
@@ -130,9 +174,11 @@ namespace NS_A4963 {
     template<>
     struct RegisterValues<A4963RegisterNames::PositionControllerProportionalGain> {
         static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::PositionControllerProportionalGain;
+        static constexpr auto code = RegisterCodes::Config2;
         static constexpr auto min = 1.0/128;
         static constexpr auto max = 256.0;
-        static constexpr auto functor = [](auto t1) { return std::pow(2, t1 + 7); };
+        static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
@@ -185,6 +231,285 @@ namespace NS_A4963 {
             T12_5Percent = 0,
             T25Percent = 1
         };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::PositionControllerIntegralGain> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::PositionControllerIntegralGain;
+        static constexpr auto code = RegisterCodes::Config3;
+        static constexpr auto min = 1.0/128;
+        static constexpr auto max = 256.0;
+        static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::OverspeedLimitRatio> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::OverspeedLimitRatio;
+        static constexpr auto code = RegisterCodes::Config2;
+
+        enum class values : uint16_t {
+            T100Percent = 0,
+            T125Percent = 1,
+            T150Percent = 2,
+            T200Percent = 3
+        };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::DegaussCompensation> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::DegaussCompensation;
+        static constexpr auto code = RegisterCodes::Config2;
+
+        enum class values : uint16_t {
+            Off = 0,
+            Active = 1
+        };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::FixedPeriod> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::FixedPeriod;
+        static constexpr auto code = RegisterCodes::Config2;
+        static constexpr auto min = 20.0us;
+        static constexpr auto max = 96.6us;
+        static constexpr auto functor = [](auto t1) { return min+(t1*1.6us); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1 -min)/1.6us); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::PWMDutyCycleHoldTorque> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::PWMDutyCycleHoldTorque;
+        static constexpr auto code = RegisterCodes::Config3;
+        static constexpr auto min = 6.25_perc;
+        static constexpr auto max = 100.0_perc;
+        static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min).getPercent()-1); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::HoldTime> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::HoldTime;
+        static constexpr auto code = RegisterCodes::Config3;
+        static constexpr auto min = 0ms;
+        static constexpr auto max = 120ms;
+        static constexpr auto functor = [](auto t1) { return t1*8ms; };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1/8ms); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::PIControllerProportionalGain> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::PIControllerProportionalGain;
+        static constexpr auto code = RegisterCodes::Config4;
+        static constexpr auto min = 1/128.0;
+        static constexpr auto max = 256.0;
+        static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::PWMDutyCycleTorqueStartup> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::PWMDutyCycleTorqueStartup;
+        static constexpr auto code = RegisterCodes::Config4;
+        static constexpr auto min = 6.25_perc;
+        static constexpr auto max = 100.0_perc;
+        static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min).getPercent()-1); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::StartSpeed> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::StartSpeed;
+        static constexpr auto code = RegisterCodes::Config4;
+        static constexpr auto min = 2; //TODO: Hz
+        static constexpr auto max = 32;
+        static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min)-1); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::PIControllerIntegralGain> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::PIControllerIntegralGain;
+        static constexpr auto code = RegisterCodes::Config5;
+        static constexpr auto min = 1/128.0;
+        static constexpr auto max = 256.0;
+        static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::SpeedOutputSelection> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::SpeedOutputSelection;
+        static constexpr auto code = RegisterCodes::Config5;
+
+        enum class values : uint16_t {
+            ElectricalFrequenzy = 0,
+            CommutationFrequenzy = 1
+        };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::MaximumSpeedSetting> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::MaximumSpeedSetting;
+        static constexpr auto code = RegisterCodes::Config5;
+        static constexpr auto min = 25.5; //TODO: Hz
+        static constexpr auto max = 3276.7;
+        static constexpr auto functor = [](auto t1) { return (std::exp2(8+t1)-1)*0.1; }; //TODO: 0,1 Hz
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1*10+1)-8 ); }; //TODO: 10 Hz
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::PhaseAdvance> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::PhaseAdvance;
+        static constexpr auto code = RegisterCodes::Config5;
+        static constexpr auto min = 0; //TODO: Phase
+        static constexpr auto max = 28.125;
+        static constexpr auto functor = [](auto t1) { return t1*1.875; }; //TODO: 1.875 Phase
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 1.875); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::MotorControlMode> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::MotorControlMode;
+        static constexpr auto code = RegisterCodes::Run;
+
+        enum class values : uint16_t {
+            IndirectSpeed = 0b00,
+            DirectSpeed = 0b01,
+            ClosedLoopCurrent = 0b10,
+            ClosedLoopSpeed = 0b11
+        };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::EnableStopOnFail> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::EnableStopOnFail;
+        static constexpr auto code = RegisterCodes::Run;
+
+        enum class values : uint16_t {
+            NoStopOnFail = 0,
+            StopOnFail = 1,
+        };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::DutyCycleControl> {
+        static inline constexpr bool isRanged = true;
+        static constexpr auto mask = RegisterMask::DutyCycleControl;
+        static constexpr auto code = RegisterCodes::Run;
+        static constexpr auto min = 10.0_perc;
+        static constexpr auto max = 100.0_perc;
+        static constexpr auto functor = [](auto t1) { return 7.0_perc+CustomDataTypes::Percentage(t1*3.0); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1 -7.0_perc)/3.0); };
+        static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::RestartControl> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::RestartControl;
+        static constexpr auto code = RegisterCodes::Run;
+
+        enum class values : uint16_t {
+            NoRestart = 0,
+            RestartAfterLossOfSync = 1
+        };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::Brake> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::Brake;
+        static constexpr auto code = RegisterCodes::Run;
+
+        enum class values : uint16_t {
+            BrakeDisabled = 0,
+            EnableIfPWMDisabled = 1
+        };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::DirectionOfRotation> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::DirectionOfRotation;
+        static constexpr auto code = RegisterCodes::Run;
+
+        enum class values : uint16_t {
+            Forward = 0,
+            Reverse = 1
+        };
+    };
+
+    template<>
+    struct RegisterValues<A4963RegisterNames::Run> {
+        static inline constexpr bool isRanged = false;
+        static constexpr auto mask = RegisterMask::Run;
+        static constexpr auto code = RegisterCodes::Run;
+
+        enum class values : uint16_t {
+            DisableOutputCoastMotor = 0,
+            StartAndRunMotor = 1
+        };
+    };
+    struct Mask {
+        uint16_t
+        PhaseCLowSideVDS : 1,
+        PhaseCHighSideVDS : 1,
+        PhaseBLowSideVDS : 1,
+        PhaseBHighSideVDS :1,
+        PhaseALowSideVDS : 1,
+        PhaseAHighSideVDS : 1,
+        UndefinedBit1 : 1,
+        VBBUndervoltage : 1,
+        UndefinedBit2 : 1,
+        LossOfBemfSynchronization : 1,
+        OverTemperature : 1,
+        TemperatureWarning : 1;
+    };
+
+    struct Diagnostic {
+        uint16_t
+                PhaseCLowSideVDS : 1,
+                PhaseCHighSideVDS : 1,
+                PhaseBLowSideVDS : 1,
+                PhaseBHighSideVDS :1,
+                PhaseALowSideVDS : 1,
+                PhaseAHighSideVDS : 1,
+                UndefinedBit1 : 1,
+                VBBUndervoltage : 1,
+                UndefinedBit2 : 1,
+                LossOfBemfSynchronization : 1,
+                OverTemperature : 1,
+                HighTemperature : 1,
+                UndefinedBit3 : 1,
+                SerialTransferError : 1,
+                PowerOnReset : 1,
+                DiagnosticRegisterFlag : 1;
     };
 }
 
