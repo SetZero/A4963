@@ -9,6 +9,7 @@
 #include "LibUSBDevices.h"
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
+#include "inc/json.h"
 #ifdef __linux__
     #include "mcp2210_api.h"
     #include "src/SPI/mcp2210_hal.h"
@@ -48,6 +49,9 @@ int atmega_main() {
         device->commit();
         auto cstv = device->getRegEntry<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
         std::cout << "Current Sense Threshold: " << cstv << std::endl;
+
+        auto mxspd = device->getRegEntry<NS_A4963::A4963RegisterNames::MaximumSpeedSetting>();
+        std::cout << "Maximum Speed Setting: " << mxspd << std::endl;
 
         auto rcn = device->getRegEntry<NS_A4963::A4963RegisterNames::RecirculationMode>();
         std::cout << "Recirculation Mode: " << static_cast<int>(rcn) << std::endl;

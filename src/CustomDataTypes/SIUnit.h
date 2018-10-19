@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include "../utils/RatioLookup.h"
 
-namespace CustomDataTypes::Electricity {
+namespace CustomDataTypes {
     template<typename D, typename Rep, typename Period>
     class SIUnit;
 
@@ -190,15 +190,6 @@ namespace CustomDataTypes::Electricity {
         os << other.count() << " " << utils::ratio_lookup<std::ratio<Num, Denom>>::abr_value << C<Rep, std::ratio<Num, Denom>>::abr_value;
         return os;
     }
-
-    template<typename Rep, typename Period = std::ratio<1> >
-    class Herz : public SIUnit<Herz<Rep, Period>, Rep, Period> {
-        using parent_type = SIUnit<Herz<Rep, Period>, Rep, Period>;
-    public:
-        static constexpr std::string_view abr_value = "Hz";
-        constexpr explicit Herz(Rep input) : parent_type{input} {}
-        constexpr explicit Herz(parent_type &input) {}
-    };
 }
 
 

@@ -1,8 +1,11 @@
 //
 // Created by sebastian on 17.09.18.
-//
+
+#define CATCH_CONFIG_MAIN
+
 #include "catch.hpp"
 #include "SIUnit.h"
+#include "Volt.h"
 
 template<typename Rep, typename Period = std::ratio<1> >
 using Volt = CustomDataTypes::Electricity::Volt<Rep, Period>;
