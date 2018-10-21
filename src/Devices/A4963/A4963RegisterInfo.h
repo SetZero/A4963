@@ -22,6 +22,25 @@ namespace NS_A4963 {
 
     namespace detail {
 
+        enum class Diagnostic : uint16_t {
+            PhaseCLowSideVDS = (1 << 0),
+            PhaseCHighSideVDS = (1 << 1),
+            PhaseBLowSideVDS = (1 << 2),
+            PhaseBHighSideVDS = (1 << 3),
+            PhaseALowSideVDS = (1 << 4),
+            PhaseAHighSideVDS = (1 << 5),
+            UndefinedBit1 = (1 << 6),
+            VBBUndervoltage = (1 << 7),
+            UndefinedBit2 = (1 << 8),
+            LossOfBemfSynchronization = (1 << 9),
+            OverTemperature = (1 << 10),
+            HighTemperature = (1 << 11),
+            UndefinedBit3 = (1 << 12),
+            SerialTransferError = (1 << 13),
+            PowerOnReset = (1 << 14),
+            DiagnosticRegisterFlag = (1 << 15)
+        };
+
         enum class RegisterMask : uint16_t {
             /* Common Addresses */
             RegisterAddress                     = 0b1110000000000000,
@@ -70,8 +89,23 @@ namespace NS_A4963 {
             RestartControl                      = 0b0000000000001000,
             Brake                               = 0b0000000000000100,
             DirectionOfRotation                 = 0b0000000000000010,
-            Run                                 = 0b0000000000000001
+            Run                                 = 0b0000000000000001,
+
+            /* Mask Addresses*/
+            PhaseCLowSideVDS = (1 << 0),
+            PhaseCHighSideVDS = (1 << 1),
+            PhaseBLowSideVDS = (1 << 2),
+            PhaseBHighSideVDS = (1 << 3),
+            PhaseALowSideVDS = (1 << 4),
+            PhaseAHighSideVDS = (1 << 5),
+            UndefinedBit1 = (1 << 6),
+            VBBUndervoltage = (1 << 7),
+            UndefinedBit2 = (1 << 8),
+            LossOfBemfSynchronization = (1 << 9),
+            OverTemperature = (1 << 10),
+            TemperatureWarning = (1 << 11)
         };
+
         enum class RegisterCodes : uint8_t {
             Config0     = 0b000,
             Config1     = 0b001,
@@ -378,7 +412,7 @@ namespace NS_A4963 {
         static constexpr auto min = 25.5_Hz;
         static constexpr auto max = 3.2767_kHz;
         static constexpr auto functor = [](auto t1) { return (std::exp2(8+t1)-1)*0.1; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(static_cast<CustomDataTypes::Frequency::Hertz<long double>>(t1*10+1_Hz).count())-8 ); };
+        static constexpr auto inverse_functor = [](auto t1) noexcept { return static_cast<ssize_t>(std::log2(static_cast<CustomDataTypes::Frequency::Hertz<long double>>(t1*10+1_Hz).count())-8 ); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
     };
 
@@ -478,41 +512,6 @@ namespace NS_A4963 {
             DisableOutputCoastMotor = 0,
             StartAndRunMotor = 1
         };
-    };
-    struct Mask {
-        uint16_t
-        PhaseCLowSideVDS : 1,
-        PhaseCHighSideVDS : 1,
-        PhaseBLowSideVDS : 1,
-        PhaseBHighSideVDS :1,
-        PhaseALowSideVDS : 1,
-        PhaseAHighSideVDS : 1,
-        UndefinedBit1 : 1,
-        VBBUndervoltage : 1,
-        UndefinedBit2 : 1,
-        LossOfBemfSynchronization : 1,
-        OverTemperature : 1,
-        TemperatureWarning : 1;
-    };
-
-    struct Diagnostic {
-        uint16_t
-        PhaseCLowSideVDS : 1,
-        PhaseCHighSideVDS : 1,
-        PhaseBLowSideVDS : 1,
-        PhaseBHighSideVDS :1,
-        PhaseALowSideVDS : 1,
-        PhaseAHighSideVDS : 1,
-        UndefinedBit1 : 1,
-        VBBUndervoltage : 1,
-        UndefinedBit2 : 1,
-        LossOfBemfSynchronization : 1,
-        OverTemperature : 1,
-        HighTemperature : 1,
-        UndefinedBit3 : 1,
-        SerialTransferError : 1,
-        PowerOnReset : 1,
-        DiagnosticRegisterFlag : 1;
     };
 }
 

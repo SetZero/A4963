@@ -105,10 +105,8 @@ namespace spi {
         big_endian
     };
 
-    template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian>
+    template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian, bool optimized = true>
     class SPIData : public Data {
-        //setting this option to true will disable exceptions so becareful
-        static inline constexpr bool optimized = true;
 
         static_assert((numberOfBytes & (numberOfBytes - 1)) == 0, " the number of bytes have to be a pow of 2");
         static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");

@@ -111,4 +111,27 @@ namespace NS_A4963 {
     A4963::size_type A4963::extractRegisterValue(size_t registerValue, RegisterMask registerMask) {
         return static_cast<size_type>(registerValue & static_cast<size_type>(registerMask)) >> utils::getFirstSetBitPos(static_cast<size_type>(registerMask));
     }
+
+    void A4963::configDiagnostic(const RegisterMask & mask,bool activate) {
+        auto val  = createRegisterEntry(static_cast<size_type>(activate),mask);
+        writeRegisterEntry(RegisterCodes::Mask,mask,val);
+    }
+
+
+
+    std::vector<Diagnostic> A4963::readDiagnostic() {
+        std::bitset<16> tmp{readRegister(RegisterCodes::Diagnostic)};
+        std::vector<Diagnostic> ret{};
+        if(tmp.to_ulong() != 0) {
+            for(size_type i = 0; i < 16;i++){
+                if(tmp.test(i))
+                    ret.push_back(static_cast<Diagnostic>(1 << i));
+            }
+        }
+        return ret;
+    }
+
+    bool A4963::testDiagnostic() {
+        return readRegister(RegisterCodes::Diagnostic) != 0;
+    }
 }
