@@ -65,6 +65,11 @@ namespace NS_A4963 {
             bool dirty;
         };
 
+        void configDiagnostic(const RegisterMask& mask,bool active);
+
+        std::vector<Diagnostic> readDiagnostic();
+
+        bool testDiagnostic();
 
         std::map<RegisterCodes, RegisterInfo> mRegisterData;
 
@@ -77,7 +82,6 @@ namespace NS_A4963 {
         void markRegisterForReload(const RegisterCodes &reg);
 
         std::unique_ptr<spi::Data> send16bitRegister(size_type address);
-
 
         void setRegisterEntry(size_type data, const RegisterMask &mask, const RegisterCodes& registerEntry);
 
