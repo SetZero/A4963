@@ -135,6 +135,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return t1 * 400ns; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 400ns); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Blank Time";
 
     };
 
@@ -148,6 +149,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return t1 * 50.0ns; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 50.0ns); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Dead Time";
     };
 
     template<>
@@ -160,6 +162,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return (t1 + 1) * min; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / min) - 1; };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Current Sense Threshold Voltage";
     };
 
     template<>
@@ -172,6 +175,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return t1 * 50.0_mV; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 50.0_mV); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "VDS Threshold";
     };
 
     template<>
@@ -184,6 +188,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Position Controller Proportional Gain";
     };
 
     template<>
@@ -191,6 +196,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::RecirculationModeAddress;
         static constexpr auto code = RegisterCodes::Config0;
+        static constexpr std::string_view name = "Recirculation Mode";
 
         enum class values : uint16_t {
             Auto = 0b00,
@@ -205,6 +211,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::BemfTimeQualifierAddress;
         static constexpr auto code = RegisterCodes::Config1;
+        static constexpr std::string_view name = "Bemf Time Qualifier";
 
         enum class values : uint16_t {
             DebounceTimer = 0,
@@ -217,6 +224,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::InvertPWMInputAddress;
         static constexpr auto code = RegisterCodes::Config1;
+        static constexpr std::string_view name = "Invert PWM Input";
 
         enum class values : uint16_t {
             NormalTrueLogic = 0,
@@ -229,6 +237,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::PercentFastDecayAddress;
         static constexpr auto code = RegisterCodes::Config1;
+        static constexpr std::string_view name = "Percent Fast Decay";
 
         enum class values : uint16_t {
             T12_5Percent = 0,
@@ -246,6 +255,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Position Controller Integral Gain";
     };
 
     template<>
@@ -253,6 +263,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::OverspeedLimitRatio;
         static constexpr auto code = RegisterCodes::Config2;
+        static constexpr std::string_view name = "Overspeed Limit Ratio";
 
         enum class values : uint16_t {
             T100Percent = 0,
@@ -267,6 +278,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::DegaussCompensation;
         static constexpr auto code = RegisterCodes::Config2;
+        static constexpr std::string_view name = "Degauss Compensation";
 
         enum class values : uint16_t {
             Off = 0,
@@ -284,6 +296,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return min+(t1*1.6us); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1 -min)/1.6us); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Fixed Period";
     };
 
     template<>
@@ -296,6 +309,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min).getPercent()-1); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "PWM Duty Cycle Hold Torque";
     };
 
     template<>
@@ -308,6 +322,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return t1*8ms; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1/8ms); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Hold Time";
     };
 
     template<>
@@ -320,6 +335,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "PI Controller Proportional Gain";
     };
 
     template<>
@@ -332,6 +348,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min).getPercent()-1); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "PWM Duty Cycle Torque Startup";
     };
 
     template<>
@@ -344,6 +361,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return CustomDataTypes::Frequency::hertz(t1+1) * min; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min)-1_Hz); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Start Speed";
     };
 
     template<>
@@ -356,6 +374,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return std::exp2(t1 - 7); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(t1) + 7); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "PI Controller Integral Gain";
     };
 
     template<>
@@ -363,6 +382,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::SpeedOutputSelection;
         static constexpr auto code = RegisterCodes::Config5;
+        static constexpr std::string_view name = "Speed Output Selection";
 
         enum class values : uint16_t {
             ElectricalFrequenzy = 0,
@@ -380,6 +400,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return (std::exp2(8+t1)-1)*0.1; };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(std::log2(static_cast<CustomDataTypes::Frequency::Hertz<long double>>(t1*10+1_Hz).count())-8 ); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Maximum Speed Setting";
     };
 
     template<>
@@ -392,6 +413,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return t1*1.875; }; //TODO: 1.875 Phase
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 1.875); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Phase Advance";
     };
 
     template<>
@@ -399,6 +421,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::MotorControlMode;
         static constexpr auto code = RegisterCodes::Run;
+        static constexpr std::string_view name = "Motor Control Mode";
 
         enum class values : uint16_t {
             IndirectSpeed = 0b00,
@@ -413,6 +436,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::EnableStopOnFail;
         static constexpr auto code = RegisterCodes::Run;
+        static constexpr std::string_view name = "Enable Stop On Fail";
 
         enum class values : uint16_t {
             NoStopOnFail = 0,
@@ -430,6 +454,7 @@ namespace NS_A4963 {
         static constexpr auto functor = [](auto t1) { return 7.0_perc+CustomDataTypes::Percentage(t1*3.0); };
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1 -7.0_perc)/3.0); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
+        static constexpr std::string_view name = "Duty Cycle Control";
     };
 
     template<>
@@ -437,6 +462,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::RestartControl;
         static constexpr auto code = RegisterCodes::Run;
+        static constexpr std::string_view name = "Restart Control";
 
         enum class values : uint16_t {
             NoRestart = 0,
@@ -449,6 +475,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::Brake;
         static constexpr auto code = RegisterCodes::Run;
+        static constexpr std::string_view name = "Brake";
 
         enum class values : uint16_t {
             BrakeDisabled = 0,
@@ -461,6 +488,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::DirectionOfRotation;
         static constexpr auto code = RegisterCodes::Run;
+        static constexpr std::string_view name = "Direction Of Rotation";
 
         enum class values : uint16_t {
             Forward = 0,
@@ -473,6 +501,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = false;
         static constexpr auto mask = RegisterMask::Run;
         static constexpr auto code = RegisterCodes::Run;
+        static constexpr std::string_view name = "Run";
 
         enum class values : uint16_t {
             DisableOutputCoastMotor = 0,
