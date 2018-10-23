@@ -18,6 +18,7 @@
 #endif
 #include "src/25LC256.h"
 #include "src/Devices/A4963/A4963.h"
+#include "src/Devices/A4963/DeserializeA4963.h"
 #include "src/utils/scales/UnitScale.h"
 
 
