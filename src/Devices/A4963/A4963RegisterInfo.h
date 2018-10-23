@@ -442,7 +442,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = true;
         static constexpr auto mask = RegisterMask::PhaseAdvance;
         static constexpr auto code = RegisterCodes::Config5;
-        static constexpr auto min = 0; //TODO: Phase
+        static constexpr auto min = 0.0;
         static constexpr auto max = 28.125;
         static constexpr auto functor = [](auto t1) { return t1*1.875; }; //TODO: 1.875 Phase
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 1.875); };

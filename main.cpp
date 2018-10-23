@@ -10,6 +10,8 @@
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
 #include "inc/json.h"
+#include <fstream>
+#include <iomanip>
 #ifdef __linux__
     #include "mcp2210_api.h"
     #include "src/SPI/mcp2210_hal.h"
@@ -47,6 +49,7 @@ int atmega_main() {
         auto deadTime = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
         device->set<NS_A4963::A4963RegisterNames::DeadTime>(deadTime.getMaxValue());
         device->commit();
+        setRuntime(*device,A4963RegisterNames::BlankTime,4711);
         auto cstv = device->getRegEntry<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
         std::cout << "Current Sense Threshold: " << cstv << std::endl;
 
@@ -78,6 +81,13 @@ int atmega_main() {
 
 int mcp_main(){
     using namespace CustomDataTypes::literals;
+
+    using namespace nlohmann;
+    json j{"VDS Threshold","Mask: ",0b0000000000011111,"Register: ",0b001, "value: ", 42};
+    json i; i.push_back(j);i.push_back(j);i.push_back(j);i.push_back(j);i.push_back(j);
+    std::ofstream of = std::ofstream("test.json");
+    of << std::setw(2) << i << std::endl;
+    of.close();
     std::cout << "this is sparta!" << std::endl;
     std::unique_ptr<MCP2210> ptr;
     using namespace spi::literals;

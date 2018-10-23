@@ -128,4 +128,154 @@ namespace NS_A4963 {
         static_assert(!RegisterValues<toSet>::isRanged, "here is no checked type allowed");
         using values = typename RegisterValues<toSet>::values;
     };
+
+    void setRuntime(A4963& device, A4963RegisterNames toSet, uint16_t data){
+        switch(toSet){
+            case A4963RegisterNames::PhaseAdvance: {
+                auto d = decltype(RegisterValues<A4963RegisterNames::PhaseAdvance>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::PhaseAdvance>(d);
+                break;
+            }
+            case A4963RegisterNames::BlankTime:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::BlankTime>::min){data};
+                device.set<A4963RegisterNames::BlankTime>(d);
+                break;
+            };
+            case A4963RegisterNames::DeadTime:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::DeadTime>::min){data};
+                device.set<A4963RegisterNames::DeadTime>(d);
+                break;
+            };
+            case A4963RegisterNames::CurrentSenseThresholdVoltage:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::CurrentSenseThresholdVoltage>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::CurrentSenseThresholdVoltage>(d);
+                break;
+            };
+            case A4963RegisterNames::VDSThreshold:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::VDSThreshold>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::VDSThreshold>(d);
+                break;
+            };
+            case A4963RegisterNames::PositionControllerProportionalGain:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::PositionControllerProportionalGain>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::PositionControllerProportionalGain>(d);
+                break;
+            };
+            case A4963RegisterNames::RecirculationMode:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::RecirculationMode>::values>(data);
+                device.set<A4963RegisterNames::RecirculationMode>(d);
+                break;
+            };
+            case A4963RegisterNames::PercentFastDecay:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::PercentFastDecay>::values>(data);
+                device.set<A4963RegisterNames::PercentFastDecay>(d);
+                break;
+            };
+            case A4963RegisterNames::InvertPWMInput:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::InvertPWMInput>::values>(data);
+                device.set<A4963RegisterNames::InvertPWMInput>(d);
+                break;
+            };
+            case A4963RegisterNames::BemfTimeQualifier:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::BemfTimeQualifier>::values>(data);
+                device.set<A4963RegisterNames::BemfTimeQualifier>(d);
+                break;
+            };
+            case A4963RegisterNames::OverspeedLimitRatio:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::OverspeedLimitRatio>::values>(data);
+                device.set<A4963RegisterNames::OverspeedLimitRatio>(d);
+                break;
+            };
+            case A4963RegisterNames::DegaussCompensation:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::DegaussCompensation>::values>(data);
+                device.set<A4963RegisterNames::DegaussCompensation>(d);
+                break;
+            };
+            case A4963RegisterNames::FixedPeriod:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::FixedPeriod>::min){data};
+                device.set<A4963RegisterNames::FixedPeriod>(d);
+                break;
+            };
+            case A4963RegisterNames::PositionControllerIntegralGain:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::PositionControllerIntegralGain>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::PositionControllerIntegralGain>(d);
+                break;
+            };
+            case A4963RegisterNames::PWMDutyCycleHoldTorque:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::PWMDutyCycleHoldTorque>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::PWMDutyCycleHoldTorque>(d);
+                break;
+            };
+            case A4963RegisterNames::HoldTime:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::HoldTime>::min){data};
+                device.set<A4963RegisterNames::HoldTime>(d);
+                break;
+            };
+            case A4963RegisterNames::PIControllerProportionalGain:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::PIControllerProportionalGain>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::PIControllerProportionalGain>(d);
+                break;
+            };
+            case A4963RegisterNames::PWMDutyCycleTorqueStartup:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::PWMDutyCycleTorqueStartup>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::PWMDutyCycleTorqueStartup>(d);
+                break;
+            };
+            case A4963RegisterNames::StartSpeed:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::StartSpeed>::min){data};
+                device.set<A4963RegisterNames::StartSpeed>(d);
+                break;
+            };
+            case A4963RegisterNames::PIControllerIntegralGain:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::PIControllerIntegralGain>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::PIControllerIntegralGain>(d);
+                break;
+            };
+            case A4963RegisterNames::SpeedOutputSelection:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::SpeedOutputSelection>::values>(data);
+                device.set<A4963RegisterNames::SpeedOutputSelection>(d);
+                break;
+            };
+            case A4963RegisterNames::MaximumSpeedSetting:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::MaximumSpeedSetting>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::MaximumSpeedSetting>(d);
+                break;
+            };
+            case A4963RegisterNames::MotorControlMode:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::MotorControlMode>::values>(data);
+                device.set<A4963RegisterNames::MotorControlMode>(d);
+                break;
+            };
+            case A4963RegisterNames::EnableStopOnFail:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::EnableStopOnFail>::values>(data);
+                device.set<A4963RegisterNames::EnableStopOnFail>(d);
+                break;
+            };
+            case A4963RegisterNames::DutyCycleControl:{
+                auto d = decltype(RegisterValues<A4963RegisterNames::DutyCycleControl>::min){static_cast<double>(data)};
+                device.set<A4963RegisterNames::DutyCycleControl>(d);
+                break;
+            };
+            case A4963RegisterNames::RestartControl:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::RestartControl>::values>(data);
+                device.set<A4963RegisterNames::RestartControl>(d);
+                break;
+            };
+            case A4963RegisterNames::Brake:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::Brake>::values>(data);
+                device.set<A4963RegisterNames::Brake>(d);
+                break;
+            };
+            case A4963RegisterNames::DirectionOfRotation:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::DirectionOfRotation>::values>(data);
+                device.set<A4963RegisterNames::DirectionOfRotation>(d);
+                break;
+            };
+            case A4963RegisterNames::Run:{
+                auto d = static_cast<RegisterValues<A4963RegisterNames::Run>::values>(data);
+                device.set<A4963RegisterNames::Run>(d);
+                break;
+            };
+        }
+    }
 }
