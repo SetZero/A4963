@@ -49,7 +49,13 @@ namespace NS_A4963 {
                 const auto &registerName = el.key();
                 auto registerValue =  el.value().get<std::string>();
 
-                auto val = RegisterStrings::get(registerName);
+                A4963RegisterNames val;
+                try {
+                    val = RegisterStrings::get(registerName);
+                } catch (std::exception& e) {
+                    std::cerr << "Unknown Register Value: " << registerName << std::endl;
+                    continue;
+                }
 
                 std::smatch unit_match;
                 long double unit_val = 0.0;
@@ -63,13 +69,19 @@ namespace NS_A4963 {
                         std::cout << i << ": " << unit_match[i] << '\n';
                         switch (i) {
                             case 1:
-                                unit_val = std::atof(unit_match[i].str().data());
+                                if(unit_match[i].length() > 0) {
+                                    unit_val = std::atof(unit_match[i].str().data());
+                                }
                                 break;
                             case 2:
-                                prefix = unit_match[i].str().at(0);
+                                if(unit_match[i].length() > 0) {
+                                    prefix = unit_match[i].str().at(0);
+                                }
                                 break;
                             case 3:
-                                unit = unit_match[i].str();
+                                if(unit_match[i].length() > 0) {
+                                    unit = unit_match[i].str();
+                                }
                                 break;
                         }
                     }
