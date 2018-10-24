@@ -6,14 +6,17 @@
 
 #include <chrono>
 #include <variant>
+#include <fstream>
 #include "../../CustomDataTypes/SIUnit.h"
 #include "../../CustomDataTypes/Volt.h"
 #include "../../CustomDataTypes/Hertz.h"
 #include "../../CustomDataTypes/Percentage.h"
+#include "../../../inc/json.h"
 #include "A4963.h"
 #include "A4963RegisterInfo.h"
 
 namespace NS_A4963 {
+    using nlohmann::json;
 
     std::pair<std::intmax_t, std::intmax_t> getRatio(const char prefix) {
         switch(prefix) {
@@ -89,7 +92,7 @@ namespace NS_A4963 {
                 device.set<N>(d);
             }
             catch(std::exception& e){
-                std::cout << std::endl << utils::periodic_info<T>::period::num << " " << utils::periodic_info<T>::period::den;
+                std::cerr << "Invalid Unit \"" << prefix << unit << "\" in register \"" << RegisterValues<N>::name << "\"" << std::endl;
             }
 
         }
@@ -100,24 +103,24 @@ namespace NS_A4963 {
     struct ifStruct<false> {
         template<typename T, A4963RegisterNames N>
         static void setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
+            if(prefix != '\0') {
+                std::cerr << "This register (" << RegisterValues<N>::name << ") doesn't expect a prefix. This might be an error!" << std::endl;
+            }
             if constexpr(!std::is_arithmetic_v<T>) {
+                if(!unit.empty()) {
+                    std::cerr << "This register (" << RegisterValues<N>::name << ") doesn't expect an unit. This might be an error!" << std::endl;
+                }
                 auto d = T{static_cast<typename T::value_type>(data)};
                 device.set<N>(d);
             }
             else {
                 device.set<N>(static_cast<T>(data));
             }
-
         }
     };
 
-    template<typename T,A4963RegisterNames N, typename = std::enable_if_t<utils::is_periodic<T>::value>>
-    void setIfNotPeriodic(A4963& device, double data){
-    }
-
-
     template<A4963RegisterNames N>
-    void setRuntimeTest(A4963& device, A4963RegisterNames toSet,const char prefix, const std::string& unit, double data){
+    void setRuntimeTest(A4963& device, A4963RegisterNames toSet, const char prefix, const std::string& unit, double data){
         if (toSet == N){
             if constexpr(RegisterValues<N>::isRanged) {
                 using type = std::remove_const_t<decltype(RegisterValues<N>::min)>;
@@ -132,8 +135,6 @@ namespace NS_A4963 {
         }
     }
 
-
-
     template<>
     void setRuntimeTest<A4963RegisterNames::Run>(A4963& device, A4963RegisterNames toSet,const char prefix, const std::string& unit, double data){
         auto d = static_cast<typename RegisterValues<A4963RegisterNames::Run>::values>(data);
@@ -145,6 +146,27 @@ namespace NS_A4963 {
         setRuntimeTest<static_cast<A4963RegisterNames>(1)>(device,toSet,prefix, unit, data);
     }
 
+
+    class RegisterStrings {
+    private:
+        template<A4963RegisterNames reg>
+        static constexpr std::pair<std::string_view, A4963RegisterNames> reg_pair() {
+            return std::pair<std::string_view, A4963RegisterNames>{RegisterValues<reg>::name, reg};
+        }
+
+        static const std::map<std::string_view, A4963RegisterNames> values;
+    public:
+        static A4963RegisterNames get(const std::string_view& string) {
+            return values.at(string);
+        }
+    };
+
+    class JsonSetter {
+    private:
+        json j;
+    public:
+        JsonSetter(const std::string& str);
+    };
 
     void setRuntime(A4963& device, A4963RegisterNames toSet, uint16_t data){
         switch(toSet){
