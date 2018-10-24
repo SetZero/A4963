@@ -301,4 +301,17 @@ namespace utils {
 
     template <typename T, typename U>
     inline constexpr bool is_template_same_v = is_template_same<T, U>::value;
+
+	template<typename T>
+	struct periodic_printable;
+
+	template<template<typename , typename> typename T , typename Rep, intmax_t Nom, intmax_t Denom>
+	struct periodic_printable<T<Rep, std::ratio<Nom,Denom>>> {
+		static constexpr std::string_view name = T<Rep, std::ratio<Nom,Denom>>::abr_value;
+	};
+
+	template<typename Rep, intmax_t Nom, intmax_t Denom>
+	struct periodic_printable<std::chrono::duration<Rep, std::ratio<Nom,Denom>>> {
+		static constexpr std::string_view name = "s";
+	};
 }

@@ -29,7 +29,7 @@ void clearInput();
 enum Chips {
     ATMEGA, MCP
 };
-static constexpr Chips used_chip = Chips::MCP;
+static constexpr Chips used_chip = Chips::ATMEGA;
 
 int atmega_main() {
     using namespace spi::literals;
@@ -43,7 +43,8 @@ int atmega_main() {
         auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
         auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
-        constexpr auto recirculationMode = A4963RegisterNames::RecirculationMode;
+        std::cout << "INDIGO!" << std::endl;
+        /*constexpr auto recirculationMode = A4963RegisterNames::RecirculationMode;
         device->set<recirculationMode>(possibleValues<recirculationMode>::values::Off);
         auto blankTime = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
         device->set<NS_A4963::A4963RegisterNames::BlankTime>(blankTime.getMaxValue());
@@ -59,7 +60,8 @@ int atmega_main() {
         std::cout << "Maximum Speed Setting: " << mxspd << std::endl;
 
         auto rcn = device->getRegEntry<NS_A4963::A4963RegisterNames::RecirculationMode>();
-        std::cout << "Recirculation Mode: " << static_cast<int>(rcn) << std::endl;
+        std::cout << "Recirculation Mode: " << static_cast<int>(rcn) << std::endl;*/
+        JsonSetter s{*device, "data.json"};
         device->show_register();
 /*
         auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
@@ -89,12 +91,7 @@ int mcp_main(){
     using namespace nlohmann;
     using namespace NS_A4963;
     auto device = std::make_shared<NS_A4963::A4963>(ptr);
-    //int z;
-    //std::cin >> z;
-    //setRuntime(*device,static_cast<A4963RegisterNames>(z),'n',"s",100);
     JsonSetter s{*device, "data.json"};
-    //static_assert(utils::is_periodic<std::remove_const_t<const std::chrono::duration<long double, std::ratio<1, 1000000000> >>>::value,"not periodic");
-    std::cout << "this is sparta!" << std::endl;
 
     enum class TO : uint8_t {
         f = 1,
