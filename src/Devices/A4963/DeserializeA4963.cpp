@@ -60,13 +60,10 @@ namespace NS_A4963 {
                 std::smatch unit_match;
                 long double unit_val = 0.0;
                 char prefix = '\0';
-                std::string unit = "";
+                std::string unit;
 
                 if(std::regex_search(registerValue, unit_match, unit_regex)) {
-                    //std::cout << "matches for '" << registerValue << "'\n";
-                    //std::cout << "Prefix: '" << unit_match.prefix() << "'\n";
                     for (size_t i = 0; i < unit_match.size(); ++i) {
-                        //std::cout << i << ": " << unit_match[i] << '\n';
                         switch (i) {
                             case 1:
                                 if(unit_match[i].length() > 0) {
@@ -82,6 +79,8 @@ namespace NS_A4963 {
                                 if(unit_match[i].length() > 0) {
                                     unit = unit_match[i].str();
                                 }
+                                break;
+                            default:
                                 break;
                         }
                     }
