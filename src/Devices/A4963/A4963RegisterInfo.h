@@ -1,3 +1,4 @@
+#pragma GCC diagnostic push
 //
 // Created by sebastian on 23.09.18.
 //
@@ -11,6 +12,8 @@
 #include "../../CustomDataTypes/Volt.h"
 #include "../../CustomDataTypes/Hertz.h"
 #include "../../CustomDataTypes/Percentage.h"
+#include <map>
+#include <string_view>
 
 #ifdef debug
     #pragma GCC diagnostic push
@@ -90,7 +93,9 @@ namespace NS_A4963 {
             Brake                               = 0b0000000000000100,
             DirectionOfRotation                 = 0b0000000000000010,
             Run                                 = 0b0000000000000001,
+        };
 
+        enum class Masks : uint16_t {
             /* Mask Addresses*/
             PhaseCLowSideVDS = (1 << 0),
             PhaseCHighSideVDS = (1 << 1),
@@ -238,6 +243,13 @@ namespace NS_A4963 {
             Low = 0b10,
             Off = 0b11
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Auto", values::Auto},
+                {"High", values::High},
+                {"Low", values::Low},
+                {"Off", values::Off}
+        };
     };
 
     template<>
@@ -250,6 +262,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             DebounceTimer = 0,
             WindowTimer = 1
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Debounce Timer", values::DebounceTimer},
+                {"Window Timer", values::WindowTimer}
         };
     };
 
@@ -264,6 +281,11 @@ namespace NS_A4963 {
             NormalTrueLogic = 0,
             InverterLogic = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Normal True Logic", values::NormalTrueLogic},
+                {"Inverter Logic", values::InverterLogic}
+        };
     };
 
     template<>
@@ -276,6 +298,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             T12_5Percent = 0,
             T25Percent = 1
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"12,5 Percent", values::T12_5Percent},
+                {"25 Percent", values::T25Percent}
         };
     };
 
@@ -305,6 +332,13 @@ namespace NS_A4963 {
             T150Percent = 2,
             T200Percent = 3
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"100 Percent", values::T100Percent},
+                {"125 Percent", values::T125Percent},
+                {"150 Percent", values::T150Percent},
+                {"200 Percent", values::T200Percent}
+        };
     };
 
     template<>
@@ -317,6 +351,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             Off = 0,
             Active = 1
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Off", values::Off},
+                {"Active", values::Active}
         };
     };
 
@@ -422,6 +461,11 @@ namespace NS_A4963 {
             ElectricalFrequenzy = 0,
             CommutationFrequenzy = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Electrical Frequenzy", values::ElectricalFrequenzy},
+                {"Commutation Frequenzy", values::CommutationFrequenzy}
+        };
     };
 
     template<>
@@ -463,6 +507,13 @@ namespace NS_A4963 {
             ClosedLoopCurrent = 0b10,
             ClosedLoopSpeed = 0b11
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Indirect Speed", values::IndirectSpeed},
+                {"Direct Speed", values::DirectSpeed},
+                {"Closed Loop Current", values::ClosedLoopCurrent},
+                {"Closed Loop Speed", values::ClosedLoopSpeed}
+        };
     };
 
     template<>
@@ -475,6 +526,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             NoStopOnFail = 0,
             StopOnFail = 1,
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"No Stop On Fail", values::NoStopOnFail},
+                {"Stop On Fail", values::StopOnFail}
         };
     };
 
@@ -502,6 +558,11 @@ namespace NS_A4963 {
             NoRestart = 0,
             RestartAfterLossOfSync = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"No Restart", values::NoRestart},
+                {"Restart After Loss Of Sync", values::RestartAfterLossOfSync}
+        };
     };
 
     template<>
@@ -514,6 +575,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             BrakeDisabled = 0,
             EnableIfPWMDisabled = 1
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Brake Disabled", values::BrakeDisabled},
+                {"Enable If PWM Disabled", values::EnableIfPWMDisabled}
         };
     };
 
@@ -528,6 +594,12 @@ namespace NS_A4963 {
             Forward = 0,
             Reverse = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Forward", values::Forward},
+                {"Reverse", values::Reverse}
+        };
+
     };
 
     template<>
@@ -541,9 +613,15 @@ namespace NS_A4963 {
             DisableOutputCoastMotor = 0,
             StartAndRunMotor = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+            {"Disable Output Coast Motor", values::DisableOutputCoastMotor},
+            {"Start And Run Motor", values::StartAndRunMotor}
+        };
     };
 }
 
 #ifdef debug
     #pragma GCC diagnostic pop
 #endif
+#pragma GCC diagnostic pop

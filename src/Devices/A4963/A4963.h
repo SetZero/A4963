@@ -121,6 +121,10 @@ namespace NS_A4963 {
             auto scale = getRegisterRange<Name>();
             return scale.getActualValue(value);
         }
+
+        void setMask(Masks mask, bool on){
+            writeRegisterEntry(RegisterCodes::Mask, static_cast<RegisterMask>(mask), on);
+        }
     };
 
     template< A4963RegisterNames toSet>

@@ -50,8 +50,8 @@ int atmega_main() {
         auto deadTime = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
         device->set<NS_A4963::A4963RegisterNames::DeadTime>(deadTime.getMaxValue());
         device->commit();
-        setRuntime(*device,A4963RegisterNames::BlankTime,4711);
-        //setRuntimeTest<void>(*device,A4963RegisterNames::PhaseAdvance,42);
+        //setRuntime(*device,A4963RegisterNames::BlankTime,4711);
+        setRuntime(*device,A4963RegisterNames::PhaseAdvance,'\0',"",42);
         auto cstv = device->getRegEntry<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
         std::cout << "Current Sense Threshold: " << cstv << std::endl;
 
@@ -89,12 +89,17 @@ int mcp_main(){
     using namespace nlohmann;
     using namespace NS_A4963;
     auto device = std::make_shared<NS_A4963::A4963>(ptr);
-    /*int z;
+    int z;
     std::cin >> z;
-    setRuntimeTest(*device,static_cast<A4963RegisterNames>(z),'n',"s",100);*/
+    setRuntime(*device,static_cast<A4963RegisterNames>(z),'n',"s",100);
     JsonSetter s{"data.json"};
     //static_assert(utils::is_periodic<std::remove_const_t<const std::chrono::duration<long double, std::ratio<1, 1000000000> >>>::value,"not periodic");
     std::cout << "this is sparta!" << std::endl;
+
+    enum class TO : uint8_t {
+        f = 1,
+        ff = 2
+    };
 
     using namespace spi::literals;
 
