@@ -84,19 +84,20 @@ namespace NS_A4963 {
     }
 
     template<typename T, A4963RegisterNames N>
-    static void setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
+    static bool setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
         using Rep = typename utils::periodic_info<T>::rep;
         using Period = typename utils::periodic_info<T>::period;
         try {
             auto d = T{std::get<T>(
                     getType<Rep, typename utils::periodic_info<T>::period>(prefix, unit, static_cast<Rep>(data)))};
             device.set<N>(d);
+            return true;
         }
         catch(std::exception& e){
             std::cerr << "Invalid Unit \"" << prefix << unit << "\" in register \"" << RegisterValues<N>::name <<
                         "\", did you mean \"" << utils::ratio_lookup<Period>::abr_value << utils::periodic_printable<T>::name << "\" ?" << std::endl;
+            return false;
         }
-
     }
 
     template<typename T, A4963RegisterNames N>
@@ -117,7 +118,9 @@ namespace NS_A4963 {
             if constexpr(RegisterValues<N>::isRanged) {
                 using type = std::remove_const_t<decltype(RegisterValues<N>::min)>;
                 if constexpr(utils::is_periodic<type>::value) {
-                    setIfPeriodic<type, N>(device, data, prefix, unit);
+                    if(setIfPeriodic<type, N>(device, data, prefix, unit)) {
+                        std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit << std::endl;
+                    }
                 } else {
                     if(prefix != '\0') {
                         std::cerr << "This register (" << RegisterValues<N>::name << ") doesn't expect a prefix. This might be an error!" << std::endl;
@@ -126,12 +129,12 @@ namespace NS_A4963 {
                             std::cerr << "This register (" << RegisterValues<N>::name << ") doesn't expect an unit. This might be an error!" << std::endl;
                     }
                     setIfNotPeriodic<type, N>(device, data);
+                    std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit << std::endl;
                 }
             } else {
                 auto d = static_cast<typename RegisterValues<N>::values>(data);
                 device.set<N>(d);
             }
-            std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit << std::endl;
         } else {
             setRuntime<static_cast<A4963RegisterNames>(static_cast<uint8_t>(N) + 1)>(device, toSet, prefix, unit, data);
         }
