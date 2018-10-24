@@ -32,8 +32,8 @@ public:
         mode3 = 3  //clock polarity = 1 clock phase = 1
     };
     struct spiSettings  {
-        spiMode mode                = spiMode::mode0;
-        uint16_t speed			    = 20000,  //bits per second
+        spiMode mode        = spiMode::mode0;
+        uint16_t speed		= 20000,  //bits per second
         actcsval		    = 0xFFEF, //active chip select value
         idlecsval		    = 0xFFFF, //idle chip select value
         gpcsmask		    = 0x0010, //general purpose chip select?

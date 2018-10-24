@@ -55,9 +55,9 @@ namespace NS_A4963 {
     }
 
     template<typename Rep, typename Period = std::ratio<1, 1>>
-    std::variant<CustomDataTypes::Frequency::Hertz<Rep, Period>, CustomDataTypes::Electricity::Volt<Rep, Period>, std::chrono::duration<Rep, Period>> getType(const char prefix, const std::string& unit, Rep& value) {
+    std::variant<CustomDataTypes::Frequency::Hertz<Rep, Period>, CustomDataTypes::Electricity::Volt<Rep, Period>, std::chrono::duration<Rep, Period>> getType(const char prefix, const std::string& unit, Rep value) {
         auto prefixRatio = getRatio(prefix);
-        auto newValue = (value * prefixRatio.first * Period::num) / (prefixRatio.second * Period::den);
+        auto newValue = (value * prefixRatio.first * Period::den) / (prefixRatio.second * Period::num);
         if(unit == "v") {
             return CustomDataTypes::Electricity::Volt<Rep, Period>{newValue};
         } else if(unit == "hz") {
@@ -70,13 +70,81 @@ namespace NS_A4963 {
     }
 
     template<typename Rep>
-    std::variant<Rep, CustomDataTypes::Percentage<Rep>> getType(const std::string& unit, Rep& value) {
+    std::variant<Rep, CustomDataTypes::Percentage<Rep>> getType(const std::string& unit, Rep value) {
         if(unit == "%") {
             return CustomDataTypes::Percentage{value};
         } else {
             return value;
         }
     }
+
+    template<bool b>
+    struct ifStruct {
+        template<typename T, A4963RegisterNames N>
+        static void setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
+            using Rep = typename utils::periodic_info<T>::rep;
+            try {
+                auto d = T{std::get<T>(
+                        getType<Rep, typename utils::periodic_info<T>::period>(prefix, unit, static_cast<Rep>(data)))};
+                device.set<N>(d);
+            }
+            catch(std::exception& e){
+                std::cout << std::endl << utils::periodic_info<T>::period::num << " " << utils::periodic_info<T>::period::den;
+            }
+
+        }
+
+    };
+
+    template<>
+    struct ifStruct<false> {
+        template<typename T, A4963RegisterNames N>
+        static void setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
+            if constexpr(!std::is_arithmetic_v<T>) {
+                auto d = T{static_cast<typename T::value_type>(data)};
+                device.set<N>(d);
+            }
+            else {
+                device.set<N>(static_cast<T>(data));
+            }
+
+        }
+    };
+
+    template<typename T,A4963RegisterNames N, typename = std::enable_if_t<utils::is_periodic<T>::value>>
+    void setIfNotPeriodic(A4963& device, double data){
+    }
+
+
+    template<A4963RegisterNames N>
+    void setRuntimeTest(A4963& device, A4963RegisterNames toSet,const char prefix, const std::string& unit, double data){
+        if (toSet == N){
+            if constexpr(RegisterValues<N>::isRanged) {
+                using type = std::remove_const_t<decltype(RegisterValues<N>::min)>;
+                    ifStruct<utils::is_periodic<type>::value>::template setIfPeriodic<type,N>(device,data,prefix,unit);
+            } else {
+                auto d = static_cast<typename RegisterValues<N>::values>(data);
+                device.set<N>(d);
+            }
+        }
+        else{
+            setRuntimeTest<static_cast<A4963RegisterNames>(static_cast<uint8_t>(N)+1)>(device, toSet, prefix, unit, data);
+        }
+    }
+
+
+
+    template<>
+    void setRuntimeTest<A4963RegisterNames::Run>(A4963& device, A4963RegisterNames toSet,const char prefix, const std::string& unit, double data){
+        auto d = static_cast<typename RegisterValues<A4963RegisterNames::Run>::values>(data);
+        device.set<A4963RegisterNames::Run>(d);
+    }
+
+    template<typename T = void>
+    void setRuntimeTest(A4963& device, A4963RegisterNames toSet,const char prefix, const std::string& unit, double data) {
+        setRuntimeTest<static_cast<A4963RegisterNames>(1)>(device,toSet,prefix, unit, data);
+    }
+
 
     void setRuntime(A4963& device, A4963RegisterNames toSet, uint16_t data){
         switch(toSet){

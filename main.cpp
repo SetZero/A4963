@@ -22,14 +22,14 @@
 #include "src/utils/scales/UnitScale.h"
 
 
-bool reconnect( std::unique_ptr<MCP2210>& ptr);
+bool reconnect( std::shared_ptr<MCP2210>& ptr);
 int userInput();
 void clearInput();
 
 enum Chips {
     ATMEGA, MCP
 };
-static constexpr Chips used_chip = Chips::ATMEGA;
+static constexpr Chips used_chip = Chips::MCP;
 
 int atmega_main() {
     using namespace spi::literals;
@@ -51,6 +51,7 @@ int atmega_main() {
         device->set<NS_A4963::A4963RegisterNames::DeadTime>(deadTime.getMaxValue());
         device->commit();
         setRuntime(*device,A4963RegisterNames::BlankTime,4711);
+        //setRuntimeTest<void>(*device,A4963RegisterNames::PhaseAdvance,42);
         auto cstv = device->getRegEntry<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
         std::cout << "Current Sense Threshold: " << cstv << std::endl;
 
@@ -83,16 +84,19 @@ int atmega_main() {
 int mcp_main(){
     using namespace CustomDataTypes::literals;
 
+    std::shared_ptr<MCP2210> ptr;
+    ptr = std::make_shared<MCP2210>();
     using namespace nlohmann;
-    json j{"VDS Threshold","Mask: ",0b0000000000011111,"Register: ",0b001, "value: ", 42};
-    json i; i.push_back(j);i.push_back(j);i.push_back(j);i.push_back(j);i.push_back(j);
-    std::ofstream of = std::ofstream("test.json");
-    of << std::setw(2) << i << std::endl;
-    of.close();
+    using namespace NS_A4963;
+    auto device = std::make_shared<NS_A4963::A4963>(ptr);
+    int z;
+    std::cin >> z;
+    setRuntimeTest(*device,static_cast<A4963RegisterNames>(z),'n',"s",100);
+    //static_assert(utils::is_periodic<std::remove_const_t<const std::chrono::duration<long double, std::ratio<1, 1000000000> >>>::value,"not periodic");
     std::cout << "this is sparta!" << std::endl;
-    std::unique_ptr<MCP2210> ptr;
+
     using namespace spi::literals;
-    ptr = std::make_unique<MCP2210>();
+
     ptr->setGPIODirection(gpio::gpioDirection::in,MCP2210::pin3);
     while(true){
         int z = 0;
@@ -175,7 +179,7 @@ int main() {
 }
 
 
-bool reconnect( std::unique_ptr<MCP2210>& ptr){
+bool reconnect( std::shared_ptr<MCP2210>& ptr){
     do {
         std::cout << " type sth to attempt a reconnect ('break' for stop trying) " << std::endl;
         std::string z;

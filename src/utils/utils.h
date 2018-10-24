@@ -4,7 +4,10 @@
 #include <limits>
 #include <cmath>
 #include <chrono>
+#include <ratio>
 #include "../../src/CustomDataTypes/Volt.h"
+#include "../../src/CustomDataTypes/Hertz.h"
+
 
 namespace utils {
 
@@ -262,12 +265,33 @@ namespace utils {
     template<class Rep, class Period>
     struct is_duration<std::chrono::duration<Rep, Period>> : std::true_type {};
 
+	template<class T>
+	struct is_hertz : std::false_type {};
+
+	template<class Rep, class Period>
+	struct is_hertz<CustomDataTypes::Frequency::Hertz<Rep,Period>> : std::true_type {};
+
     template<class T>
     struct is_volt : std::false_type {};
 
     template<class Rep, class Period>
     struct is_volt<CustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
 
+
+	template<typename T>
+	struct is_periodic : std::false_type {};
+
+	template<template<typename , typename> typename T , typename Rep, intmax_t Nom, intmax_t Denom>
+	struct is_periodic<T<Rep, std::ratio<Nom,Denom>>> : std::true_type {};
+
+	template<typename T>
+	struct periodic_info;
+
+	template<template<typename , typename> typename T , typename Rep, intmax_t Nom, intmax_t Denom>
+	struct periodic_info<T<Rep, std::ratio<Nom,Denom>>> {
+		using rep = Rep;
+		using period = std::ratio<Nom,Denom>;
+	};
 
     template <typename T, typename U>
     struct is_template_same : std::false_type {};

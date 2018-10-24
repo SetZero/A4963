@@ -8,6 +8,8 @@ MCP2210::MCP2210() {
 MCP2210::~MCP2210() {
     udev_enumerate_unref(enumerate);
     udev_unref(udev);
+    udev_device_unref(dev);
+    delete npath;
     close_device(fd);
 }
 

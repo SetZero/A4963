@@ -15,6 +15,7 @@ namespace CustomDataTypes {
         static_assert(std::is_floating_point<accuracy>(), "wrong type: only floating point types allowed");
         accuracy mPercentage = 0;
     public:
+        using value_type = accuracy;
         constexpr inline Percentage() = default;
         constexpr inline explicit Percentage(accuracy percent) : mPercentage(percent){};
         constexpr Percentage(Percentage&& other) noexcept : Percentage() { this->swap(other);};
