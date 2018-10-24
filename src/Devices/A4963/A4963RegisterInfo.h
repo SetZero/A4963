@@ -475,7 +475,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config5;
         static constexpr auto min = 25.5_Hz;
         static constexpr auto max = 3.2767_kHz;
-        static constexpr auto functor = [](auto t1) { return (std::exp2(8+t1)-1)*0.1; };
+        static constexpr auto functor = [](auto t1) { return (std::exp2(8+t1)-1)*0.1_Hz; };
         static constexpr auto inverse_functor = [](auto t1) noexcept { return static_cast<ssize_t>(std::log2(static_cast<CustomDataTypes::Frequency::Hertz<long double>>(t1*10+1_Hz).count())-8 ); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "Maximum Speed Setting";

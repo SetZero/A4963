@@ -63,9 +63,9 @@ namespace NS_A4963 {
     getType(const char prefix, const std::string &unit, Rep value) {
         auto prefixRatio = getRatio(prefix);
         auto newValue = (value * prefixRatio.first * Period::den) / (prefixRatio.second * Period::num);
-        if (unit == "v") {
+        if (unit == "V") {
             return CustomDataTypes::Electricity::Volt<Rep, Period>{newValue};
-        } else if (unit == "hz") {
+        } else if (unit == "Hz") {
             return CustomDataTypes::Frequency::Hertz<Rep, Period>{newValue};
         } else if (unit == "s") {
             return std::chrono::duration<Rep, Period>{newValue};
@@ -90,8 +90,10 @@ namespace NS_A4963 {
         try {
             auto d = T{std::get<T>(
                     getType<Rep, typename utils::periodic_info<T>::period>(prefix, unit, static_cast<Rep>(data)))};
-            device.set<N>(d);
-            return true;
+            if(device.set<N>(d)) {
+                return true;
+            }
+            return false;
         }
         catch(std::exception& e){
             std::cerr << "Invalid Unit \"" << prefix << unit << "\" in register \"" << RegisterValues<N>::name <<
@@ -139,7 +141,6 @@ namespace NS_A4963 {
             setRuntime<static_cast<A4963RegisterNames>(static_cast<uint8_t>(N) + 1)>(device, toSet, prefix, unit, data);
         }
     }
-
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

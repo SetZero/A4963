@@ -25,6 +25,8 @@ namespace CustomDataTypes {
             return mPercentage;
         }
 
+
+
         template<typename T>
         constexpr explicit operator T() const {
             static_assert(std::is_arithmetic<T>(), "cannot cast to a non arithmetic type");
@@ -112,6 +114,11 @@ namespace CustomDataTypes {
     template<typename accuracy>
     constexpr bool operator==(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
         return std::abs(lhs.getPercent() - rhs.getPercent()) < std::numeric_limits<accuracy>::epsilon();
+    }
+
+    template<typename accuracy>
+    constexpr bool operator!=(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
+        return !(lhs == rhs);
     }
 
     template<typename accuracy>
