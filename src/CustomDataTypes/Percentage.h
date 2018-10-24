@@ -46,9 +46,9 @@ namespace CustomDataTypes {
         constexpr Percentage& operator*=(const Skalar skalar){
             static_assert(std::is_arithmetic<Skalar>(), "cannot multiplicate from a non arithmetic type");
             if(skalar >= 0)
-                this->mPercentage = mPercentage/100 * skalar;
+                this->mPercentage = mPercentage * skalar;
             else
-                this->mPercentage = mPercentage/100 * -skalar;
+                this->mPercentage = mPercentage * -skalar;
             return *this;
         }
         constexpr Percentage& operator-=(const Percentage& other){
@@ -64,7 +64,7 @@ namespace CustomDataTypes {
         template<typename Skalar>
         constexpr Percentage& operator/=(const Skalar skalar){
             static_assert(std::is_arithmetic<Skalar>(), "cannot divide by a non arithmetic type");
-            this->mPercentage = mPercentage/100/skalar;
+            this->mPercentage = mPercentage/skalar;
             return *this;
         }
 

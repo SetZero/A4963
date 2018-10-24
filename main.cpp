@@ -29,7 +29,7 @@ void clearInput();
 enum Chips {
     ATMEGA, MCP
 };
-static constexpr Chips used_chip = Chips::ATMEGA;
+static constexpr Chips used_chip = Chips::MCP;
 
 int atmega_main() {
     using namespace spi::literals;
@@ -85,7 +85,11 @@ int atmega_main() {
 
 int mcp_main(){
     using namespace CustomDataTypes::literals;
-
+    static constexpr auto min = 6.25_perc;
+    static constexpr auto max = 100.0_perc;
+    auto x = (3+1)*min;
+    auto x1 = static_cast<ssize_t>((x.getPercent()/min)-1.0_perc);
+    std:: cout << x.getPercent() << " " << x1;
     std::shared_ptr<MCP2210> ptr;
     ptr = std::make_shared<MCP2210>();
     using namespace nlohmann;
