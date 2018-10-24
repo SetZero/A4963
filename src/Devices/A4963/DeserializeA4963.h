@@ -7,6 +7,7 @@
 #include <chrono>
 #include <variant>
 #include <fstream>
+#include <regex>
 #include "../../CustomDataTypes/SIUnit.h"
 #include "../../CustomDataTypes/Volt.h"
 #include "../../CustomDataTypes/Hertz.h"
@@ -131,6 +132,7 @@ namespace NS_A4963 {
         } else {
             setRuntime<static_cast<A4963RegisterNames>(static_cast<uint8_t>(N) + 1)>(device, toSet, prefix, unit, data);
         }
+        std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit << std::endl;
     }
 
 
@@ -149,6 +151,7 @@ namespace NS_A4963 {
     void setRuntime(A4963 &device, A4963RegisterNames toSet, const char prefix, const std::string &unit, double data) {
         setRuntime<static_cast<A4963RegisterNames>(0)>(device, toSet, prefix, unit, data);
     }
+
     class RegisterStrings {
     private:
         template<A4963RegisterNames reg>
@@ -162,12 +165,13 @@ namespace NS_A4963 {
             return values.at(string);
         }
     };
+
     class JsonSetter {
 
     private:
     public:
         json j;
-        JsonSetter(const std::string& str);
+        JsonSetter(A4963 &device, const std::string& str);
     };
 
 }

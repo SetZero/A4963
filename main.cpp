@@ -89,10 +89,10 @@ int mcp_main(){
     using namespace nlohmann;
     using namespace NS_A4963;
     auto device = std::make_shared<NS_A4963::A4963>(ptr);
-    int z;
-    std::cin >> z;
-    setRuntime(*device,static_cast<A4963RegisterNames>(z),'n',"s",100);
-    JsonSetter s{"data.json"};
+    //int z;
+    //std::cin >> z;
+    //setRuntime(*device,static_cast<A4963RegisterNames>(z),'n',"s",100);
+    JsonSetter s{*device, "data.json"};
     //static_assert(utils::is_periodic<std::remove_const_t<const std::chrono::duration<long double, std::ratio<1, 1000000000> >>>::value,"not periodic");
     std::cout << "this is sparta!" << std::endl;
 
