@@ -47,12 +47,12 @@ namespace NS_A4963 {
         for (const auto &element : config) {
             for(const auto &el : element.value().items()) {
                 const auto &registerName = el.key();
-                auto registerValue =  el.value().get<std::string>();
+                auto registerValue = el.value().get<std::string>();
 
                 A4963RegisterNames val;
                 try {
                     val = RegisterStrings::get(registerName);
-                } catch (std::exception& e) {
+                } catch (std::exception &e) {
                     std::cerr << "Unknown Register Value: " << registerName << std::endl;
                     continue;
                 }
@@ -62,21 +62,21 @@ namespace NS_A4963 {
                 char prefix = '\0';
                 std::string unit;
 
-                if(std::regex_search(registerValue, unit_match, unit_regex)) {
+                if (std::regex_search(registerValue, unit_match, unit_regex)) {
                     for (size_t i = 0; i < unit_match.size(); ++i) {
                         switch (i) {
                             case 1:
-                                if(unit_match[i].length() > 0) {
+                                if (unit_match[i].length() > 0) {
                                     unit_val = std::atof(unit_match[i].str().data());
                                 }
                                 break;
                             case 2:
-                                if(unit_match[i].length() > 0) {
+                                if (unit_match[i].length() > 0) {
                                     prefix = unit_match[i].str().at(0);
                                 }
                                 break;
                             case 3:
-                                if(unit_match[i].length() > 0) {
+                                if (unit_match[i].length() > 0) {
                                     unit = unit_match[i].str();
                                 }
                                 break;
