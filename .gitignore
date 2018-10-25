@@ -180,3 +180,5 @@ build/hid
 build/test_cases
 
 SPI\.cbp
+
+hid

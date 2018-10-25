@@ -1,6 +1,12 @@
 #include "mcp2210_hal.h"
 
 MCP2210::MCP2210() {
+    try {
+        logger = spdlog::basic_logger_mt("mcplogger", "mcp_log.txt");
+    } catch(const spdlog::spdlog_ex &ex) {
+        std::cerr << "could not create logger: " << ex.what() << std::endl;
+    }
+
     //tut: http://www.signal11.us/oss/udev/
     connect();
 }
@@ -105,6 +111,7 @@ void MCP2210::connect() {
         udev = udev_new();
         if (!udev) {
             std::cerr << "Can't create udev\n" << std::endl;
+            logger->log(spdlog::level::err, "udev creation failed");
             exit(1);
         }
 
@@ -158,7 +165,7 @@ void MCP2210::connect() {
             *connection = true;
         }
     } else {
-        std::cout << "device is already connected" << std::endl;
+        std::wcerr << "device is already connected" << std::endl;
     }
 
 }
@@ -173,67 +180,67 @@ void MCP2210::exceptionHandling(int32_t errorCode) const{
             return;
         case (10): {
             std::cerr << " Write Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Write Error "));
+            logger->log(spdlog::level::err, (" Write Error "));
             break;
         }
         case (20): {
             std::cout << " Read Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Read Error "));
+            logger->log(spdlog::level::err, (" Read Error "));
             break;
         }
         case (30): {
             std::cout << " Hardware Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Hardware Error "));
+            logger->log(spdlog::level::err, (" Hardware Error "));
             break;
         }
         case (100): {
             std::cout << " Chip Status Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Chip Status Error "));
+            logger->log(spdlog::level::err, (" Chip Status Error "));
             break;
         }
         case (110): {
             std::cout << " Get Settings Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Get Settings Error "));
+            logger->log(spdlog::level::err, (" Get Settings Error "));
             break;
         }
         case (120): {
             std::cout << " set Settings Error " << std::endl;
-            (*logger).log(spdlog::level::err, ("set Settings Error"));
+            logger->log(spdlog::level::err, ("set Settings Error"));
             break;
         }
         case (130): {
             std::cout << " Get SPI Settings Error " << std::endl;
-            (*logger).log(spdlog::level::err, ( " Get SPI Settings Error " ));
+            logger->log(spdlog::level::err, ( " Get SPI Settings Error " ));
             break;
         }
         case (140): {
             std::cout << " set SPI Settings Error " << std::endl;
-            (*logger).log(spdlog::level::err, ( " set SPI Settings Error " ));
+            logger->log(spdlog::level::err, ( " set SPI Settings Error " ));
             break;
         }
         case (150): {
             std::cout << " Address out of range Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Address out of range Error "));
+            logger->log(spdlog::level::err, (" Address out of range Error "));
             break;
         }
         case (160): {
             std::cout << " Blocked Access Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Blocked Access Error "));
+            logger->log(spdlog::level::err, (" Blocked Access Error "));
             break;
         }
         case (170): {
             std::cout << " Write GPIO Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Write GPIO Error "));
+            logger->log(spdlog::level::err, (" Write GPIO Error "));
             break;
         }
         case (180): {
             std::cout << " Read GPIO Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" Read GPIO Error "));
+            logger->log(spdlog::level::err, (" Read GPIO Error "));
             break;
         }
         case (190): {
             std::cout << " set GPIO direction Error " << std::endl;
-            (*logger).log(spdlog::level::err, (" set GPIO direction Error "));
+            logger->log(spdlog::level::err, (" set GPIO direction Error "));
             break;
         }
         default: {

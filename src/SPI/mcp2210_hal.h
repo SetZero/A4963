@@ -45,7 +45,7 @@ public:
     };
 private:
     const char *npath = nullptr;
-    std::shared_ptr<spdlog::logger> logger = spdlog::basic_logger_mt("mcplogger", "mcp_log.txt");
+    std::shared_ptr<spdlog::logger> logger;
     struct udev *udev;
     struct udev_enumerate *enumerate;
     struct udev_list_entry *devices, *dev_list_entry;
