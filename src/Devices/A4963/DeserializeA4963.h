@@ -19,6 +19,50 @@
 namespace NS_A4963 {
     using nlohmann::json;
 
+    static auto A4963NamesMap = std::map<std::string_view, A4963RegisterNames>{
+            {RegisterValues<A4963RegisterNames::BlankTime>::name, A4963RegisterNames::BlankTime},
+            {RegisterValues<A4963RegisterNames::DeadTime>::name, A4963RegisterNames::DeadTime},
+            {RegisterValues<A4963RegisterNames::CurrentSenseThresholdVoltage>::name, A4963RegisterNames::CurrentSenseThresholdVoltage},
+            {RegisterValues<A4963RegisterNames::VDSThreshold>::name, A4963RegisterNames::VDSThreshold},
+            {RegisterValues<A4963RegisterNames::PositionControllerProportionalGain>::name, A4963RegisterNames::PositionControllerProportionalGain},
+            {RegisterValues<A4963RegisterNames::RecirculationMode>::name, A4963RegisterNames::RecirculationMode},
+            {RegisterValues<A4963RegisterNames::PercentFastDecay>::name, A4963RegisterNames::PercentFastDecay},
+            {RegisterValues<A4963RegisterNames::InvertPWMInput>::name, A4963RegisterNames::InvertPWMInput},
+            {RegisterValues<A4963RegisterNames::BemfTimeQualifier>::name, A4963RegisterNames::BemfTimeQualifier},
+            {RegisterValues<A4963RegisterNames::OverspeedLimitRatio>::name, A4963RegisterNames::OverspeedLimitRatio},
+            {RegisterValues<A4963RegisterNames::DegaussCompensation>::name, A4963RegisterNames::DegaussCompensation},
+            {RegisterValues<A4963RegisterNames::FixedPeriod>::name, A4963RegisterNames::FixedPeriod},
+            {RegisterValues<A4963RegisterNames::PositionControllerIntegralGain>::name, A4963RegisterNames::PositionControllerIntegralGain},
+            {RegisterValues<A4963RegisterNames::PWMDutyCycleHoldTorque>::name, A4963RegisterNames::PWMDutyCycleHoldTorque},
+            {RegisterValues<A4963RegisterNames::HoldTime>::name, A4963RegisterNames::HoldTime},
+            {RegisterValues<A4963RegisterNames::PIControllerProportionalGain>::name, A4963RegisterNames::PIControllerProportionalGain},
+            {RegisterValues<A4963RegisterNames::PWMDutyCycleTorqueStartup>::name, A4963RegisterNames::PWMDutyCycleTorqueStartup},
+            {RegisterValues<A4963RegisterNames::StartSpeed>::name, A4963RegisterNames::StartSpeed},
+            {RegisterValues<A4963RegisterNames::PIControllerIntegralGain>::name, A4963RegisterNames::PIControllerIntegralGain},
+            {RegisterValues<A4963RegisterNames::SpeedOutputSelection>::name, A4963RegisterNames::SpeedOutputSelection},
+            {RegisterValues<A4963RegisterNames::MaximumSpeedSetting>::name, A4963RegisterNames::MaximumSpeedSetting},
+            {RegisterValues<A4963RegisterNames::PhaseAdvance>::name, A4963RegisterNames::PhaseAdvance},
+            {RegisterValues<A4963RegisterNames::MotorControlMode>::name, A4963RegisterNames::MotorControlMode},
+            {RegisterValues<A4963RegisterNames::EnableStopOnFail>::name, A4963RegisterNames::EnableStopOnFail},
+            {RegisterValues<A4963RegisterNames::DutyCycleControl>::name, A4963RegisterNames::DutyCycleControl},
+            {RegisterValues<A4963RegisterNames::RestartControl>::name, A4963RegisterNames::RestartControl},
+            {RegisterValues<A4963RegisterNames::Brake>::name, A4963RegisterNames::Brake},
+            {RegisterValues<A4963RegisterNames::DirectionOfRotation>::name, A4963RegisterNames::DirectionOfRotation},
+            {RegisterValues<A4963RegisterNames::Run>::name, A4963RegisterNames::Run}
+    };
+
+
+    static auto A4963MasksMap = std::map<std::string_view, Masks>{
+            {"Temperatur Warning", Masks::TemperatureWarning},
+            {"Loss Of Bemf Synchronitation", Masks::LossOfBemfSynchronization},
+            {"Phase A High Side VDS", Masks::PhaseAHighSideVDS},
+            {"Phase B High Side VDS", Masks::PhaseBHighSideVDS},
+            {"Phase C High Side VDS", Masks::PhaseCHighSideVDS},
+            {"VBB Undervoltage", Masks::VBBUndervoltage},
+    };
+
+
+
     std::pair<std::intmax_t, std::intmax_t> getRatio(const char prefix) {
         switch (prefix) {
             case 'a':
