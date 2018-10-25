@@ -62,7 +62,6 @@ namespace NS_A4963 {
     };
 
 
-
     std::pair<std::intmax_t, std::intmax_t> getRatio(const char prefix) {
         switch (prefix) {
             case 'a':

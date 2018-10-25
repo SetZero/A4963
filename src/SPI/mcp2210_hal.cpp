@@ -6,9 +6,6 @@ MCP2210::MCP2210() {
 }
 
 MCP2210::~MCP2210() {
-    udev_enumerate_unref(enumerate);
-    udev_unref(udev);
-    udev_device_unref(dev);
     delete npath;
     close_device(fd);
 }
@@ -153,8 +150,8 @@ void MCP2210::connect() {
         }
         /* Free the enumerator object */
         udev_enumerate_unref(enumerate);
-
         udev_unref(udev);
+
         if (fd <= 0) std::cout << "could not detect your device, check the device and try to reconnect." << std::endl;
         else { //connection was successful, init the gpios
             gpio_setdir(fd, 0);
