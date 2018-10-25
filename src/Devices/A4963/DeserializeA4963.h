@@ -29,49 +29,12 @@ namespace NS_A4963 {
     };
 
 
-    std::pair<std::intmax_t, std::intmax_t> getRatio(const char prefix) {
-        switch (prefix) {
-            case 'a':
-                return {1, 1000000000000000000};
-            case 'f':
-                return {1, 1000000000000000};
-            case 'p':
-                return {1, 1000000000000};
-            case 'n':
-                return {1, 1000000000};
-            case 'u':
-                return {1, 1000000};
-            case 'm':
-                return {1, 1000};
-            case 'c':
-                return {1, 100};
-            case 'd':
-                return {1, 10};
-            case '\0':
-                return {1, 1};
-            case 'D':
-                return {10, 1};
-            case 'H':
-                return {100, 1};
-            case 'k':
-                return {1000, 1};
-            case 'M':
-                return {1000000, 1};
-            case 'G':
-                return {1000000000, 1};
-            case 'T':
-                return {1000000000000, 1};
-            case 'E':
-                return {1000000000000000, 1};
-            default:
-                throw std::runtime_error("Unknown Type!");
-        }
-    }
+
 
     template<typename Rep, typename Period = std::ratio<1, 1>>
     std::variant<CustomDataTypes::Frequency::Hertz<Rep, Period>, CustomDataTypes::Electricity::Volt<Rep, Period>, std::chrono::duration<Rep, Period>>
     getType(const char prefix, const std::string &unit, Rep value) {
-        auto prefixRatio = getRatio(prefix);
+        auto prefixRatio = utils::getRatio(prefix);
         auto newValue = (value * prefixRatio.first * Period::den) / (prefixRatio.second * Period::num);
         if (unit == "V") {
             return CustomDataTypes::Electricity::Volt<Rep, Period>{newValue};
