@@ -101,7 +101,6 @@ MCP2210::transfer(const std::initializer_list<std::unique_ptr<spi::Data>>& spiDa
 
 void MCP2210::connect() {
     if (!(*connection)) {
-
         /* Create the udev object */
         udev = udev_new();
         if (!udev) {
