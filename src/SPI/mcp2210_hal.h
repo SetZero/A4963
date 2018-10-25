@@ -8,6 +8,8 @@
 #include "GPIOBridge.h"
 #include "../utils/utils.h"
 #include <libudev.h>
+#include "../../inc/spdlog/spdlog.h"
+#include "../../inc/spdlog/sinks/basic_file_sink.h"
 //#include "USB/LibUSBDevices.h"
 
 struct MCPIOException : public std::exception {
@@ -43,6 +45,7 @@ public:
     };
 private:
     const char *npath = nullptr;
+    std::shared_ptr<spdlog::logger> logger = spdlog::basic_logger_mt("mcplogger", "mcp_log.txt");
     struct udev *udev;
     struct udev_enumerate *enumerate;
     struct udev_list_entry *devices, *dev_list_entry;

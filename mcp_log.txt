@@ -1,0 +1,2 @@
+[2018-10-25 17:28:27.452] [mcplogger] [error]  Chip Status Error 
+[2018-10-25 17:34:21.603] [mcplogger] [error]  Chip Status Error

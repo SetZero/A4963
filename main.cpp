@@ -95,6 +95,7 @@ int mcp_main(){
     using namespace nlohmann;
     using namespace NS_A4963;
     auto device = std::make_shared<NS_A4963::A4963>(ptr);
+        ptr->exceptionHandling(-100);
     //JsonSetter s{*device, "data.json"};
 
     enum class TO : uint8_t {

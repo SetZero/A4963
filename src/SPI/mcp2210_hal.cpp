@@ -169,58 +169,71 @@ MCP2210::operator bool() {
 
 void MCP2210::exceptionHandling(int32_t errorCode) const{
     switch (-errorCode) {
-        case (0) :
+        case (ERR_NOERR) :
             return;
         case (10): {
-            std::cout << " Write Error " << std::endl;
+            std::cerr << " Write Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Write Error "));
             break;
         }
         case (20): {
             std::cout << " Read Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Read Error "));
             break;
         }
         case (30): {
             std::cout << " Hardware Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Hardware Error "));
             break;
         }
         case (100): {
             std::cout << " Chip Status Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Chip Status Error "));
             break;
         }
         case (110): {
             std::cout << " Get Settings Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Get Settings Error "));
             break;
         }
         case (120): {
             std::cout << " set Settings Error " << std::endl;
+            (*logger).log(spdlog::level::err, ("set Settings Error"));
             break;
         }
         case (130): {
             std::cout << " Get SPI Settings Error " << std::endl;
+            (*logger).log(spdlog::level::err, ( " Get SPI Settings Error " ));
             break;
         }
         case (140): {
             std::cout << " set SPI Settings Error " << std::endl;
+            (*logger).log(spdlog::level::err, ( " set SPI Settings Error " ));
             break;
         }
         case (150): {
             std::cout << " Address out of range Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Address out of range Error "));
             break;
         }
         case (160): {
             std::cout << " Blocked Access Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Blocked Access Error "));
             break;
         }
         case (170): {
             std::cout << " Write GPIO Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Write GPIO Error "));
             break;
         }
         case (180): {
             std::cout << " Read GPIO Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" Read GPIO Error "));
             break;
         }
         case (190): {
             std::cout << " set GPIO direction Error " << std::endl;
+            (*logger).log(spdlog::level::err, (" set GPIO direction Error "));
             break;
         }
         default: {
@@ -230,7 +243,6 @@ void MCP2210::exceptionHandling(int32_t errorCode) const{
     *connection=false;
     close_device(fd);
     std::cerr << "device disconnected" << std::endl;
-    throw MCPIOException{};
 }
 
 MCP2210::spiSettings MCP2210::getSettings() const {
@@ -240,54 +252,3 @@ MCP2210::spiSettings MCP2210::getSettings() const {
 void MCP2210::setSettings(const MCP2210::spiSettings& settings) {
     MCP2210::settings = settings;
 }
-
-
-//old search mechanism for hidraw:
-/*
-    for(auto z = 0; z < 255; z++) {
-        temp = device;
-        temp.append(std::to_string(z));
-        fd = open_device(temp.c_str());
-        if(fd>0) {
-            get_chip_status(fd, x.get());
-            if (x->ucSpiState == ERR_NOERR) {
-                try {
-                    using namespace spi::literals;
-                    transfer(0_spi8);
-                    std::cout << "device found: " << temp << std::endl;
-                    break;
-                }
-                catch (std::exception& e) {
-                    std::cout << e.what() <<std::endl;
-                    close_device(fd);
-                }
-            } else {
-                close_device(fd);
-            }
-        }
-       temp.empty();
-    }*/
-
-/*deprecated
-MCP2210::MCP2210(unsigned char number) {
-    std::string device = "/dev/hidraw";
-    std::unique_ptr<stChipStatus_T> x = std::make_unique<stChipStatus_T>();
-    device.append(std::to_string(number));
-    fd = open_device(device.c_str());
-    if (fd > 0) {
-        get_chip_status(fd, x.get());
-        if (x->ucSpiState == ERR_NOERR) {
-            try {
-                using namespace spi::literals;
-                transfer(0_spi8);
-                std::cout << "device found: " << device << std::endl;
-            }
-            catch (std::exception &e) {
-                e.what();
-                close_device(fd);
-            }
-        } else {
-            close_device(fd);
-        }
-    } else std::cout << "Error with device: " << fd << std::endl;
-}*/

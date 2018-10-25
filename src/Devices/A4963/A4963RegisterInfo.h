@@ -15,7 +15,7 @@
 #include <map>
 #include <string_view>
 
-#ifdef debug
+#ifdef a4963_debug
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
@@ -621,7 +621,7 @@ namespace NS_A4963 {
     };
 }
 
-#ifdef debug
+#ifdef a4963_debug
     #pragma GCC diagnostic pop
 #endif
 #pragma GCC diagnostic pop
