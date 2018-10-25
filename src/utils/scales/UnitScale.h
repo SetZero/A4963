@@ -50,7 +50,7 @@ public:
             auto actual_value = functor(converted_value);
             if(actual_value != value) {
                 std::cerr << "Warning! Converted value not equal to actual value (" << static_cast<non_ref_type>(actual_value)
-                          << " vs. " << static_cast<non_ref_type>(value) << ")" << std::endl;
+                          << " vs. " << static_cast<non_ref_type>(value) << "), next possible upper bound value: " << functor(converted_value + 1)  << std::endl;
             }
             return {converted_value};
         } else {
@@ -62,17 +62,19 @@ public:
 
     template<typename Rep, typename Period>
     constexpr std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value) const {
-        using duration_type = std::chrono::duration<Rep, Period>;
+        using namespace utils::printable;
         //TODO: round value up/down
         if(value >= min && value <= max) {
             auto steps = std::chrono::duration_cast<non_ref_type>(value);
-            return inverse_functor(steps);
+            auto converted_value = inverse_functor(static_cast<non_ref_type>(value));
+            auto actual_value = functor(converted_value);
+            if(actual_value != value) {
+                std::cerr << "Warning! Saved value not equal to given value (" << static_cast<non_ref_type>(actual_value)
+                          << " vs. " << static_cast<non_ref_type>(value) << "), closest possible upper value: " << functor(converted_value + 1) << std::endl;
+            }
+            return {converted_value};
         } else {
-            std::cerr << "Maximum: " << max.count()
-                      << utils::ratio_lookup<typename utils::periodic_info<std::remove_const_t<std::remove_reference_t<decltype(max)>>>::period>::abr_value
-                      << utils::periodic_printable<duration_type>::name << ", Minimum: " << min.count()
-                      << utils::ratio_lookup<typename utils::periodic_info<std::remove_const_t<std::remove_reference_t<decltype(min)>>>::period>::abr_value
-                      << utils::periodic_printable<duration_type>::name  << ", Given: " << value.count() << std::endl;
+            std::cerr << "Maximum: " << max << ", Minimum: " << min << ", Given: " << value.count() << std::endl;
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
         }

@@ -29,7 +29,7 @@ void clearInput();
 enum Chips {
     ATMEGA, MCP
 };
-static constexpr Chips used_chip = Chips::MCP;
+static constexpr Chips used_chip = Chips::ATMEGA;
 
 int atmega_main() {
     using namespace spi::literals;
@@ -39,46 +39,23 @@ int atmega_main() {
     usb::LibUSBDeviceList deviceList;
     std::cout << "Found " << deviceList.size() << " devices" << std::endl;
     if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
-        std::cout << "One of them was the Atmega!" << std::endl;
+        std::cout << "INDIGO!" << std::endl;
         auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
         auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
-        std::cout << "INDIGO!" << std::endl;
-        /*constexpr auto recirculationMode = A4963RegisterNames::RecirculationMode;
-        device->set<recirculationMode>(possibleValues<recirculationMode>::values::Off);
-        auto blankTime = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
-        device->set<NS_A4963::A4963RegisterNames::BlankTime>(blankTime.getMaxValue());
-        auto deadTime = device->getRegisterRange<NS_A4963::A4963RegisterNames::DeadTime>();
-        device->set<NS_A4963::A4963RegisterNames::DeadTime>(deadTime.getMaxValue());
-        device->commit();
-        //setRuntime(*device,A4963RegisterNames::BlankTime,4711);
-        setRuntime(*device,A4963RegisterNames::PhaseAdvance,'\0',"",42);
-        auto cstv = device->getRegEntry<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
-        std::cout << "Current Sense Threshold: " << cstv << std::endl;
-
-        auto mxspd = device->getRegEntry<NS_A4963::A4963RegisterNames::MaximumSpeedSetting>();
-        std::cout << "Maximum Speed Setting: " << mxspd << std::endl;
-
-        auto rcn = device->getRegEntry<NS_A4963::A4963RegisterNames::RecirculationMode>();
-        std::cout << "Recirculation Mode: " << static_cast<int>(rcn) << std::endl;*/
         JsonSetter s{*device, "data.json"};
+
+        using namespace utils::printable;
+        auto bt = device->getRegEntry<NS_A4963::A4963RegisterNames::BlankTime>();
+        std::cout << "Blank Time: " << bt << std::endl;
+        auto cstv = device->getRegEntry<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
+        std::cout << "Current Sense Threshold Voltage: " << cstv << std::endl;
+        auto dt = device->getRegEntry<NS_A4963::A4963RegisterNames::DeadTime>();
+        std::cout << "Current Sense Threshold Voltage: " << dt << std::endl;
+        auto pdcts = device->getRegEntry<NS_A4963::A4963RegisterNames::PWMDutyCycleHoldTorque>();
+        std::cout << "PWM Duty Cycle Torque Startup: " << pdcts << std::endl;
+
         device->show_register();
-/*
-        auto blankTimeRange = device->getRegisterRange<NS_A4963::A4963RegisterNames::BlankTime>();
-        device->setBlankTime(blankTimeRange.getMinValue());
-
-        auto csThresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::CurrentSenseThresholdVoltage>();
-        //double insert = 0;
-        //std::cout << "Insert a value between 12.5 and 200 (mV): " << std::endl;
-        //std::cin >> insert;
-        //auto v = decltype(thresholdVoltage.getMinValue()){insert};
-        device->setCurrentSenseThresholdVoltage(csThresholdVoltage.getMaxValue());
-
-        auto vdsThresholdVoltage = device->getRegisterRange<NS_A4963::A4963RegisterNames::VDSThreshold>();
-        device->setVDSThreshold(vdsThresholdVoltage.getMaxValue());
-        device->commit();
-
-        device->show_register();*/
     }
     return 0;
 }

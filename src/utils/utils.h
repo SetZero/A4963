@@ -314,4 +314,20 @@ namespace utils {
 	struct periodic_printable<std::chrono::duration<Rep, std::ratio<Nom,Denom>>> {
 		static constexpr std::string_view name = "s";
 	};
+
+    template< class T >
+    struct remove_cvref {
+        typedef std::remove_cv_t<std::remove_reference_t<T>> type;
+    };
+
+	namespace printable {
+	    template<typename Rep, typename p>
+        std::ostream& operator<< (std::ostream& stream, const std::chrono::duration<Rep, p>& duration) {
+            using duration_type =  std::chrono::duration<Rep, p>;
+            stream << duration.count()
+                   << utils::ratio_lookup<typename utils::periodic_info<duration_type>::period>::abr_value
+                   << utils::periodic_printable<duration_type>::name;
+            return stream;
+        }
+	}
 }
