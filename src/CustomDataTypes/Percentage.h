@@ -15,6 +15,7 @@ namespace CustomDataTypes {
         static_assert(std::is_floating_point<accuracy>(), "wrong type: only floating point types allowed");
         accuracy mPercentage = 0;
     public:
+        static constexpr std::string_view abr_value = "%";
         using value_type = accuracy;
         constexpr inline Percentage() = default;
         constexpr inline explicit Percentage(accuracy percent) : mPercentage(percent){};
@@ -162,7 +163,7 @@ namespace CustomDataTypes {
 
     template<typename accuracy>
     constexpr std::ostream &operator<<(std::ostream &os, const Percentage<accuracy>& percentage) {
-        os << " Percentage: " << percentage.getPercent();
+        os << percentage.getPercent() << "%";
         return os;
     }
 }

@@ -170,10 +170,19 @@ namespace NS_A4963 {
                             std::cerr << "This register (" << RegisterValues<N>::name
                                       << ") doesn't expect a prefix. This might be an error!" << std::endl;
                         }
-                        if (std::is_arithmetic_v<type> && !unit.empty()) {
-                            std::cerr << "This register (" << RegisterValues<N>::name
-                                      << ") doesn't expect an unit. This might be an error!" << std::endl;
+                        if constexpr (std::is_arithmetic_v<type>) {
+                            if (!unit.empty()) {
+                                std::cerr << "This register (" << RegisterValues<N>::name
+                                          << ") doesn't expect an unit. This might be an error!" << std::endl;
+                            }
+                        } else {
+                            if(unit != type::abr_value) {
+                                std::cerr << "This register (" << RegisterValues<N>::name << ") excpects the type to be \""
+                                          << type::abr_value << "\", but is set to "
+                                          << "\"" << unit << "\"" << std::endl;
+                            }
                         }
+
                         setIfNotPeriodic<type, N>(device, static_cast<double>(data));
                         std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit
                                   << std::endl;
@@ -188,6 +197,10 @@ namespace NS_A4963 {
                     std::cout << "Set the register " << RegisterValues<N>::name << " to " << registerData << std::endl;
                 } catch (std::exception& e) {
                     std::cerr << "Unknown value " << registerData << " in register " << RegisterValues<N>::name << std::endl;
+                    std::cerr << "Possible values: " << std::endl;
+                    for(auto possibleValues : RegisterValues<N>::map) {
+                        std::cerr << "\t - " << possibleValues.first << std::endl;
+                    }
                 }
             }
         } else {

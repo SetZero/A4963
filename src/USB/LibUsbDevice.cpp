@@ -24,7 +24,7 @@ namespace usb {
     }
 
     void LibUSBDevice::openDevice() {
-        if (isOpen) {
+        if (isOpen.exchange(true)) {
             std::cout << "Device is already opened!" << std::endl;
             return;
         }
@@ -32,7 +32,6 @@ namespace usb {
         int ret = libusb_open(device, &handle);
 
         if (LIBUSB_SUCCESS == ret) {
-            isOpen = true;
             std::cout << "Device Opened!" << std::endl;
 
             if (libusb_kernel_driver_active(handle, 0) == 1) {
@@ -48,6 +47,7 @@ namespace usb {
             }
 
         } else {
+            isOpen = false;
             throw std::logic_error{"Failed to open device! (Code: " + std::to_string(ret) + ")"};
         }
 
@@ -56,14 +56,12 @@ namespace usb {
     void LibUSBDevice::closeDevice() {
         if (!isOpen) {
             throw std::logic_error{"This device isn't opened!"};
-            return;
         }
         _closeDevice();
     }
 
     void LibUSBDevice::_closeDevice() {
-        if (isOpen) {
-            isOpen = false;
+        if (isOpen.exchange(false)) {
             libusb_attach_kernel_driver(handle, 0);
             libusb_release_interface(handle, 0);
             libusb_close(handle);
