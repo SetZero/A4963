@@ -29,6 +29,22 @@ namespace NS_A4963 {
     };
 
 
+    class JsonSetter {
+
+    private:
+        json j;
+    public:
+        struct UnitInfo {
+            long double data;
+            char prefix;
+            std::string unit;
+            bool succsess;
+        };
+
+        static UnitInfo parseData(const std::string& str);
+        JsonSetter(A4963 &device, const std::string& str);
+
+    };
 
 
     template<typename Rep, typename Period = std::ratio<1, 1>>
@@ -86,32 +102,49 @@ namespace NS_A4963 {
 
     }
 
-
     template<A4963RegisterNames N>
-    void setRuntime(A4963 &device, A4963RegisterNames toSet, char prefix, const std::string &unit, double data) {
+    void setRuntime(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
         if (toSet == N) {
             if constexpr(RegisterValues<N>::isRanged) {
-                using type = std::remove_const_t<decltype(RegisterValues<N>::min)>;
-                if constexpr(utils::is_periodic<type>::value) {
-                    if(setIfPeriodic<type, N>(device, data, prefix, unit)) {
-                        std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit << std::endl;
+                JsonSetter::UnitInfo unitInfo = JsonSetter::parseData(registerData);
+                if(unitInfo.succsess) {
+                    auto prefix = unitInfo.prefix;
+                    auto unit = unitInfo.unit;
+                    auto data = unitInfo.data;
+
+                    using type = std::remove_const_t<decltype(RegisterValues<N>::min)>;
+                    if constexpr(utils::is_periodic<type>::value) {
+                        if (setIfPeriodic<type, N>(device, static_cast<double>(data), prefix, unit)) {
+                            std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix
+                                      << unit << std::endl;
+                        }
+                    } else {
+                        if (prefix != '\0') {
+                            std::cerr << "This register (" << RegisterValues<N>::name
+                                      << ") doesn't expect a prefix. This might be an error!" << std::endl;
+                        }
+                        if (std::is_arithmetic_v<type> && !unit.empty()) {
+                            std::cerr << "This register (" << RegisterValues<N>::name
+                                      << ") doesn't expect an unit. This might be an error!" << std::endl;
+                        }
+                        setIfNotPeriodic<type, N>(device, static_cast<double>(data));
+                        std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit
+                                  << std::endl;
                     }
                 } else {
-                    if(prefix != '\0') {
-                        std::cerr << "This register (" << RegisterValues<N>::name << ") doesn't expect a prefix. This might be an error!" << std::endl;
-                    }
-                    if(std::is_arithmetic_v<type> && !unit.empty()) {
-                            std::cerr << "This register (" << RegisterValues<N>::name << ") doesn't expect an unit. This might be an error!" << std::endl;
-                    }
-                    setIfNotPeriodic<type, N>(device, data);
-                    std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit << std::endl;
+                    std::cerr << "There was an error parsing your data!" << std::endl;
                 }
             } else {
-                auto d = static_cast<typename RegisterValues<N>::values>(data);
-                device.set<N>(d);
+                try {
+                    auto type = RegisterValues<N>::map.at(registerData.data());
+                    device.set<N>(type);
+                    std::cout << "Set the register " << RegisterValues<N>::name << " to " << registerData << std::endl;
+                } catch (std::exception& e) {
+                    std::cerr << "Unknown value " << registerData << " in register " << RegisterValues<N>::name << std::endl;
+                }
             }
         } else {
-            setRuntime<static_cast<A4963RegisterNames>(static_cast<uint8_t>(N) + 1)>(device, toSet, prefix, unit, data);
+            setRuntime<static_cast<A4963RegisterNames>(static_cast<uint8_t>(N) + 1)>(device, toSet, registerData);
         }
     }
 
@@ -119,16 +152,16 @@ namespace NS_A4963 {
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
     template<>
-    void setRuntime<A4963RegisterNames::Run>(A4963 &device, A4963RegisterNames toSet, const char prefix, const std::string &unit, double data) {
-        auto d = static_cast<typename RegisterValues<A4963RegisterNames::Run>::values>(data);
+    void setRuntime<A4963RegisterNames::Run>(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
+        auto d = static_cast<typename RegisterValues<A4963RegisterNames::Run>::values>(std::atof(registerData.data()));
         device.set<A4963RegisterNames::Run>(d);
     }
 
 #pragma GCC diagnostic pop
 
     template<typename T = void>
-    void setRuntime(A4963 &device, A4963RegisterNames toSet, const char prefix, const std::string &unit, double data) {
-        setRuntime<static_cast<A4963RegisterNames>(0)>(device, toSet, prefix, unit, data);
+    void setRuntime(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
+        setRuntime<static_cast<A4963RegisterNames>(0)>(device, toSet, registerData);
     }
 
     class RegisterStrings {
@@ -143,14 +176,6 @@ namespace NS_A4963 {
         static A4963RegisterNames get(const std::string_view& string) {
             return values.at(string);
         }
-    };
-
-    class JsonSetter {
-
-    private:
-    public:
-        json j;
-        JsonSetter(A4963 &device, const std::string& str);
     };
 
 }

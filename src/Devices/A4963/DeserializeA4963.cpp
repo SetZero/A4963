@@ -41,7 +41,7 @@ namespace NS_A4963 {
         std::ifstream i(str);
         i >> j;
 
-        std::regex unit_regex("([-+]?[0-9]*\\.?[0-9]+)(a|f|p|n|u|m|c|d|D|h|k|M|T|P|E)?(V|Hz|s)?");
+
 
         auto config = j["config"].items();
         for (const auto &element : config) {
@@ -57,37 +57,47 @@ namespace NS_A4963 {
                     continue;
                 }
 
-                std::smatch unit_match;
-                long double unit_val = 0.0;
-                char prefix = '\0';
-                std::string unit;
-
-                if (std::regex_search(registerValue, unit_match, unit_regex)) {
-                    for (size_t i = 0; i < unit_match.size(); ++i) {
-                        switch (i) {
-                            case 1:
-                                if (unit_match[i].length() > 0) {
-                                    unit_val = std::atof(unit_match[i].str().data());
-                                }
-                                break;
-                            case 2:
-                                if (unit_match[i].length() > 0) {
-                                    prefix = unit_match[i].str().at(0);
-                                }
-                                break;
-                            case 3:
-                                if (unit_match[i].length() > 0) {
-                                    unit = unit_match[i].str();
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-                setRuntime(device, val, prefix, unit, unit_val);
+                setRuntime(device, val, registerValue);
             }
         }
         device.commit();
+    }
+
+    JsonSetter::UnitInfo JsonSetter::parseData(const std::string &registerValue) {
+        static std::regex unit_regex("([-+]?[0-9]*\\.?[0-9]+)(a|f|p|n|u|m|c|d|D|h|k|M|T|P|E)?(V|Hz|s)?");
+
+        std::smatch unit_match;
+        long double unit_val = 0.0;
+        char prefix = '\0';
+        std::string unit;
+
+        if (std::regex_search(registerValue, unit_match, unit_regex)) {
+            for (size_t i = 0; i < unit_match.size(); ++i) {
+                switch (i) {
+                    case 1:
+                        if (unit_match[i].length() > 0) {
+                            unit_val = std::atof(unit_match[i].str().data());
+                        }
+                        break;
+                    case 2:
+                        if (unit_match[i].length() > 0) {
+                            prefix = unit_match[i].str().at(0);
+                        }
+                        break;
+                    case 3:
+                        if (unit_match[i].length() > 0) {
+                            unit = unit_match[i].str();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return UnitInfo{unit_val, prefix, unit, true};
+        } else {
+            UnitInfo failed;
+            failed.succsess = false;
+            return failed;
+        }
     }
 }
