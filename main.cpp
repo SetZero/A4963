@@ -25,7 +25,9 @@ int consoleInterface(const char* spiDevice);
 int simpleInput(int min, int max);
 int serverInterface(const char* spiDevice);
 
-static std::array<const char*,4> optMain {
+static inline constexpr int nrOfOptions = 4;
+
+static std::array<const char*,nrOfOptions> optMain {
         "1: load config from JSON",
         "2: setup Registers",
         "3: show Register value",
@@ -107,9 +109,9 @@ int consoleInterface(const char* spiDevice){
         auto ptr = std::make_shared<MCP2210>();
         device = std::make_shared<NS_A4963::A4963>(ptr);
     }
-    showOptions<4>(optMain);
+    showOptions<nrOfOptions>(optMain);
     while(true) {
-        int choice = simpleInput(1, 4);
+        int choice = simpleInput(1, nrOfOptions);
         switch (choice) {
             case 1: {
                 using namespace nlohmann;
@@ -124,10 +126,7 @@ int consoleInterface(const char* spiDevice){
                         for (auto it1 = (*it).begin(); it1 != (*it).end(); ++it1) {
                             if (it1.key() != "Duty Cycle Control" ||
                                 (it1.key() == "Duty Cycle Control" && it1.value() != "0")) {
-                                A4963RegisterNames mask;
-                                try {
-                                    mask = RegisterStrings::get(it1.key()); //TODO: Here is a bug fix it
-                                } catch (std::exception &e) {}
+                                auto mask = RegisterStrings::get(it1.key());
                                 setRuntime(*device, mask, it1.value());
                             }
                             else
