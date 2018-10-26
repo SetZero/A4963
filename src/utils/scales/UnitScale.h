@@ -49,6 +49,7 @@ public:
             auto converted_value = inverse_functor(static_cast<non_ref_type>(value));
             auto actual_value = functor(converted_value);
             if(actual_value != value) {
+                //TODO: "%" has a non working functor and will always default to 0, fixme!
                 std::cerr << "Warning! Converted value not equal to actual value (" << static_cast<non_ref_type>(actual_value)
                           << " vs. " << static_cast<non_ref_type>(value) << "), next possible upper bound value: " << functor(converted_value + 1)  << std::endl;
             }
