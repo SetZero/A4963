@@ -545,7 +545,7 @@ namespace NS_A4963 {
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1 -7.0_perc)/3.0); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "Duty Cycle Control";
-    };
+    }; //TODO: special case: when 0000 then off
 
     template<>
     struct RegisterValues<A4963RegisterNames::RestartControl> {

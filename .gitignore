@@ -182,3 +182,5 @@ build/test_cases
 SPI\.cbp
 
 hid
+
+config\.json

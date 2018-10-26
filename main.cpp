@@ -21,15 +21,140 @@
 #include "src/Devices/A4963/DeserializeA4963.h"
 #include "src/utils/scales/UnitScale.h"
 
+int consoleInterface(const char* spiDevice);
+int simpleInput(int min, int max);
+int serverInterface(const char* spiDevice);
+
+static std::array<const char*,4> optMain {
+        "1: load config from JSON",
+        "2: setup Registers",
+        "3: show Register value",
+        "4: exit program"
+};
+
+template<uint8_t N>
+void showOptions(const std::array<const char*,N>& arr){
+    std::cout << "you have the following options:" << std::endl;
+    for(auto e : arr){
+        std:: cout << e << std::endl;
+    }
+}
+
+int main(int argc, char** argv){
+    std::ofstream of{"config.json"};
+    of << std::setw(4) << NS_A4963::defaultValues;
+    of.close();
+    if(argc < 2 ) {
+        return consoleInterface("mcp");
+        /*
+        std::cerr << "too few arguments" << std::endl;
+        return -42;*/
+    } if(std::string(argv[0]) == "console") {
+        if(std::string(argv[1]) == "mcp" || std::string(argv[1]) == "atmega" )
+            return consoleInterface(argv[1]);
+        else {
+            std::cerr << "wrong argument: " << argv[1] << " it should be mcp or atmega" << std::endl;
+            return -21;
+        }
+    } else if (std::string(argv[0]) == "server") {
+        if(std::string(argv[1]) == "mcp" || std::string(argv[1]) == "atmega" )
+            return serverInterface(argv[1]);
+        else {
+            std::cerr << "wrong argument: " << argv[1] << " it should be mcp or atmega" << std::endl;
+            return -21;
+        }
+    }
+    else {
+        std::cerr << "wrong argument: " << argv[0] << " it should be console or server!" << std::endl;
+        return -4711;
+    }
+}
+
+int simpleInput(int min, int max){
+    std::cout << "give a valid number from " << std::to_string(min) << " to " << std::to_string(max) << std::endl;
+    int z = -1;
+    do {
+        try {
+            std::string str = std::to_string(0);
+            std::cin >> str;
+            z = std::stoi(str);
+        } catch(std::exception& e){
+            std::cout << " please use a valid number! " << std::endl;
+        }
+    } while(z == -1);
+    //clear input
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return z;
+}
+
+int consoleInterface(const char* spiDevice){
+    std::shared_ptr<NS_A4963::A4963> device;
+    if(std::string(spiDevice) == "atmega"){
+        std::cout << "Starting Atmega32u4..." << std::endl;
+        usb::LibUSBDeviceList deviceList;
+        std::cout << "Found " << deviceList.size() << " devices" << std::endl;
+        if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
+            std::cout << "INDIGO!" << std::endl;
+            auto ptr = std::make_shared<spi::ATmega32u4SPI>(*atmega);
+            device = std::make_shared<NS_A4963::A4963>(ptr);
+        }
+        else {
+            std::cerr << " atmega not found " << std::endl;
+        }
+    } else {
+        using namespace CustomDataTypes::literals;
+        auto ptr = std::make_shared<MCP2210>();
+        device = std::make_shared<NS_A4963::A4963>(ptr);
+    }
+    showOptions<4>(optMain);
+    while(true) {
+        int choice = simpleInput(1, 4);
+        switch (choice) {
+            case 1: {
+                using namespace nlohmann;
+                using namespace NS_A4963;
+                json j;
+                std::ifstream ifs = std::ifstream("config.json");
+                ifs >> j;
+                ifs.close();
+                json config = j["config"];
+                for(int i = 0; i < config.size(); i++){
+                    json inner = config[i];
+                    //std::string value = inner.;
+
+                }
+                break;
+            }
+            case 2: {
+
+                break;
+            }
+            case 3: {
+                break;
+            }
+            case 4: {
+                return 0;
+            }
+            default: return -42;
+        }
+    }
+}
+
+int serverInterface(const char* spiDevice){
+
+}
+
+/* Obsolete
+ *
+ * enum Chips {
+    ATMEGA, MCP
+};
+static constexpr Chips used_chip = Chips::ATMEGA;
 
 bool reconnect( std::shared_ptr<MCP2210>& ptr);
 int userInput();
 void clearInput();
-
-enum Chips {
-    ATMEGA, MCP
-};
-static constexpr Chips used_chip = Chips::ATMEGA;
 
 int atmega_main() {
     using namespace spi::literals;
@@ -73,7 +198,6 @@ int mcp_main(){
     using namespace NS_A4963;
     auto device = std::make_shared<NS_A4963::A4963>(ptr);
         ptr->exceptionHandling(-100);
-    //JsonSetter s{*device, "data.json"};
 
     enum class TO : uint8_t {
         f = 1,
@@ -153,9 +277,8 @@ int mcp_main(){
         }
     }
 }
-
-//int argc, char **argv
-int main() {
+ //int argc, char **argv
+int main2() {
     if constexpr (used_chip == Chips::ATMEGA) {
         return atmega_main();
     } else if(used_chip == Chips::MCP) {
@@ -183,11 +306,11 @@ int userInput(){
             std::cin >> str;
             z = std::stoi(str);
         } catch(std::exception& e){
-            std::cerr << e.what();
             std::cout << " please use a valid number! " << std::endl;
         }
     } while(z == -1);
-    clearInput();
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return z;
 }
 
@@ -195,3 +318,4 @@ void clearInput(){
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
+ */

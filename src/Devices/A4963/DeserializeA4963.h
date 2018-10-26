@@ -19,6 +19,53 @@
 namespace NS_A4963 {
     using nlohmann::json;
 
+    static inline const json defaultValues{
+            {"config", 
+                {
+                    json{{"Blank Time","1200ns"}},
+                    json{{"Dead Time","1000ns"}},
+                    json{{"Recirculation Mode","Off"}},
+                    json{{"Percent Fast Decay","12.5 Percent"}},
+                    json{{"Invert PWM Input","Normal True Logic"}},
+                    json{{"Current Sense Threshold Voltage","200mV"}},
+                    json{{"Bemf Time Qualifier","Debounce Timer"}},
+                    json{{"VDS Threshold","1.55V"}},
+                    json{{"Position Controller Proportional Gain", 1}},
+                    json{{"Overspeed Limit Ratio","150 Percent"}},
+                    json{{"Degauss Compensation","Off"}},
+                    json{{"Fixed Period","50.4us"}},
+                    json{{"Position Controller Integral Gain",1}},
+                    json{{"PWM Duty Cycle Hold Torque","37.5%"}},
+                    json{{"Hold Time","16ms"}},
+                    json{{"PI Controller Proportional Gain",1}},
+                    json{{"PWM Duty Cycle Torque Startup","50%"}},
+                    json{{"Start Speed","8Hz"}},
+                    json{{"PI Controller Integral Gain",1}},
+                    json{{"Speed Output Selection","Electrical Frequenzy"}},
+                    json{{"Maximum Speed Setting","819.1Hz"}},
+                    json{{"Phase Advance",15}},
+                    json{{"Motor Control Mode","Indirect Speed"}},
+                    json{{"Enable Stop On Fail","No Stop On Fail"}},
+                    json{{"Duty Cycle Control",0}},
+                    json{{"Restart Control","Restart After Loss Of Sync"}},
+                    json{{"Brake","Brake Disabled"}},
+                    json{{"Direction Of Rotation","Forward"}},
+                    json{{"Run Enable","Start And Run Motor"}},
+                }
+            },
+            {"mask", 
+                {
+                    json{{"Temperature Warning",false}},
+                    json{{"Overtemperature",false}},
+                    json{{"Loss Of Bemf Synchronitation",false}},
+                    json{{"Phase A High Side VDS",false}},
+                    json{{"Phase B High Side VDS",false}},
+                    json{{"Phase C High Side VDS",false}},
+                    json{{"VBB Undervoltage",false}},
+                }
+            }
+    };
+
     static auto A4963MasksMap = std::map<std::string_view, Masks>{
             {"Temperatur Warning", Masks::TemperatureWarning},
             {"Loss Of Bemf Synchronitation", Masks::LossOfBemfSynchronization},
