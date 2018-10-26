@@ -51,6 +51,10 @@ namespace NS_A4963 {
             return setRegisterEntry(static_cast<size_type>(value),RegisterValues<toSet>::mask, RegisterValues<toSet>::code);
         }
 
+        void turnOffDutyCycle(){
+            writeRegisterEntry(RegisterCodes::Run,RegisterMask::DutyCycleControl,0);
+        }
+
     private:
 
         std::shared_ptr<spi::SPIBridge> mBridge;

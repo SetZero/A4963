@@ -118,12 +118,23 @@ int consoleInterface(const char* spiDevice){
                 std::ifstream ifs = std::ifstream("config.json");
                 ifs >> j;
                 ifs.close();
-                json config = j["config"];
-                for(int i = 0; i < config.size(); i++){
-                    json inner = config[i];
-                    //std::string value = inner.;
+                auto vec = j["config"];
 
-                }
+                    for (auto it = vec.begin(); it != vec.end(); ++it) {
+                        for (auto it1 = (*it).begin(); it1 != (*it).end(); ++it1) {
+                            if (it1.key() != "Duty Cycle Control" ||
+                                (it1.key() == "Duty Cycle Control" && it1.value() != "0")) {
+                                A4963RegisterNames mask;
+                                try {
+                                    mask = RegisterStrings::get(it1.key()); //TODO: Here is a bug fix it
+                                } catch (std::exception &e) {}
+                                setRuntime(*device, mask, it1.value());
+                            }
+                            else
+                                device->turnOffDutyCycle();
+                        }
+                    }
+
                 break;
             }
             case 2: {
