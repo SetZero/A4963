@@ -7,6 +7,7 @@
 #include <memory>
 #include <libusb.h>
 #include <iostream>
+#include <atomic>
 #include "src/SPI/SPIBridge.h"
 #include "USBUtils.h"
 
@@ -34,7 +35,7 @@ namespace usb {
         libusb_device *device = nullptr;
         libusb_device_handle *handle = nullptr;
         size_t mUsbID;
-        bool isOpen = false;
+        std::atomic<bool> isOpen = false;
     };
 
     inline namespace literals {
