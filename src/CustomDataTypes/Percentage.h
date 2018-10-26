@@ -65,7 +65,7 @@ namespace CustomDataTypes {
         template<typename Skalar>
         constexpr Percentage& operator/=(const Skalar skalar){
             static_assert(std::is_arithmetic<Skalar>(), "cannot divide by a non arithmetic type");
-            this->mPercentage = mPercentage/skalar;
+            this->mPercentage /= skalar;
             return *this;
         }
 
@@ -83,6 +83,12 @@ namespace CustomDataTypes {
         }
         constexpr auto operator"" _perc(long double percent){
             return Percentage<double>(percent);
+        }
+        constexpr auto operator"" _perc(unsigned long long percent){
+            return Percentage<double>(percent);
+        }
+        constexpr auto operator"" _percLd(unsigned long long percent){
+            return Percentage<long double>(percent);
         }
     }
 
@@ -145,7 +151,7 @@ namespace CustomDataTypes {
     }
     template<typename Skalar, typename accuracy>
     constexpr Percentage<accuracy> operator/(const Skalar lhs, const Percentage<accuracy>& rhs){
-        Percentage<accuracy> temp{lhs};
+        Percentage<accuracy> temp{static_cast<accuracy>(lhs)};
         temp/=(accuracy) rhs;
         return temp;
     }
@@ -157,7 +163,7 @@ namespace CustomDataTypes {
     }
 
     template<typename accuracy>
-    constexpr void swap(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
+    constexpr void swap(Percentage<accuracy>& lhs, Percentage<accuracy>& rhs){
         lhs.swap(rhs);
     }
 
