@@ -44,38 +44,27 @@ public:
 
     template<typename T>
     constexpr std::optional<TValueType> convertValue(const T& value) const {
+        using namespace utils::printable;
         //TODO: round value up/down
-        if(value >= min && value <= max) {
+        if(utils::approximately_greater_or_equal(value, min) &&
+            utils::approximately_less_or_equal(value, max))
+        {
             auto converted_value = inverse_functor(static_cast<non_ref_type>(value));
             auto actual_value = functor(converted_value);
-            if(actual_value != value) {
-                //TODO: "%" has a non working functor and will always default to 0, fixme!
-                std::cerr << "Warning! Converted value not equal to actual value (" << static_cast<non_ref_type>(actual_value)
-                          << " vs. " << static_cast<non_ref_type>(value) << "), next possible upper bound value: " << functor(converted_value + 1)  << std::endl;
+            if(!utils::approximately_same(actual_value, value)) {
+                auto next_possible_value = functor(converted_value + 1);
+                if(utils::approximately_less_or_equal(next_possible_value, max) && utils::approximately_same(next_possible_value, value)) {
+                    converted_value = converted_value + 1;
+                } else {
+                    std::cerr << "Warning! Converted value not equal to actual value ("
+                              << static_cast<non_ref_type>(actual_value)
+                              << " vs. " << static_cast<non_ref_type>(value) << "), next possible upper bound value: "
+                              << next_possible_value << std::endl;
+                }
             }
             return {converted_value};
         } else {
             std::cerr << "Maximum: " << max << ", Minimum: " << min << ", Given: " << value << std::endl;
-            std::cerr << "Duration not in Range!" << std::endl;
-            return std::nullopt;
-        }
-    }
-
-    template<typename Rep, typename Period>
-    constexpr std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value) const {
-        using namespace utils::printable;
-        //TODO: round value up/down
-        if(value >= min && value <= max) {
-            auto steps = std::chrono::duration_cast<non_ref_type>(value);
-            auto converted_value = inverse_functor(static_cast<non_ref_type>(value));
-            auto actual_value = functor(converted_value);
-            if(actual_value != value) {
-                std::cerr << "Warning! Saved value not equal to given value (" << static_cast<non_ref_type>(actual_value)
-                          << " vs. " << static_cast<non_ref_type>(value) << "), closest possible upper value: " << functor(converted_value + 1) << std::endl;
-            }
-            return {converted_value};
-        } else {
-            std::cerr << "Maximum: " << max << ", Minimum: " << min << ", Given: " << value.count() << std::endl;
             std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
         }

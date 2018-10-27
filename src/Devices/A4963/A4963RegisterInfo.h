@@ -432,7 +432,7 @@ namespace NS_A4963 {
         static constexpr auto min = 2_Hz;
         static constexpr auto max = 32_Hz;
         static constexpr auto functor = [](auto t1) { return CustomDataTypes::Frequency::hertz(t1+1) * min; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min)-1_Hz); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min)-1.0_Hz); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "Start Speed";
     };

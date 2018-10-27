@@ -17,8 +17,8 @@ add_executable(hid main.cpp)
 find_library(LIBUSB_LIBRARY
         NAMES usb-1.0)
 
-find_library(LIBEVPP
-        NAMES libevpp.so)
+#find_library(LIBEVPP
+#        NAMES libevpp.so)
 
 find_path(LIBUSB_INCLUDE_DIR
         NAMES libusb.h
@@ -90,7 +90,8 @@ add_subdirectory(src/Devices/A4963)
 include_directories(src/CustomDataTypes)
 add_subdirectory(src/CustomDataTypes)
 
-target_link_libraries(hid     src spi usbb inc  utils scales a4963 cdt ${LIBEVPP} ${LIBUSB_LIBRARY})
+# LIBEVPP
+target_link_libraries(hid     src spi usbb inc  utils scales a4963 cdt  ${LIBUSB_LIBRARY})
 
 #add_executable(SPI
 #        inc/mcp2210_api.c

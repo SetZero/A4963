@@ -7,6 +7,7 @@
 #include <ratio>
 #include <limits>
 #include <stdexcept>
+#include <iostream>
 #include "../utils/RatioLookup.h"
 
 namespace CustomDataTypes {

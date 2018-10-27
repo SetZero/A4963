@@ -7,6 +7,7 @@
 #include <ratio>
 #include "../../src/CustomDataTypes/Volt.h"
 #include "../../src/CustomDataTypes/Hertz.h"
+#include "../../src/CustomDataTypes/Percentage.h"
 
 
 namespace utils {
@@ -319,6 +320,80 @@ namespace utils {
     struct remove_cvref {
         typedef std::remove_cv_t<std::remove_reference_t<T>> type;
     };
+
+    constexpr bool approximately_same(long a, long b)
+    {
+        return a == b;
+    }
+
+    template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+	bool approximately_same(T a, T b)
+	{
+        return std::fabs(a - b) <= 1E-13;
+	}
+
+	template<template <typename, typename> typename T, typename Rep, typename U, typename V>
+    bool approximately_same(T<Rep, U> a, T<Rep, V> b) {
+            if(std::ratio_less_v<U, V>) {
+                auto tmp_b = static_cast<T<Rep, U>>(b);
+                return approximately_same(a.count(), tmp_b.count());
+            } else {
+                auto tmp_a = static_cast<T<Rep, V>>(a);
+                return approximately_same(tmp_a.count(), b.count());
+            }
+    }
+
+    template<template <typename> typename T, typename Rep>
+    bool approximately_same(T<Rep> a, T<Rep> b) {
+        return a == b;
+    }
+
+    template<typename Rep, typename U, typename V>
+    bool approximately_same(std::chrono::duration<Rep, U> a, std::chrono::duration<Rep, V> b) {
+        if(std::ratio_less_v<U, V>) {
+            auto tmp_b = std::chrono::duration_cast<std::chrono::duration<Rep, U>>(b);
+            return approximately_same(a.count(), tmp_b.count());
+        } else {
+            auto tmp_a = std::chrono::duration_cast<std::chrono::duration<Rep, V>>(a);
+            return approximately_same(tmp_a.count(), b.count());
+        }
+    }
+
+    template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+    bool approximately_greater_or_equal(T a, T b)
+    {
+        return (a > b || approximately_same(a, b));
+    }
+
+    template<typename Rep>
+    bool approximately_greater_or_equal(CustomDataTypes::Percentage<Rep> a, CustomDataTypes::Percentage<Rep>  b)
+    {
+        return (a.getPercent() > b.getPercent() || approximately_same(a, b));
+    }
+
+    template<template <typename, typename> typename T, typename Rep, typename U, typename V>
+    bool approximately_greater_or_equal(T<Rep, U> a, T<Rep, V> b)
+    {
+        return (a > b || approximately_same(a, b));
+    }
+
+    template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+    bool approximately_less_or_equal(T a, T b)
+    {
+        return (a < b || approximately_same(a, b));
+    }
+
+    template<template <typename, typename> typename T, typename Rep, typename U, typename V>
+    bool approximately_less_or_equal(T<Rep, U> a, T<Rep, V> b)
+    {
+        return (a < b || approximately_same(a, b));
+    }
+
+    template<typename Rep>
+    bool approximately_less_or_equal(CustomDataTypes::Percentage<Rep> a, CustomDataTypes::Percentage<Rep>  b)
+    {
+        return (a.getPercent() < b.getPercent() || approximately_same(a, b));
+    }
 
 	namespace printable {
 	    template<typename Rep, typename p>
