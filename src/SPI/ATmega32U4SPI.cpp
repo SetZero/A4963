@@ -68,7 +68,7 @@ namespace spi {
 
             auto data = mDevice.get()->sendData(dataVector);
             if(data.empty()) {
-                std::cout << "There was an error with the spi data!" << std::endl;
+                std::cout << "There was an error with the spi data! (empty input)" << std::endl;
             } else {
                 if (data[0] == static_cast<unsigned char>(SPIAnswerypes::SPIAnswerWaiting)) {
                     std::cout << "Failed to send data: device not ready yet..." << std::endl;

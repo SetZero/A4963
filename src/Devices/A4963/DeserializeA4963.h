@@ -189,7 +189,7 @@ namespace NS_A4963 {
 
                     }
                 } else {
-                    std::cerr << "There was an error parsing your data!" << std::endl;
+                    std::cerr << "There was an error parsing your data at register " << RegisterValues<N>::name << std::endl;
                 }
             } else {
                 try {

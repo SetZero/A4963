@@ -67,6 +67,7 @@ namespace NS_A4963 {
         std::smatch unit_match;
         long double unit_val = 0.0;
         char prefix = '\0';
+        bool success = true;
         std::string unit;
 
         if (std::regex_search(registerValue, unit_match, unit_regex)) {
@@ -75,6 +76,8 @@ namespace NS_A4963 {
                     case 1:
                         if (unit_match[i].length() > 0) {
                             unit_val = std::atof(unit_match[i].str().data());
+                        } else {
+                            success = false;
                         }
                         break;
                     case 2:
@@ -91,7 +94,7 @@ namespace NS_A4963 {
                         break;
                 }
             }
-            return UnitInfo{unit_val, prefix, unit, true};
+            return UnitInfo{unit_val, prefix, unit, success};
         } else {
             UnitInfo failed;
             failed.succsess = false;
