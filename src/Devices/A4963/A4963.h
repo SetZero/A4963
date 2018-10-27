@@ -15,7 +15,6 @@ namespace NS_A4963 {
     using namespace CustomDataTypes::Electricity::literals;
 
     class A4963 : public SPIDevice {
-
     public:
         using size_type = uint16_t;
 
@@ -24,7 +23,6 @@ namespace NS_A4963 {
         void commit();
 
         void show_register();
-
 
         template<A4963RegisterNames reg>
         auto getRegisterRange() const {
@@ -40,6 +38,9 @@ namespace NS_A4963 {
                         RegisterValues<toGet>::mask));
             }
         }
+
+        template<A4963RegisterNames toGet = static_cast<A4963RegisterNames>(0)>
+        uint16_t getRuntime(A4963RegisterNames name);
 
         template< A4963RegisterNames toSet, typename = std::enable_if_t<RegisterValues<toSet>::isRanged>>
         auto set(decltype(RegisterValues<toSet>::min) value){
@@ -130,6 +131,20 @@ namespace NS_A4963 {
             writeRegisterEntry(RegisterCodes::Mask, static_cast<RegisterMask>(mask), on);
         }
     };
+
+    template<A4963RegisterNames toGet = static_cast<A4963RegisterNames>(0)>
+    uint16_t A4963::getRuntime(A4963RegisterNames name){
+        if (toGet == name){
+            return getRegisterEntry(RegisterValues<toGet>::code,RegisterValues<toGet>::mask);
+        } else {
+            return getRuntime<static_cast<A4963RegisterNames>(static_cast<uint16_t>(toGet)+1)>(name);
+        }
+    }
+
+    template<>
+    inline uint16_t A4963::getRuntime<A4963RegisterNames::Run>(A4963RegisterNames name){
+            return A4963::getRegisterEntry(RegisterValues<A4963RegisterNames::Run>::code,RegisterValues<A4963RegisterNames::Run>::mask);
+    }
 
     template< A4963RegisterNames toSet>
     struct possibleValues {

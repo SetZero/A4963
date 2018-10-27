@@ -149,7 +149,7 @@ namespace NS_A4963 {
 
     }
 
-    template<A4963RegisterNames N>
+    template<A4963RegisterNames N = static_cast<A4963RegisterNames>(0)>
     void setRuntime(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
         if (toSet == N) {
             if constexpr(RegisterValues<N>::isRanged) {
@@ -212,18 +212,13 @@ namespace NS_A4963 {
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
     template<>
-    void setRuntime<A4963RegisterNames::Run>(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
+    inline void setRuntime<A4963RegisterNames::Run>(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
         std::cout << "Set the register " << RegisterValues<A4963RegisterNames::Run>::name << " to " << registerData << std::endl;
         auto d = static_cast<typename RegisterValues<A4963RegisterNames::Run>::values>(std::atof(registerData.data()));
         device.set<A4963RegisterNames::Run>(d);
     }
 
 #pragma GCC diagnostic pop
-
-    template<typename T = void>
-    void setRuntime(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
-        setRuntime<static_cast<A4963RegisterNames>(0)>(device, toSet, registerData);
-    }
 
     class RegisterStrings {
     private:
