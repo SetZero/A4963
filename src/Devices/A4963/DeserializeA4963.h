@@ -57,7 +57,7 @@ namespace NS_A4963 {
                 {
                     json{{"Temperature Warning",false}},
                     json{{"Overtemperature",false}},
-                    json{{"Loss Of Bemf Synchronitation",false}},
+                    json{{"Loss Of Bemf Synchronization",false}},
                     json{{"Phase A High Side VDS",false}},
                     json{{"Phase B High Side VDS",false}},
                     json{{"Phase C High Side VDS",false}},
@@ -67,8 +67,9 @@ namespace NS_A4963 {
     };
 
     static auto A4963MasksMap = std::map<std::string_view, Masks>{
-            {"Temperatur Warning", Masks::TemperatureWarning},
-            {"Loss Of Bemf Synchronitation", Masks::LossOfBemfSynchronization},
+            {"Temperature Warning", Masks::TemperatureWarning},
+            {"Overtemperature", Masks::OverTemperature},
+            {"Loss Of Bemf Synchronization", Masks::LossOfBemfSynchronization},
             {"Phase A High Side VDS", Masks::PhaseAHighSideVDS},
             {"Phase B High Side VDS", Masks::PhaseBHighSideVDS},
             {"Phase C High Side VDS", Masks::PhaseCHighSideVDS},

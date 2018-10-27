@@ -52,9 +52,6 @@ void showOptions(const std::array<const char*,N>& arr){
 int main(int argc, char** argv){
     if(argc < 2 ) {
         return consoleInterface("mcp");
-        /*
-        std::cerr << "too few arguments" << std::endl;
-        return -42;*/
     } if(std::string(argv[0]) == "console") {
         if(std::string(argv[1]) == "mcp" || std::string(argv[1]) == "atmega" )
             return consoleInterface(argv[1]);
@@ -215,6 +212,13 @@ inline void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device){
             }
             else
                 device->turnOffDutyCycle();
+        }
+    }
+    vec = j["mask"];
+    for (auto &it : vec) {
+        for (auto it1 = it.begin(); it1 != it.end(); ++it1) {
+            device->configDiagnostic(static_cast<NS_A4963::RegisterMask>(NS_A4963::A4963MasksMap.at(it1.key())),it1.value());
+            std::cout << "set: " << it1.key() << " to: " << (it1.value() ? " On " : " Off ") << std::endl;
         }
     }
 }

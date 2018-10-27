@@ -56,6 +56,10 @@ namespace NS_A4963 {
             writeRegisterEntry(RegisterCodes::Run,RegisterMask::DutyCycleControl,0);
         }
 
+        void configDiagnostic(const RegisterMask& mask,bool active);
+
+        std::vector<Diagnostic> readDiagnostic();
+
     private:
 
         std::shared_ptr<spi::SPIBridge> mBridge;
@@ -69,12 +73,6 @@ namespace NS_A4963 {
             size_type data;
             bool dirty;
         };
-
-        void configDiagnostic(const RegisterMask& mask,bool active);
-
-        std::vector<Diagnostic> readDiagnostic();
-
-        bool testDiagnostic();
 
         std::map<RegisterCodes, RegisterInfo> mRegisterData;
 

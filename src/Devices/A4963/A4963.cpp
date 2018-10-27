@@ -117,8 +117,6 @@ namespace NS_A4963 {
         writeRegisterEntry(RegisterCodes::Mask,mask,val);
     }
 
-
-
     std::vector<Diagnostic> A4963::readDiagnostic() {
         std::bitset<16> tmp{readRegister(RegisterCodes::Diagnostic)};
         std::vector<Diagnostic> ret{};
@@ -129,9 +127,5 @@ namespace NS_A4963 {
             }
         }
         return ret;
-    }
-
-    bool A4963::testDiagnostic() {
-        return readRegister(RegisterCodes::Diagnostic) != 0;
     }
 }
