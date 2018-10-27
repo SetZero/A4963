@@ -47,7 +47,7 @@ int main(int argc, char** argv){
     of << std::setw(4) << NS_A4963::defaultValues;
     of.close();
     if(argc < 2 ) {
-        return consoleInterface("mcp");
+        return consoleInterface("atmega");
         /*
         std::cerr << "too few arguments" << std::endl;
         return -42;*/

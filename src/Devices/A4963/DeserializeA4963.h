@@ -8,6 +8,7 @@
 #include <variant>
 #include <fstream>
 #include <regex>
+#include <iomanip>
 #include "../../CustomDataTypes/SIUnit.h"
 #include "../../CustomDataTypes/Volt.h"
 #include "../../CustomDataTypes/Hertz.h"
@@ -120,21 +121,18 @@ namespace NS_A4963 {
     }
 
     template<typename T, A4963RegisterNames N>
-    static bool setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
+    static auto setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
         using Rep = typename utils::periodic_info<T>::rep;
         using Period = typename utils::periodic_info<T>::period;
         try {
             auto d = T{std::get<T>(
                     getType<Rep, typename utils::periodic_info<T>::period>(prefix, unit, static_cast<Rep>(data)))};
-            if(device.set<N>(d)) {
-                return true;
-            }
-            return false;
+            return device.set<N>(d);
         }
         catch(std::exception& e){
             std::cerr << "Invalid Unit \"" << prefix << unit << "\" in register \"" << RegisterValues<N>::name <<
                         "\", did you mean \"" << utils::ratio_lookup<Period>::abr_value << utils::periodic_printable<T>::name << "\" ?" << std::endl;
-            return false;
+            return std::optional<const T>{};
         }
     }
 
@@ -151,6 +149,7 @@ namespace NS_A4963 {
 
     template<A4963RegisterNames N>
     void setRuntime(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
+        using namespace utils::printable;
         if (toSet == N) {
             if constexpr(RegisterValues<N>::isRanged) {
                 JsonSetter::UnitInfo unitInfo = JsonSetter::parseData(registerData);
@@ -161,9 +160,9 @@ namespace NS_A4963 {
 
                     using type = std::remove_const_t<decltype(RegisterValues<N>::min)>;
                     if constexpr(utils::is_periodic<type>::value) {
-                        if (setIfPeriodic<type, N>(device, static_cast<double>(data), prefix, unit)) {
-                            std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix
-                                      << unit << std::endl;
+                        if (auto value = setIfPeriodic<type, N>(device, static_cast<double>(data), prefix, unit)) {
+                            std::cout << "Set the register " << std::setw(40) << RegisterValues<N>::name << " to "
+                                    << std::setw(20) << *value << std::endl;
                         }
                     } else {
                         if (prefix != '\0') {
@@ -184,8 +183,9 @@ namespace NS_A4963 {
                         }
 
                         setIfNotPeriodic<type, N>(device, static_cast<double>(data));
-                        std::cout << "Set the register " << RegisterValues<N>::name << " to " << data << prefix << unit
-                                  << std::endl;
+                        std::cout << "Set the register " << std::setw(40) << RegisterValues<N>::name << " to " << std::setw(20)
+                                  << data << prefix << unit << std::endl;
+
                     }
                 } else {
                     std::cerr << "There was an error parsing your data!" << std::endl;
@@ -194,7 +194,7 @@ namespace NS_A4963 {
                 try {
                     auto type = RegisterValues<N>::map.at(registerData.data());
                     device.set<N>(type);
-                    std::cout << "Set the register " << RegisterValues<N>::name << " to " << registerData << std::endl;
+                    std::cout << "Set the register " << std::setw(40) << RegisterValues<N>::name << " to " << std::setw(20) << registerData << std::endl;
                 } catch (std::exception& e) {
                     std::cerr << "Unknown value " << registerData << " in register " << RegisterValues<N>::name << std::endl;
                     std::cerr << "Possible values: " << std::endl;
