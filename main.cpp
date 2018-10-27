@@ -25,13 +25,20 @@ int consoleInterface(const char* spiDevice);
 int simpleInput(int min, int max);
 int serverInterface(const char* spiDevice);
 
-static inline constexpr int nrOfOptions = 4;
+static inline constexpr int nrOfOptions = 5;
+
+void clearInput();
+void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device);
+void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device);
+void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device);
+void generateDefault();
 
 static std::array<const char*,nrOfOptions> optMain {
         "1: load config from JSON",
         "2: setup Registers",
         "3: show Register value",
-        "4: exit program"
+        "4: generate default config.json File",
+        "5: exit program"
 };
 
 template<uint8_t N>
@@ -43,14 +50,8 @@ void showOptions(const std::array<const char*,N>& arr){
 }
 
 int main(int argc, char** argv){
-    std::ofstream of{"config.json"};
-    of << std::setw(4) << NS_A4963::defaultValues;
-    of.close();
     if(argc < 2 ) {
         return consoleInterface("atmega");
-        /*
-        std::cerr << "too few arguments" << std::endl;
-        return -42;*/
     } if(std::string(argv[0]) == "console") {
         if(std::string(argv[1]) == "mcp" || std::string(argv[1]) == "atmega" )
             return consoleInterface(argv[1]);
@@ -85,8 +86,7 @@ int simpleInput(int min, int max){
         }
     } while(z == -1);
     //clear input
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    clearInput();
     return z;
 }
 
@@ -114,36 +114,22 @@ int consoleInterface(const char* spiDevice){
         int choice = simpleInput(1, nrOfOptions);
         switch (choice) {
             case 1: {
-                using namespace nlohmann;
-                using namespace NS_A4963;
-                json j;
-                std::ifstream ifs = std::ifstream("config.json");
-                ifs >> j;
-                ifs.close();
-                auto vec = j["config"];
-
-                    for (auto it = vec.begin(); it != vec.end(); ++it) {
-                        for (auto it1 = (*it).begin(); it1 != (*it).end(); ++it1) {
-                            if (it1.key() != "Duty Cycle Control" ||
-                                (it1.key() == "Duty Cycle Control" && it1.value() != "0")) {
-                                auto mask = RegisterStrings::get(it1.key());
-                                setRuntime(*device, mask, it1.value());
-                            }
-                            else
-                                device->turnOffDutyCycle();
-                        }
-                    }
-
+                loadFromFile(device);
                 break;
             }
             case 2: {
-
+                setRegisterVal(device);
                 break;
             }
             case 3: {
+                showRegisterVal(device);
                 break;
             }
             case 4: {
+                generateDefault();
+                break;
+            }
+            case 5: {
                 return 0;
             }
             default: return -42;
@@ -153,6 +139,93 @@ int consoleInterface(const char* spiDevice){
 
 int serverInterface(const char* spiDevice){
 
+}
+
+inline void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
+    std::string str;
+    while(true) {
+        std::cout << "type the name of the Register mask you want to read" << std::endl;
+        std::getline(std::cin,str);
+        if (str == "exit") break;
+        try {
+            auto mask = NS_A4963::RegisterStrings::get(str);
+            std::cout << device->getRuntime(mask) << std::endl;
+            break;
+        } catch (std::exception &e) {
+            std::cout << "type a valid name or exit" << std::endl;
+        }
+    }
+}
+
+inline void generateDefault(){
+    std::cout << "this action will override the old file, type 'yes' if you are sure" << std::endl;
+    std::string str;
+    std::cin >> str;
+    if(str != "yes") return;
+    std::ofstream of{"config.json"};
+    of << std::setw(4) << NS_A4963::defaultValues;
+    of.close();
+    std::cout << "new config file successfully generated" << std::endl;
+}
+
+inline void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
+    std::cout << "type the Name of the Register you want to Set, or exit to cancel" << std::endl;
+    std::string str;
+    NS_A4963::A4963RegisterNames mask;
+    while(true) {
+        std::getline(std::cin,str);
+        if (str == "exit") break;
+        try {
+            mask = NS_A4963::RegisterStrings::get(str);
+            break;
+        } catch (std::exception &e) {
+            std::cout << "type a valid name or exit" << std::endl;
+        }
+    }
+    std::cout << "type the value you want to set" << std::endl;
+    while(true) {
+        std::getline(std::cin,str);
+        if (str == "exit") break;
+        try {
+            NS_A4963::setRuntime(*device,mask,str);
+            break;
+        } catch (std::exception &e) {
+            std::cout << "type a valid value or exit" << std::endl;
+        }
+    }
+}
+
+inline void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device){
+    using namespace nlohmann;
+    using namespace NS_A4963;
+    json j;
+    std::ifstream ifs = std::ifstream("config.json");
+    ifs >> j;
+    ifs.close();
+    auto vec = j["config"];
+    for (auto &it : vec) {
+        for (auto it1 = it.begin(); it1 != it.end(); ++it1) {
+            if (it1.key() != "Duty Cycle Control" ||
+                (it1.key() == "Duty Cycle Control" && it1.value() != "0")) {
+                auto mask = RegisterStrings::get(it1.key());
+                setRuntime(*device, mask, it1.value());
+            }
+            else
+                device->turnOffDutyCycle();
+        }
+    }
+    vec = j["mask"];
+    for (auto &it : vec) {
+        for (auto it1 = it.begin(); it1 != it.end(); ++it1) {
+            device->configDiagnostic(static_cast<NS_A4963::RegisterMask>(NS_A4963::A4963MasksMap.at(it1.key())),it1.value());
+            std::cout << "set: " << it1.key() << " to: " << (it1.value() ? " On " : " Off ") << std::endl;
+        }
+    }
+}
+
+void clearInput(){
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
 /* Obsolete

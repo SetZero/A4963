@@ -58,7 +58,7 @@ namespace NS_A4963 {
                 {
                     json{{"Temperature Warning",false}},
                     json{{"Overtemperature",false}},
-                    json{{"Loss Of Bemf Synchronitation",false}},
+                    json{{"Loss Of Bemf Synchronization",false}},
                     json{{"Phase A High Side VDS",false}},
                     json{{"Phase B High Side VDS",false}},
                     json{{"Phase C High Side VDS",false}},
@@ -68,8 +68,9 @@ namespace NS_A4963 {
     };
 
     static auto A4963MasksMap = std::map<std::string_view, Masks>{
-            {"Temperatur Warning", Masks::TemperatureWarning},
-            {"Loss Of Bemf Synchronitation", Masks::LossOfBemfSynchronization},
+            {"Temperature Warning", Masks::TemperatureWarning},
+            {"Overtemperature", Masks::OverTemperature},
+            {"Loss Of Bemf Synchronization", Masks::LossOfBemfSynchronization},
             {"Phase A High Side VDS", Masks::PhaseAHighSideVDS},
             {"Phase B High Side VDS", Masks::PhaseBHighSideVDS},
             {"Phase C High Side VDS", Masks::PhaseCHighSideVDS},
@@ -147,7 +148,7 @@ namespace NS_A4963 {
 
     }
 
-    template<A4963RegisterNames N>
+    template<A4963RegisterNames N = static_cast<A4963RegisterNames>(0)>
     void setRuntime(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
         using namespace utils::printable;
         if (toSet == N) {
@@ -212,18 +213,13 @@ namespace NS_A4963 {
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
     template<>
-    void setRuntime<A4963RegisterNames::Run>(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
+    inline void setRuntime<A4963RegisterNames::Run>(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
         std::cout << "Set the register " << RegisterValues<A4963RegisterNames::Run>::name << " to " << registerData << std::endl;
         auto d = static_cast<typename RegisterValues<A4963RegisterNames::Run>::values>(std::atof(registerData.data()));
         device.set<A4963RegisterNames::Run>(d);
     }
 
 #pragma GCC diagnostic pop
-
-    template<typename T = void>
-    void setRuntime(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
-        setRuntime<static_cast<A4963RegisterNames>(0)>(device, toSet, registerData);
-    }
 
     class RegisterStrings {
     private:
