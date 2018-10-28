@@ -301,8 +301,8 @@ namespace NS_A4963 {
         };
 
         static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
-                {"12,5 Percent", values::T12_5Percent},
-                {"25 Percent", values::T25Percent}
+                {"12,5%", values::T12_5Percent},
+                {"25%", values::T25Percent}
         };
     };
 
@@ -334,10 +334,10 @@ namespace NS_A4963 {
         };
 
         static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
-                {"100 Percent", values::T100Percent},
-                {"125 Percent", values::T125Percent},
-                {"150 Percent", values::T150Percent},
-                {"200 Percent", values::T200Percent}
+                {"100%", values::T100Percent},
+                {"125%", values::T125Percent},
+                {"150%", values::T150Percent},
+                {"200%", values::T200Percent}
         };
     };
 
@@ -480,7 +480,7 @@ namespace NS_A4963 {
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "Maximum Speed Setting";
     };
-
+pö
     template<>
     struct RegisterValues<A4963RegisterNames::PhaseAdvance> {
         static inline constexpr bool isRanged = true;

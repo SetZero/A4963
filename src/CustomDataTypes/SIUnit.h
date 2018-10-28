@@ -188,7 +188,7 @@ namespace CustomDataTypes {
 
     template<template<typename, typename> typename C, typename Rep, std::intmax_t Num, std::intmax_t Denom>
     std::ostream &operator<<(std::ostream &os, const C<Rep, std::ratio<Num, Denom>> &other) {
-        os << other.count() << " " << utils::ratio_lookup<std::ratio<Num, Denom>>::abr_value << C<Rep, std::ratio<Num, Denom>>::abr_value;
+        os << other.count()  << utils::ratio_lookup<std::ratio<Num, Denom>>::abr_value << C<Rep, std::ratio<Num, Denom>>::abr_value;
         return os;
     }
 }
