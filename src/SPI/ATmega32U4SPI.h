@@ -19,7 +19,8 @@ namespace spi {
         static const usb::DeviceID deviceID;
         static const usb::VendorID vendorID;
 
-        explicit ATmega32u4SPI(const std::shared_ptr<usb::LibUSBDevice> &device);
+        explicit ATmega32u4SPI(const std::shared_ptr<usb::LibUSBDevice>& device);
+
         void setGPIODirection(const gpio::gpioDirection &direction,const gpio::GPIOPin& pin) override;
         void writeGPIO(const gpio::gpioState &state,const gpio::GPIOPin& pin) override;
         gpio::gpioState readGPIO(const gpio::GPIOPin& pin) const override;

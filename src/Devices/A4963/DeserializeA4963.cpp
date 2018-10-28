@@ -47,17 +47,29 @@ namespace NS_A4963 {
                 const auto &registerName = el.key();
                 auto registerValue = el.value().get<std::string>();
 
-                A4963RegisterNames val;
-                try {
-                    val = RegisterStrings::get(registerName);
-                } catch (std::exception &e) {
-                    std::cerr << "Unknown Register Value: " << registerName << std::endl;
-                    continue;
-                }
+                if(registerName != "Duty Cycle Control" || (registerName != "Duty Cycle Control" && registerValue == "0")) {
+                    A4963RegisterNames val;
+                    try {
+                        val = RegisterStrings::get(registerName);
+                    } catch (std::exception &e) {
+                        std::cerr << "Unknown Register Value: " << registerName << std::endl;
+                        continue;
+                    }
 
-                setRuntime(device, val, registerValue);
+                    setRuntime(device, val, registerValue);
+                } else {
+                    device.turnOffDutyCycle();
+                }
             }
         }
+
+        /*auto mask = j["mask"];
+        for (auto &it : mask) {
+            for (auto it1 = it.begin(); it1 != it.end(); ++it1) {
+                device.configDiagnostic(static_cast<NS_A4963::RegisterMask>(NS_A4963::A4963MasksMap.at(it1.key())),it1.value());
+                std::cout << "set: " << it1.key() << " to: " << (it1.value() ? " On " : " Off ") << std::endl;
+            }
+        }*/
         device.commit();
     }
 

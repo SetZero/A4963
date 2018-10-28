@@ -71,6 +71,7 @@ int main(int argc, char** argv){
         std::cerr << "wrong argument: " << argv[0] << " it should be console or server!" << std::endl;
         return -4711;
     }
+    //atmega_main();
 }
 
 int simpleInput(int min, int max){
@@ -92,17 +93,19 @@ int simpleInput(int min, int max){
 
 int consoleInterface(const char* spiDevice){
     std::shared_ptr<NS_A4963::A4963> device;
+    usb::LibUSBDeviceList deviceList;
+
     if(std::string(spiDevice) == "atmega"){
+        using namespace spi::literals;
+        using namespace std::chrono_literals;
+        using namespace NS_A4963;
         std::cout << "Starting Atmega32u4..." << std::endl;
-        usb::LibUSBDeviceList deviceList;
         std::cout << "Found " << deviceList.size() << " devices" << std::endl;
         if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
             std::cout << "INDIGO!" << std::endl;
-            auto ptr = std::make_shared<spi::ATmega32u4SPI>(*atmega);
-            device = std::make_shared<NS_A4963::A4963>(ptr);
-        }
-        else {
-            std::cerr << " atmega not found " << std::endl;
+            auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
+            device = std::make_shared<NS_A4963::A4963>(spi);
+            spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
         }
     } else {
         using namespace CustomDataTypes::literals;
@@ -198,7 +201,7 @@ inline void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
 inline void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device){
     using namespace nlohmann;
     using namespace NS_A4963;
-    json j;
+    /*json j;
     std::ifstream ifs = std::ifstream("config.json");
     ifs >> j;
     ifs.close();
@@ -220,7 +223,9 @@ inline void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device){
             device->configDiagnostic(static_cast<NS_A4963::RegisterMask>(NS_A4963::A4963MasksMap.at(it1.key())),it1.value());
             std::cout << "set: " << it1.key() << " to: " << (it1.value() ? " On " : " Off ") << std::endl;
         }
-    }
+    }*/
+    JsonSetter s{*device, "config.json"};
+    device->show_register();
 }
 
 void clearInput(){
@@ -251,7 +256,7 @@ int atmega_main() {
         auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
         auto device = std::make_shared<NS_A4963::A4963>(spi);
         spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
-        JsonSetter s{*device, "data.json"};
+        JsonSetter s{*device, "config.json"};
 
         using namespace utils::printable;
         auto bt = device->getRegEntry<NS_A4963::A4963RegisterNames::BlankTime>();
