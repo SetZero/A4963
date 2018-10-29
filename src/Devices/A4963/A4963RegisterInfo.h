@@ -480,7 +480,7 @@ namespace NS_A4963 {
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "Maximum Speed Setting";
     };
-pö
+
     template<>
     struct RegisterValues<A4963RegisterNames::PhaseAdvance> {
         static inline constexpr bool isRanged = true;

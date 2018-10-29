@@ -74,7 +74,9 @@ namespace NS_A4963 {
     }
 
     JsonSetter::UnitInfo JsonSetter::parseData(const std::string &registerValue) {
-        static std::regex unit_regex("([-+]?[0-9]*\\.?[0-9]+)(a|f|p|n|u|m|c|d|D|h|k|M|T|P|E)?(V|Hz|s|%)?");
+        static std::regex unit_regex(
+                R"(([-+]?[0-9]*\.?[0-9]+)(a|f|p|n|u|m|c|d|D|h|k|M|T|P|E)?([A-Z0-9a-z!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]+)?)",
+                                    std::regex_constants::ECMAScript);
 
         std::smatch unit_match;
         long double unit_val = 0.0;

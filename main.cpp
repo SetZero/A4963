@@ -50,6 +50,8 @@ void showOptions(const std::array<const char*,N>& arr){
 }
 
 int main(int argc, char** argv){
+    std::vector<std::string> arguments(argv, argv + argc);
+
     if(argc < 2 ) {
         return consoleInterface("atmega");
     } if(std::string(argv[0]) == "console") {
@@ -92,25 +94,26 @@ int simpleInput(int min, int max){
 
 int consoleInterface(const char* spiDevice){
     std::shared_ptr<NS_A4963::A4963> device;
+    std::shared_ptr<spi::SPIBridge> spi;
     usb::LibUSBDeviceList deviceList;
+    gpio::GPIOPin pin;
 
     if(std::string(spiDevice) == "atmega"){
-        using namespace spi::literals;
-        using namespace std::chrono_literals;
-        using namespace NS_A4963;
-        std::cout << "Starting Atmega32u4..." << std::endl;
-        std::cout << "Found " << deviceList.size() << " devices" << std::endl;
         if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
             std::cout << "INDIGO!" << std::endl;
-            auto spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
-            device = std::make_shared<NS_A4963::A4963>(spi);
-            spi->slaveRegister(device, spi::ATmega32u4SPI::pin0);
+            spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
+            pin = spi::ATmega32u4SPI::pin0;
+        } else {
+            std::cerr << "No Device Connected!" << std::endl;
+            return 0;
         }
     } else {
-        using namespace CustomDataTypes::literals;
-        auto ptr = std::make_shared<MCP2210>();
-        device = std::make_shared<NS_A4963::A4963>(ptr);
+        spi = std::make_shared<MCP2210>();
+        pin = MCP2210::pin0;
     }
+    device = std::make_shared<NS_A4963::A4963>(spi);
+    spi->slaveRegister(device, pin);
+
     showOptions<nrOfOptions>(optMain);
     while(true) {
         int choice = simpleInput(1, nrOfOptions);
@@ -137,6 +140,7 @@ int consoleInterface(const char* spiDevice){
             default: return -42;
         }
     }
+    return 0;
 }
 
 int serverInterface(const char* spiDevice){
