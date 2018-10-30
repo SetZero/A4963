@@ -56,7 +56,7 @@ namespace NS_A4963 {
             writeRegisterEntry(RegisterCodes::Run,RegisterMask::DutyCycleControl,0);
         }
 
-        void configDiagnostic(const RegisterMask& mask,bool active);
+        void configDiagnostic(const Masks& mask,bool active);
 
         std::vector<Diagnostic> readDiagnostic();
 

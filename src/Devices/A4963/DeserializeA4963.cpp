@@ -66,7 +66,7 @@ namespace NS_A4963 {
         auto mask = j["mask"];
         for (auto &it : mask) {
             for (auto it1 = it.begin(); it1 != it.end(); ++it1) {
-                device.configDiagnostic(static_cast<NS_A4963::RegisterMask>(NS_A4963::A4963MasksMap.at(it1.key())),it1.value());
+                device.configDiagnostic(NS_A4963::A4963MasksMap.at(it1.key()),it1.value());
                 std::cout << "set: " << it1.key() << " to: " << (it1.value() ? " On " : " Off ") << std::endl;
             }
         }

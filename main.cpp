@@ -53,7 +53,7 @@ int main(int argc, char** argv){
     std::vector<std::string> arguments(argv, argv + argc);
 
     if(argc < 2 ) {
-        return consoleInterface("atmega");
+        return consoleInterface("mcp");
     } if(std::string(argv[0]) == "console") {
         if(std::string(argv[1]) == "mcp" || std::string(argv[1]) == "atmega" )
             return consoleInterface(argv[1]);
@@ -144,7 +144,9 @@ int consoleInterface(const char* spiDevice){
 }
 
 int serverInterface(const char* spiDevice){
-
+    if(std::string(spiDevice) == "mcp")
+        return 1;
+ return 0;
 }
 
 inline void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
