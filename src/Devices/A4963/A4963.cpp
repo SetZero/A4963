@@ -25,8 +25,9 @@ namespace NS_A4963 {
         markRegisterForReload(detail::RegisterCodes::Config3);
         markRegisterForReload(detail::RegisterCodes::Config4);
         markRegisterForReload(detail::RegisterCodes::Config5);
-        markRegisterForReload(detail::RegisterCodes::Mask);
         markRegisterForReload(detail::RegisterCodes::Run);
+        cacheRegister(detail::RegisterCodes::Mask, false);
+        markRegisterForReload(detail::RegisterCodes::Mask);
     }
 
     void A4963::writeRegisterEntry(const detail::RegisterCodes &reg, const detail::RegisterMask &mask, size_type data) {
@@ -36,14 +37,27 @@ namespace NS_A4963 {
         mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), detail::RegisterMask::RegisterAddress);
         mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Write), detail::RegisterMask::WriteAddress);
         mRegisterData[reg].data |= createRegisterEntry(data, detail::RegisterMask::GeneralData);
-        mRegisterData[reg].dirty = true;
+
+        if(mRegisterData[reg].cache != DirtyCache::DontCache) {
+            mRegisterData[reg].cache = DirtyCache::Dirty;
+        }
     }
 
     void A4963::markRegisterForReload(const detail::RegisterCodes &reg) {
         clearRegister(reg);
         mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), detail::RegisterMask::RegisterAddress);
         mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Read), detail::RegisterMask::WriteAddress);
-        mRegisterData[reg].dirty = true;
+        if(mRegisterData[reg].cache != DirtyCache::DontCache) {
+            mRegisterData[reg].cache = DirtyCache::Dirty;
+        }
+    }
+
+    void A4963::cacheRegister(const RegisterCodes &reg, bool doCache ) {
+        if(doCache) {
+            mRegisterData[reg].cache = DirtyCache::Dirty;
+        } else {
+            mRegisterData[reg].cache = DirtyCache::DontCache;
+        }
     }
 
     A4963::size_type A4963::createRegisterEntry(size_type data, const detail::RegisterMask &mask) {
@@ -69,7 +83,8 @@ namespace NS_A4963 {
     }
 
     void A4963::commit(const detail::RegisterCodes &registerCodes) {
-        if (mRegisterData[registerCodes].dirty) {
+        if (mRegisterData[registerCodes].cache == DirtyCache::Dirty ||
+            mRegisterData[registerCodes].cache == DirtyCache::DontCache ) {
             mBridge->slaveSelect(shared_from_this());
             if (getRegisterEntry(registerCodes, detail::RegisterMask::WriteAddress) ==
                 static_cast<A4963::size_type>(WriteBit::Read))
@@ -82,7 +97,10 @@ namespace NS_A4963 {
                 mRegisterData[registerCodes].data &= ~(1 << utils::getFirstSetBitPos(static_cast<size_type>(detail::RegisterMask::WriteAddress)));
             }
             mBridge->slaveDeselect(shared_from_this());
-            mRegisterData[registerCodes].dirty = false;
+
+            if(mRegisterData[registerCodes].cache != DirtyCache::DontCache) {
+                mRegisterData[registerCodes].cache = DirtyCache::Clean;
+            }
         }
     }
 
@@ -96,7 +114,8 @@ namespace NS_A4963 {
     }
 
     A4963::size_type A4963::readRegister(const detail::RegisterCodes &registerCodes, bool forceNoReload) {
-        if (!forceNoReload && mRegisterData[registerCodes].dirty) {
+        if (!forceNoReload && (mRegisterData[registerCodes].cache == DirtyCache::Dirty ||
+                               mRegisterData[registerCodes].cache == DirtyCache::DontCache)) {
             commit(registerCodes);
         }
         return mRegisterData[registerCodes].data;

@@ -69,9 +69,15 @@ namespace NS_A4963 {
             Read = 0
         };
 
+        enum class DirtyCache {
+            Dirty,
+            Clean,
+            DontCache
+        };
+
         struct RegisterInfo {
             size_type data;
-            bool dirty;
+            DirtyCache cache;
         };
 
         std::map<RegisterCodes, RegisterInfo> mRegisterData;
@@ -83,6 +89,8 @@ namespace NS_A4963 {
         void writeRegisterEntry(const RegisterCodes &reg, const detail::RegisterMask &mask, size_type data);
 
         void markRegisterForReload(const RegisterCodes &reg);
+
+        void cacheRegister(const RegisterCodes& reg, bool doCache = true);
 
         std::unique_ptr<spi::Data> send16bitRegister(size_type address);
 
