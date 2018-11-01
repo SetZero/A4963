@@ -17,8 +17,8 @@ add_executable(hid main.cpp)
 find_library(LIBUSB_LIBRARY
         NAMES usb-1.0)
 
-#find_library(LIBEVPP
-#        NAMES libevpp.so)
+find_library(LIBEVPP
+        NAMES libevpp.so)
 
 find_path(LIBUSB_INCLUDE_DIR
         NAMES libusb.h

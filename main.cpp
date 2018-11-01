@@ -6,12 +6,13 @@
 #include <chrono>
 #include <thread>
 #include <src/CustomDataTypes/Percentage.h>
+#include <fstream>
+#include <iomanip>
+#include <cxxopts.hpp>
 #include "LibUSBDevices.h"
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
 #include "inc/json.h"
-#include <fstream>
-#include <iomanip>
 #ifdef __linux__
     #include "mcp2210_api.h"
     #include "src/SPI/mcp2210_hal.h"
@@ -21,17 +22,19 @@
 #include "src/Devices/A4963/DeserializeA4963.h"
 #include "src/utils/scales/UnitScale.h"
 
-int consoleInterface(const char* spiDevice);
+int consoleInterface(const std::string& spiDevice);
+void flashJSON(const std::string& spiDevice, const std::string& filename);
 int simpleInput(int min, int max);
 int serverInterface(const char* spiDevice);
+void parseArguments(int argc, char** argv);
 
 static inline constexpr int nrOfOptions = 5;
 
 void clearInput();
-void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device);
+void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename);
 void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device);
 void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device);
-void generateDefault();
+bool generateDefault(bool force = false, const std::string& filename = "config.json");
 
 static std::array<const char*,nrOfOptions> optMain {
         "1: load config from JSON",
@@ -50,28 +53,57 @@ void showOptions(const std::array<const char*,N>& arr){
 }
 
 int main(int argc, char** argv){
-    std::vector<std::string> arguments(argv, argv + argc);
+    parseArguments(argc, argv);
+}
 
-    if(argc < 2 ) {
-        return consoleInterface("mcp");
-    } if(std::string(argv[0]) == "console") {
-        if(std::string(argv[1]) == "mcp" || std::string(argv[1]) == "atmega" )
-            return consoleInterface(argv[1]);
-        else {
-            std::cerr << "wrong argument: " << argv[1] << " it should be mcp or atmega" << std::endl;
-            return -21;
-        }
-    } else if (std::string(argv[0]) == "server") {
-        if(std::string(argv[1]) == "mcp" || std::string(argv[1]) == "atmega" )
-            return serverInterface(argv[1]);
-        else {
-            std::cerr << "wrong argument: " << argv[1] << " it should be mcp or atmega" << std::endl;
-            return -21;
+void parseArguments(int argc, char** argv) {
+    cxxopts::Options options("hid", "An A4963 USB configuration program");
+    options.add_options()
+            ("d,debug", "Enable debugging")
+            ("j,json", "read JSON file", cxxopts::value<std::string>())
+            ("g,generate", "generate JSON file")
+            ("f,force", "override current JSON file if there is any")
+            ("c,client", "use interactive client interface")
+            ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>());
+
+    auto result = options.parse(argc, argv);
+    if(result.count("debug") > 0) {
+        std::cout << "Debugging option not ready yet..." << std::endl;
+    }
+
+    if(result.count("client") > 0 && result.count("interface") > 0) {
+        auto interface = result["interface"].as<std::string>();
+        consoleInterface(interface);
+        return;
+    } else if(result.count("client") > 0 && result.count("interface") <= 0) {
+        std::cout << "Missing Parameter: --interface!" << std::endl;
+    }
+
+    if(result.count("generate") > 0) {
+        std::cout << "Generating JSON File" << std::endl;
+        if(result.count("force") > 0) {
+            std::cout << "Forcing generation..." << std::endl;
+            if(result.count("json") > 0) {
+                generateDefault(true, result["json"].as<std::string>());
+            }
+        } else {
+            generateDefault(false);
         }
     }
-    else {
-        std::cerr << "wrong argument: " << argv[0] << " it should be console or server!" << std::endl;
-        return -4711;
+
+    if(result.count("json") > 0 && result.count("interface") > 0) {
+        auto json_filename  = result["json"].as<std::string>();
+        auto interface_name = result["interface"].as<std::string>();
+        flashJSON(interface_name, json_filename);
+    } else {
+        if(result.count("json") > 0 && result.count("interface") <= 0) {
+            std::cout << "Missing parameter --interface [atmega|mcp]" << std::endl;
+        } else if(result.count("json") <= 0 && result.count("interface") > 0) {
+            std::cout << "Missing parameter --json [filename]" << std::endl;
+        }
+    }
+    if(result.arguments().empty()) {
+        std::cout << options.help() << std::endl;
     }
 }
 
@@ -92,13 +124,38 @@ int simpleInput(int min, int max){
     return z;
 }
 
-int consoleInterface(const char* spiDevice){
+void flashJSON(const std::string& spiDevice, const std::string& filename) {
     std::shared_ptr<NS_A4963::A4963> device;
     std::shared_ptr<spi::SPIBridge> spi;
     usb::LibUSBDeviceList deviceList;
     gpio::GPIOPin pin;
 
-    if(std::string(spiDevice) == "atmega"){
+    if(spiDevice == "atmega"){
+        if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
+            std::cout << "INDIGO!" << std::endl;
+            spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
+            pin = spi::ATmega32u4SPI::pin0;
+        } else {
+            std::cerr << "No Device Connected!" << std::endl;
+            return;
+        }
+    } else {
+        spi = std::make_shared<MCP2210>();
+        pin = MCP2210::pin0;
+    }
+    device = std::make_shared<NS_A4963::A4963>(spi);
+    spi->slaveRegister(device, pin);
+
+    loadFromFile(device, filename);
+}
+
+int consoleInterface(const std::string& spiDevice){
+    std::shared_ptr<NS_A4963::A4963> device;
+    std::shared_ptr<spi::SPIBridge> spi;
+    usb::LibUSBDeviceList deviceList;
+    gpio::GPIOPin pin;
+
+    if(spiDevice == "atmega"){
         if(auto atmega = deviceList.findDevice(spi::ATmega32u4SPI::vendorID, spi::ATmega32u4SPI::deviceID)) {
             std::cout << "INDIGO!" << std::endl;
             spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
@@ -119,7 +176,7 @@ int consoleInterface(const char* spiDevice){
         int choice = simpleInput(1, nrOfOptions);
         switch (choice) {
             case 1: {
-                loadFromFile(device);
+                loadFromFile(device, "config.json");
                 break;
             }
             case 2: {
@@ -165,18 +222,21 @@ inline void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     }
 }
 
-inline void generateDefault(){
-    std::cout << "this action will override the old file, type 'yes' if you are sure" << std::endl;
-    std::string str;
-    std::cin >> str;
-    if(str != "yes") return;
-    std::ofstream of{"config.json"};
-    of << std::setw(4) << NS_A4963::defaultValues;
+bool generateDefault(bool force, const std::string& filename){
+    std::ofstream of{filename};
+    bool return_value = false;
+    if(of.good() && force) {
+        of << std::setw(4) << NS_A4963::defaultValues;
+        return_value = true;
+        std::cout << "new config file successfully generated" << std::endl;
+    } else {
+        std::cout << "File already exists! use -f to force overrwrite" << std::endl;
+    }
     of.close();
-    std::cout << "new config file successfully generated" << std::endl;
+    return return_value;
 }
 
-inline void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
+void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     std::cout << "type the Name of the Register you want to Set, or exit to cancel" << std::endl;
     std::string str;
     NS_A4963::A4963RegisterNames mask;
@@ -203,11 +263,11 @@ inline void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     }
 }
 
-inline void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device){
+inline void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename){
     using namespace nlohmann;
     using namespace NS_A4963;
 
-    JsonSetter s{*device, "config.json"};
+    JsonSetter s{*device, filename};
     device->show_register();
 }
 
