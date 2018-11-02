@@ -59,24 +59,17 @@ int main(int argc, char** argv){
 void parseArguments(int argc, char** argv) {
     cxxopts::Options options("hid", "An A4963 USB configuration program");
     options.add_options()
+            ("h,help", "help")
             ("d,debug", "Enable debugging")
-            ("j,json", "read JSON file", cxxopts::value<std::string>())
+            ("j,json", "read JSON file", cxxopts::value<std::string>()->implicit_value("config.json"))
             ("g,generate", "generate JSON file")
             ("f,force", "override current JSON file if there is any")
             ("c,client", "use interactive client interface")
-            ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>());
+            ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("atmega"));
 
     auto result = options.parse(argc, argv);
     if(result.count("debug") > 0) {
         std::cout << "Debugging option not ready yet..." << std::endl;
-    }
-
-    if(result.count("client") > 0 && result.count("interface") > 0) {
-        auto interface = result["interface"].as<std::string>();
-        consoleInterface(interface);
-        return;
-    } else if(result.count("client") > 0 && result.count("interface") <= 0) {
-        std::cout << "Missing Parameter: --interface!" << std::endl;
     }
 
     if(result.count("generate") > 0) {
@@ -91,6 +84,14 @@ void parseArguments(int argc, char** argv) {
         }
     }
 
+    if(result.count("client") > 0 && result.count("interface") > 0) {
+        auto interface = result["interface"].as<std::string>();
+        consoleInterface(interface);
+        return;
+    } else if(result.count("client") > 0 && result.count("interface") <= 0) {
+        std::cout << "Missing Parameter: --interface!" << std::endl;
+    }
+
     if(result.count("json") > 0 && result.count("interface") > 0) {
         auto json_filename  = result["json"].as<std::string>();
         auto interface_name = result["interface"].as<std::string>();
@@ -102,7 +103,7 @@ void parseArguments(int argc, char** argv) {
             std::cout << "Missing parameter --json [filename]" << std::endl;
         }
     }
-    if(result.arguments().empty()) {
+    if(result.arguments().empty() || result.count("help") > 0) {
         std::cout << options.help() << std::endl;
     }
 }
