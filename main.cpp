@@ -59,10 +59,10 @@ int main(int argc, char** argv){
 void parseArguments(int argc, char** argv) {
     cxxopts::Options options("hid", "An A4963 USB configuration program");
     options.add_options()
-            ("h,help", "help")
-            ("d,debug", "Enable debugging")
+            ("h,help", "show help")
+            ("d,debug", "Enable debugging mode")
             ("j,json", "read JSON file", cxxopts::value<std::string>()->implicit_value("config.json"))
-            ("g,generate", "generate JSON file")
+            ("g,generate", "generate JSON file, will take -j location if given")
             ("f,force", "override current JSON file if there is any")
             ("c,client", "use interactive client interface")
             ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("atmega"));
@@ -77,10 +77,17 @@ void parseArguments(int argc, char** argv) {
         if(result.count("force") > 0) {
             std::cout << "Forcing generation..." << std::endl;
             if(result.count("json") > 0) {
+                std::cout << "Taking " << result["json"].as<std::string>() << " as location..." << std::endl;
                 generateDefault(true, result["json"].as<std::string>());
+            } else {
+                generateDefault(true);
             }
         } else {
-            generateDefault(false);
+            if(result.count("json") > 0) {
+                generateDefault(false, result["json"].as<std::string>());
+            } else {
+                generateDefault(false);
+            }
         }
     }
 
@@ -229,7 +236,7 @@ bool generateDefault(bool force, const std::string& filename){
     if(of.good() && force) {
         of << std::setw(4) << NS_A4963::defaultValues;
         return_value = true;
-        std::cout << "new config file successfully generated" << std::endl;
+        std::cout << "new config file successfully generated (" << filename << ")" << std::endl;
     } else {
         std::cout << "File already exists! use -f to force overrwrite" << std::endl;
     }
