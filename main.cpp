@@ -65,7 +65,7 @@ void parseArguments(int argc, char** argv) {
             ("g,generate", "generate JSON file, will take -j location if given")
             ("f,force", "override current JSON file if there is any")
             ("c,client", "use interactive client interface")
-            ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("atmega"));
+            ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("mcp"));
 
     auto result = options.parse(argc, argv);
     if(result.count("debug") > 0) {
@@ -248,7 +248,7 @@ bool generateDefault(bool force, const std::string& filename){
         return_value = true;
         std::cout << "new config file successfully generated (" << filename << ")" << std::endl;
     } else {
-        std::cout << "File already exists! use -f to force overrwrite" << std::endl;
+        std::cout << "File already exists! use -f to force overwrite" << std::endl;
     }
     of.close();
     return return_value;
@@ -281,12 +281,11 @@ void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     }
 }
 
-inline void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename){
+void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename){
     using namespace nlohmann;
     using namespace NS_A4963;
 
     JsonSetter s{*device, filename};
-    device->show_register();
 }
 
 void clearInput(){
