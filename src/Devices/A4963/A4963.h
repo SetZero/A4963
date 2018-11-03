@@ -18,7 +18,7 @@ namespace NS_A4963 {
     public:
         using size_type = uint16_t;
 
-        explicit A4963(std::shared_ptr<spi::SPIBridge> mBridge);
+        explicit A4963(std::shared_ptr<spi::SPIBridge> mBridge, bool debug_enabled = false);
 
         void commit();
 

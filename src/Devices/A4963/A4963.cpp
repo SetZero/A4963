@@ -17,7 +17,7 @@ namespace NS_A4963 {
          return mBridge->transfer(spi::SPIData<sizeof(size_type),spi::big_endian>{address});
     }
 
-    A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {
+    A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge, bool debug_enabled) : mBridge(std::move(mBridge)) {
         //reload all register
         markRegisterForReload(detail::RegisterCodes::Config0);
         markRegisterForReload(detail::RegisterCodes::Config1);
@@ -26,8 +26,19 @@ namespace NS_A4963 {
         markRegisterForReload(detail::RegisterCodes::Config4);
         markRegisterForReload(detail::RegisterCodes::Config5);
         markRegisterForReload(detail::RegisterCodes::Run);
-        cacheRegister(detail::RegisterCodes::Mask, false);
+
         markRegisterForReload(detail::RegisterCodes::Mask);
+        cacheRegister(detail::RegisterCodes::Mask, false);
+        
+        if(debug_enabled) {
+            cacheRegister(detail::RegisterCodes::Config0, false);
+            cacheRegister(detail::RegisterCodes::Config1, false);
+            cacheRegister(detail::RegisterCodes::Config2, false);
+            cacheRegister(detail::RegisterCodes::Config3, false);
+            cacheRegister(detail::RegisterCodes::Config4, false);
+            cacheRegister(detail::RegisterCodes::Config5, false);
+            cacheRegister(detail::RegisterCodes::Run, false);
+        }
     }
 
     void A4963::writeRegisterEntry(const detail::RegisterCodes &reg, const detail::RegisterMask &mask, size_type data) {
@@ -109,7 +120,14 @@ namespace NS_A4963 {
     void A4963::show_register() {
         for (auto registerData : mRegisterData) {
             std::bitset<16> bitset{readRegister(registerData.first)};
-            std::cout << static_cast<A4963::size_type>(registerData.first) << ": " << bitset << std::endl;
+            std::cout << static_cast<A4963::size_type>(registerData.first) << ": " << bitset;
+            if(registerData.second.cache == DirtyCache::DontCache) {
+                std::cout << "(Don't Cache Register)" << std::endl;
+            } else if(registerData.second.cache == DirtyCache::Dirty) {
+                std::cout << "(Dirty Register)" << std::endl;
+            } else {
+                std::cout << "(Clean Register)" << std::endl;
+            }
         }
     }
 

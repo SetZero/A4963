@@ -23,7 +23,7 @@
 #include "src/utils/scales/UnitScale.h"
 
 int consoleInterface(const std::string& spiDevice);
-void flashJSON(const std::string& spiDevice, const std::string& filename);
+void flashJSON(const std::string& spiDevice, const std::string& filename, bool enable_debug = false);
 int simpleInput(int min, int max);
 int serverInterface(const char* spiDevice);
 void parseArguments(int argc, char** argv);
@@ -69,7 +69,7 @@ void parseArguments(int argc, char** argv) {
 
     auto result = options.parse(argc, argv);
     if(result.count("debug") > 0) {
-        std::cout << "Debugging option not ready yet..." << std::endl;
+        std::cout << "Debugging option fully implemented yet..." << std::endl;
     }
 
     if(result.count("generate") > 0) {
@@ -102,7 +102,11 @@ void parseArguments(int argc, char** argv) {
     if(result.count("json") > 0 && result.count("interface") > 0) {
         auto json_filename  = result["json"].as<std::string>();
         auto interface_name = result["interface"].as<std::string>();
-        flashJSON(interface_name, json_filename);
+        if(result.count("debug") > 0) {
+            flashJSON(interface_name, json_filename, true);
+        } else {
+            flashJSON(interface_name, json_filename);
+        }
     } else {
         if(result.count("json") > 0 && result.count("interface") <= 0) {
             std::cout << "Missing parameter --interface [atmega|mcp]" << std::endl;
@@ -132,7 +136,8 @@ int simpleInput(int min, int max){
     return z;
 }
 
-void flashJSON(const std::string& spiDevice, const std::string& filename) {
+void flashJSON(const std::string& spiDevice, const std::string& filename, bool enable_debug) {
+    std::cout << "Device name: " << spiDevice << std::endl;
     std::shared_ptr<NS_A4963::A4963> device;
     std::shared_ptr<spi::SPIBridge> spi;
     usb::LibUSBDeviceList deviceList;
@@ -151,7 +156,12 @@ void flashJSON(const std::string& spiDevice, const std::string& filename) {
         spi = std::make_shared<MCP2210>();
         pin = MCP2210::pin0;
     }
-    device = std::make_shared<NS_A4963::A4963>(spi);
+    if(enable_debug) {
+        std::cout << "[DEBUG] Disabled Cache!" << std::endl;
+        device = std::make_shared<NS_A4963::A4963>(spi, true);
+    } else {
+        device = std::make_shared<NS_A4963::A4963>(spi);
+    }
     spi->slaveRegister(device, pin);
 
     loadFromFile(device, filename);
