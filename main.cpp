@@ -31,7 +31,7 @@ void parseArguments(int argc, char** argv);
 static inline constexpr int nrOfOptions = 5;
 
 void clearInput();
-void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename);
+void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename, bool enable_debug = false);
 void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device);
 void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device);
 bool generateDefault(bool force = false, const std::string& filename = "config.json");
@@ -156,15 +156,11 @@ void flashJSON(const std::string& spiDevice, const std::string& filename, bool e
         spi = std::make_shared<MCP2210>();
         pin = MCP2210::pin0;
     }
-    if(enable_debug) {
-        std::cout << "[DEBUG] Disabled Cache!" << std::endl;
-        device = std::make_shared<NS_A4963::A4963>(spi, true);
-    } else {
-        device = std::make_shared<NS_A4963::A4963>(spi);
-    }
+
+    device = std::make_shared<NS_A4963::A4963>(spi, enable_debug);
     spi->slaveRegister(device, pin);
 
-    loadFromFile(device, filename);
+    loadFromFile(device, filename, enable_debug);
 }
 
 int consoleInterface(const std::string& spiDevice){
@@ -281,11 +277,14 @@ void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     }
 }
 
-void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename){
+void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename, bool enable_debug){
     using namespace nlohmann;
     using namespace NS_A4963;
 
     JsonSetter s{*device, filename};
+    if(enable_debug) {
+        device->show_register();
+    }
 }
 
 void clearInput(){

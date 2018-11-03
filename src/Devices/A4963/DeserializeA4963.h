@@ -164,6 +164,8 @@ namespace NS_A4963 {
                         if (auto value = setIfPeriodic<type, N>(device, static_cast<double>(data), prefix, unit)) {
                             std::cout << "Set the register " << std::setw(40) << RegisterValues<N>::name << " to "
                                     << std::setw(20) << *value << std::endl;
+                        } else {
+                            std::cerr << "This error occured in register " << RegisterValues<N>::name << std::endl;
                         }
                     } else {
                         if (prefix != '\0') {
