@@ -128,7 +128,11 @@ namespace NS_A4963 {
         try {
             auto d = T{std::get<T>(
                     getType<Rep, typename utils::periodic_info<T>::period>(prefix, unit, static_cast<Rep>(data)))};
-            return device.set<N>(d);
+            auto return_value = device.set<N>(d);
+            if(!return_value) {
+                std::cerr << "This error occured in register " << RegisterValues<N>::name << std::endl;
+            }
+            return return_value;
         }
         catch(std::exception& e){
             std::cerr << "Invalid Unit \"" << prefix << unit << "\" in register \"" << RegisterValues<N>::name <<
@@ -164,8 +168,6 @@ namespace NS_A4963 {
                         if (auto value = setIfPeriodic<type, N>(device, static_cast<double>(data), prefix, unit)) {
                             std::cout << "Set the register " << std::setw(40) << RegisterValues<N>::name << " to "
                                     << std::setw(20) << *value << std::endl;
-                        } else {
-                            std::cerr << "This error occured in register " << RegisterValues<N>::name << std::endl;
                         }
                     } else {
                         if (prefix != '\0') {

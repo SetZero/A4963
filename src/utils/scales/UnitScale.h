@@ -65,7 +65,6 @@ public:
             return {converted_value};
         } else {
             std::cerr << "Maximum: " << max << ", Minimum: " << min << ", Given: " << value << std::endl;
-            std::cerr << "Duration not in Range!" << std::endl;
             return std::nullopt;
         }
     }

@@ -14,7 +14,11 @@ namespace NS_A4963 {
     }
 
     std::unique_ptr<spi::Data> A4963::send16bitRegister(size_type address) {
-         return mBridge->transfer(spi::SPIData<sizeof(size_type),spi::big_endian>{address});
+        if(mBridge != nullptr) {
+            return mBridge->transfer(spi::SPIData<sizeof(size_type), spi::big_endian>{address});
+        } else {
+            return {};
+        }
     }
 
     A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge, bool debug_enabled) : mBridge(std::move(mBridge)) {
@@ -29,7 +33,7 @@ namespace NS_A4963 {
 
         markRegisterForReload(detail::RegisterCodes::Mask);
         cacheRegister(detail::RegisterCodes::Mask, false);
-        
+
         if(debug_enabled) {
             cacheRegister(detail::RegisterCodes::Config0, false);
             cacheRegister(detail::RegisterCodes::Config1, false);
@@ -94,8 +98,12 @@ namespace NS_A4963 {
     }
 
     void A4963::commit(const detail::RegisterCodes &registerCodes) {
+        if(!mBridge)
+            return;
+
         if (mRegisterData[registerCodes].cache == DirtyCache::Dirty ||
             mRegisterData[registerCodes].cache == DirtyCache::DontCache ) {
+
             mBridge->slaveSelect(shared_from_this());
             if (getRegisterEntry(registerCodes, detail::RegisterMask::WriteAddress) ==
                 static_cast<A4963::size_type>(WriteBit::Read))
@@ -121,12 +129,14 @@ namespace NS_A4963 {
         for (auto registerData : mRegisterData) {
             std::bitset<16> bitset{readRegister(registerData.first)};
             std::cout << static_cast<A4963::size_type>(registerData.first) << ": " << bitset;
-            if(registerData.second.cache == DirtyCache::DontCache) {
+            if(registerData.second.cache == DirtyCache::DontCache && mBridge) {
                 std::cout << "(Don't Cache Register)" << std::endl;
-            } else if(registerData.second.cache == DirtyCache::Dirty) {
+            } else if(registerData.second.cache == DirtyCache::Dirty && mBridge) {
                 std::cout << "(Dirty Register)" << std::endl;
-            } else {
+            } else if(mBridge){
                 std::cout << "(Clean Register)" << std::endl;
+            } else if(!mBridge) {
+                std::cout << "(Theoretical Value)" << std::endl;
             }
         }
     }

@@ -65,7 +65,8 @@ void parseArguments(int argc, char** argv) {
             ("g,generate", "generate JSON file, will take -j location if given")
             ("f,force", "override current JSON file if there is any")
             ("c,client", "use interactive client interface")
-            ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("mcp"));
+            ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("mcp"))
+            ("s,syntax-check", "only check json file values, do not flash to register");
 
     auto result = options.parse(argc, argv);
     if(result.count("debug") > 0) {
@@ -99,17 +100,24 @@ void parseArguments(int argc, char** argv) {
         std::cout << "Missing Parameter: --interface!" << std::endl;
     }
 
-    if(result.count("json") > 0 && result.count("interface") > 0) {
+    if(result.count("json") > 0 && (result.count("interface") > 0 || result.count("syntax-check") > 0)) {
         auto json_filename  = result["json"].as<std::string>();
-        auto interface_name = result["interface"].as<std::string>();
+        std::string interface_name;
+        if(result.count("interface") > 0) {
+            interface_name = result["interface"].as<std::string>();
+            if(interface_name.empty()) {
+                std::cout << "Interface may not be empty" << std::endl;
+                return;
+            }
+        }
         if(result.count("debug") > 0) {
             flashJSON(interface_name, json_filename, true);
         } else {
             flashJSON(interface_name, json_filename);
         }
     } else {
-        if(result.count("json") > 0 && result.count("interface") <= 0) {
-            std::cout << "Missing parameter --interface [atmega|mcp]" << std::endl;
+        if(result.count("json") > 0 && (result.count("interface") <= 0 && result.count("syntax-check") <= 0)) {
+            std::cout << "Missing parameter --interface [atmega|mcp] or --syntax-check" << std::endl;
         } else if(result.count("json") <= 0 && result.count("interface") > 0) {
             std::cout << "Missing parameter --json [filename]" << std::endl;
         }
@@ -152,13 +160,16 @@ void flashJSON(const std::string& spiDevice, const std::string& filename, bool e
             std::cerr << "No Device Connected!" << std::endl;
             return;
         }
-    } else {
+    } else if(spiDevice == "mcp") {
         spi = std::make_shared<MCP2210>();
         pin = MCP2210::pin0;
+    } else if(spiDevice.empty()) {
+        spi = nullptr;
     }
 
     device = std::make_shared<NS_A4963::A4963>(spi, enable_debug);
-    spi->slaveRegister(device, pin);
+    if(spi)
+        spi->slaveRegister(device, pin);
 
     loadFromFile(device, filename, enable_debug);
 }
