@@ -57,22 +57,22 @@ int main(int argc, char** argv){
 }
 
 void parseArguments(int argc, char** argv) {
-    cxxopts::Options options("hid", "An A4963 USB configuration program");
+    const std::string path = argv[0];
+    auto const pos = path.find_last_of('/');
+    const auto leaf = path.substr(pos+1);
+
+    cxxopts::Options options(leaf, "An A4963 USB configuration program");
     options.add_options()
-            ("h,help", "show help")
+            ("h,help", "Show help")
             ("d,debug", "Enable debugging mode")
-            ("j,json", "read JSON file", cxxopts::value<std::string>()->implicit_value("config.json"))
-            ("g,generate", "generate JSON file, will take -j location if given")
-            ("f,force", "override current JSON file if there is any")
-            ("c,client", "use interactive client interface")
-            ("i,interface", "select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("mcp"))
-            ("s,syntax-check", "only check json file values, do not flash to register");
+            ("j,json", "Read JSON file", cxxopts::value<std::string>()->implicit_value("config.json"))
+            ("g,generate", "Generate JSON file, will take -j location if given")
+            ("f,force", "Force overwrite of current JSON file")
+            ("c,client", "Use interactive client interface")
+            ("i,interface", "Select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("mcp"))
+            ("s,settings-check", "Only check json file values, do not flash to device");
 
     auto result = options.parse(argc, argv);
-    if(result.count("debug") > 0) {
-        std::cout << "Debugging option fully implemented yet..." << std::endl;
-    }
-
     if(result.count("generate") > 0) {
         std::cout << "Generating JSON File" << std::endl;
         if(result.count("force") > 0) {
@@ -100,7 +100,7 @@ void parseArguments(int argc, char** argv) {
         std::cout << "Missing Parameter: --interface!" << std::endl;
     }
 
-    if(result.count("json") > 0 && (result.count("interface") > 0 || result.count("syntax-check") > 0)) {
+    if(result.count("json") > 0 && (result.count("interface") > 0 || result.count("settings-check") > 0)) {
         auto json_filename  = result["json"].as<std::string>();
         std::string interface_name;
         if(result.count("interface") > 0) {
@@ -116,8 +116,8 @@ void parseArguments(int argc, char** argv) {
             flashJSON(interface_name, json_filename);
         }
     } else {
-        if(result.count("json") > 0 && (result.count("interface") <= 0 && result.count("syntax-check") <= 0)) {
-            std::cout << "Missing parameter --interface [atmega|mcp] or --syntax-check" << std::endl;
+        if(result.count("json") > 0 && (result.count("interface") <= 0 && result.count("settings-check") <= 0)) {
+            std::cout << "Missing parameter --interface [atmega|mcp] or --settings-check" << std::endl;
         } else if(result.count("json") <= 0 && result.count("interface") > 0) {
             std::cout << "Missing parameter --json [filename]" << std::endl;
         }
