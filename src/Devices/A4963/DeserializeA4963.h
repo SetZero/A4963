@@ -39,7 +39,7 @@ namespace NS_A4963 {
                     json{{RegisterValues<A4963RegisterNames::PWMDutyCycleHoldTorque>::name,"37.5%"}},
                     json{{RegisterValues<A4963RegisterNames::HoldTime>::name,"16ms"}},
                     json{{RegisterValues<A4963RegisterNames::PIControllerProportionalGain>::name,"1"}},
-                    json{{RegisterValues<A4963RegisterNames::PWMDutyCycleHoldTorque>::name,"50%"}},
+                    json{{RegisterValues<A4963RegisterNames::PWMDutyCycleTorqueStartup>::name,"50%"}},
                     json{{RegisterValues<A4963RegisterNames::StartSpeed>::name,"8Hz"}},
                     json{{RegisterValues<A4963RegisterNames::PIControllerIntegralGain>::name,"1"}},
                     json{{RegisterValues<A4963RegisterNames::SpeedOutputSelection>::name,"Electrical Frequenzy"}},

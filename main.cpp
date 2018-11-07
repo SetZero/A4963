@@ -190,7 +190,9 @@ int consoleInterface(const std::string& spiDevice){
             return 0;
         }
     } else {
+
         spi = std::make_shared<MCP2210>();
+        if(dynamic_cast<MCP2210>(*spi))
         pin = MCP2210::pin0;
     }
     device = std::make_shared<NS_A4963::A4963>(spi);
@@ -241,11 +243,17 @@ inline void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     }
 }
 
+bool fileExists(const std::string& path){
+    std::ifstream ifs{path};
+    return ifs.good();
+}
+
 bool generateDefault(bool force, const std::string& filename){
+    bool exists = fileExists(filename);
     std::ofstream of{filename};
     bool return_value = false;
-    if(of.good() && force) {
-        of << std::setw(4) << NS_A4963::defaultValues;
+    if(of.good() && (!exists|| force)) {
+        of << std::setw(4) << NS_A4963::defaultValues << std::flush;
         return_value = true;
         std::cout << "New config successfully generated (" << filename << ")" << std::endl;
     } else {
