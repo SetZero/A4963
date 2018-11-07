@@ -62,8 +62,6 @@ namespace spi {
             std::vector<uint8_t> dataVector;
             dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
             dataVector.push_back(1);
-            //TODO: maybe put in LibUsbDevice implentions
-            //dataVector.push_back((uint8_t) spiData);
             dataVector.push_back(elem);
 
             auto data = mDevice.get()->sendData(dataVector);

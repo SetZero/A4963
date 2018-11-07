@@ -65,11 +65,11 @@ void parseArguments(int argc, char** argv) {
     options.add_options()
             ("h,help", "Show help")
             ("d,debug", "Enable debugging mode")
-            ("j,json", "Read JSON file", cxxopts::value<std::string>()->implicit_value("config.json"))
-            ("g,generate", "Generate JSON file, will take -j location if given")
-            ("f,force", "Force overwrite of current JSON file")
+            ("j,json", "Read in JSON file", cxxopts::value<std::string>())
+            ("g,generate", "Generate JSON file, will take -j location if available")
+            ("f,force", "Force overwrite of current JSON file, only possible in combination with -g")
             ("c,client", "Use interactive client interface")
-            ("i,interface", "Select USB to SPI Bridge", cxxopts::value<std::string>()->implicit_value("mcp"))
+            ("i,interface", "Select USB to SPI Bridge (atmega / mcp)", cxxopts::value<std::string>())
             ("s,settings-check", "Only check json file values, do not flash to device");
 
     auto result = options.parse(argc, argv);
@@ -128,7 +128,7 @@ void parseArguments(int argc, char** argv) {
 }
 
 int simpleInput(int min, int max){
-    std::cout << "give a valid number from " << std::to_string(min) << " to " << std::to_string(max) << std::endl;
+    std::cout << "enter a valid number from " << std::to_string(min) << " to " << std::to_string(max) << std::endl;
     int z = -1;
     do {
         try {
@@ -136,7 +136,7 @@ int simpleInput(int min, int max){
             std::cin >> str;
             z = std::stoi(str);
         } catch(std::exception& e){
-            std::cout << " please use a valid number! " << std::endl;
+            std::cout << " please enter a valid number! " << std::endl;
         }
     } while(z == -1);
     //clear input
@@ -157,7 +157,7 @@ void flashJSON(const std::string& spiDevice, const std::string& filename, bool e
             spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
             pin = spi::ATmega32u4SPI::pin0;
         } else {
-            std::cerr << "No Device Connected!" << std::endl;
+            std::cerr << "No device connected!" << std::endl;
             return;
         }
     } else if(spiDevice == "mcp") {
@@ -186,7 +186,7 @@ int consoleInterface(const std::string& spiDevice){
             spi = std::make_shared<spi::ATmega32u4SPI>(*atmega);
             pin = spi::ATmega32u4SPI::pin0;
         } else {
-            std::cerr << "No Device Connected!" << std::endl;
+            std::cerr << "No device connected!" << std::endl;
             return 0;
         }
     } else {
@@ -225,16 +225,10 @@ int consoleInterface(const std::string& spiDevice){
     return 0;
 }
 
-int serverInterface(const char* spiDevice){
-    if(std::string(spiDevice) == "mcp")
-        return 1;
- return 0;
-}
-
 inline void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     std::string str;
     while(true) {
-        std::cout << "type the name of the Register mask you want to read" << std::endl;
+        std::cout << "enter the name of the Register mask you want to read" << std::endl;
         std::getline(std::cin,str);
         if (str == "exit") break;
         try {
@@ -242,7 +236,7 @@ inline void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
             std::cout << device->getRuntime(mask) << std::endl;
             break;
         } catch (std::exception &e) {
-            std::cout << "type a valid name or exit" << std::endl;
+            std::cout << "enter a valid name or exit" << std::endl;
         }
     }
 }
@@ -253,16 +247,16 @@ bool generateDefault(bool force, const std::string& filename){
     if(of.good() && force) {
         of << std::setw(4) << NS_A4963::defaultValues;
         return_value = true;
-        std::cout << "new config file successfully generated (" << filename << ")" << std::endl;
+        std::cout << "New config successfully generated (" << filename << ")" << std::endl;
     } else {
-        std::cout << "File already exists! use -f to force overwrite" << std::endl;
+        std::cout << "File already exists! Use -f to force overwrite" << std::endl;
     }
     of.close();
     return return_value;
 }
 
 void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
-    std::cout << "type the Name of the Register you want to Set, or exit to cancel" << std::endl;
+    std::cout << "Enter the name of the register you want to set, or \"exit\" to cancel" << std::endl;
     std::string str;
     NS_A4963::A4963RegisterNames mask;
     while(true) {
@@ -272,10 +266,10 @@ void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
             mask = NS_A4963::RegisterStrings::get(str);
             break;
         } catch (std::exception &e) {
-            std::cout << "type a valid name or exit" << std::endl;
+            std::cout << "Enter a valid name or exit" << std::endl;
         }
     }
-    std::cout << "type the value you want to set" << std::endl;
+    std::cout << "Enter the value you want to set" << std::endl;
     while(true) {
         std::getline(std::cin,str);
         if (str == "exit") break;
@@ -283,7 +277,7 @@ void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
             NS_A4963::setRuntime(*device,mask,str);
             break;
         } catch (std::exception &e) {
-            std::cout << "type a valid value or exit" << std::endl;
+            std::cout << "Enter a valid value or exit" << std::endl;
         }
     }
 }
