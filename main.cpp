@@ -190,9 +190,16 @@ int consoleInterface(const std::string& spiDevice){
             return 0;
         }
     } else {
-
-        spi = std::make_shared<MCP2210>();
-        if(dynamic_cast<MCP2210>(*spi))
+        std::shared_ptr<MCP2210> dev = std::make_shared<MCP2210>();
+        while(!*dev){
+            std::cout << " device not connected, try again?: y/n" << std::endl;
+            std::string str;
+            std::cin >> str;
+            if(str == "y")
+                dev->connect();
+            else break;
+        }
+        spi = dev;
         pin = MCP2210::pin0;
     }
     device = std::make_shared<NS_A4963::A4963>(spi);
