@@ -3,6 +3,8 @@
 #include<type_traits>
 #include <limits>
 #include <cmath>
+#include <chrono>
+#include "../../src/CustomDataTypes/Volt.h"
 
 namespace utils {
 
@@ -251,5 +253,28 @@ namespace utils {
 				return sameTypes<T...>();
 		}
 	
-	};
+	}
+
+
+    template<class T>
+    struct is_duration : std::false_type {};
+
+    template<class Rep, class Period>
+    struct is_duration<std::chrono::duration<Rep, Period>> : std::true_type {};
+
+    template<class T>
+    struct is_volt : std::false_type {};
+
+    template<class Rep, class Period>
+    struct is_volt<CustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
+
+
+    template <typename T, typename U>
+    struct is_template_same : std::false_type {};
+
+    template <template<typename, typename> typename T, typename Rep, typename Period, typename oRep, typename oPeriod>
+    struct is_template_same<T<Rep, Period>, T<oRep, oPeriod>> : std::true_type {};
+
+    template <typename T, typename U>
+    inline constexpr bool is_template_same_v = is_template_same<T, U>::value;
 }

@@ -4,18 +4,10 @@
 
 #include "SPIDevice.h"
 
-bool SPIDevice::operator<(const SPIDevice &rhs) const {
-    return someValue < rhs.someValue;
+const gpio::GPIOPin &SPIDevice::getSlavePin() const{
+    return slavePin;
 }
 
-bool SPIDevice::operator>(const SPIDevice &rhs) const {
-    return rhs < *this;
-}
-
-bool SPIDevice::operator<=(const SPIDevice &rhs) const {
-    return !(rhs < *this);
-}
-
-bool SPIDevice::operator>=(const SPIDevice &rhs) const {
-    return !(*this < rhs);
+void SPIDevice::selectPin(const gpio::GPIOPin &pin){
+    slavePin = pin;
 }

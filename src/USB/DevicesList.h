@@ -8,6 +8,7 @@
 #include "src/SPI/ATmega32U4SPI.h"
 //#include "USBUtils.h"
 
+
 namespace device_list {
     struct DeviceList {
         using ATmega = spi::ATmega32u4SPI;

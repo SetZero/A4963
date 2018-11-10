@@ -8,83 +8,76 @@
 #include <type_traits>
 #include <iostream>
 #include <optional>
+#include <stdexcept>
 #include "../../CustomDataTypes/Volt.h"
+#include "utils.h"
 
-template<typename TDuration>
-struct DurationData {
-    TDuration precision;
-    TDuration maxValue;
-    TDuration minValue;
-};
-
-template<typename TUnitType, typename TValueType>
-class UnitScale {
-public:
-    explicit UnitScale(const DurationData<TUnitType> data) : mPrecision(data.precision), mMaxValue(data.maxValue),
-                                                                           mMinValue(data.minValue) {
-        static_assert(is_duration<TUnitType>::value || is_volt<TUnitType>::value, "TUnitType must be of type std::chrono::duration" \
-                                                                                  "or CustomDataTypes::Electricity::Volt");
-    }
-
-    //TODO: return ScaleOptional and return if it is too big or too small
-    template<typename Rep, typename Period>
-    std::optional<TValueType> convertValue(const CustomDataTypes::Electricity::Volt<Rep, Period> &value) {
-        //TODO: round value up/down
-        if(value >= mMinValue && value <= mMaxValue) {
-            auto steps = static_cast<TUnitType>(value);
-            return steps.count() / mPrecision;
-        } else {
-            std::cerr << "Duration not in Range!" << std::endl;
-            return std::nullopt;
-        }
-    }
-
-    template<typename Rep, typename Period>
-    std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period> &value) {
-        //TODO: round value up/down
-        if(value >= mMinValue && value <= mMaxValue) {
-            auto steps = std::chrono::duration_cast<TUnitType>(value);
-            return steps / mPrecision;
-        } else {
-            std::cerr << "Duration not in Range!" << std::endl;
-            return std::nullopt;
-        }
-    }
-
-    TUnitType getActualValue(TValueType value) {
-        return TUnitType{value * mPrecision.count()};
-    }
-
-    TUnitType getMPrecision() const {
-        return mPrecision;
-    }
-
-    TUnitType getMMaxValue() const {
-        return mMaxValue;
-    }
-
-    TUnitType getMMinValue() const {
-        return mMinValue;
-    }
-
+template<auto& min, auto& max, auto& functor, auto& inverse_functor, typename TValueType = uint16_t, TValueType stepsize = 1>
+class NewUnitScale {
+    static_assert(std::is_invocable_v<decltype(functor), TValueType>);
+    static_assert(std::is_invocable_v<decltype(inverse_functor), decltype(min)>);
+    static_assert(min <= max);
+    static_assert(std::is_arithmetic_v<TValueType>);
+    static_assert(stepsize > 0);
 
 private:
-    TUnitType mPrecision;
-    TUnitType mMaxValue;
-    TUnitType mMinValue;
+    using non_ref_type = std::remove_const_t<std::remove_reference_t<decltype(min)>>;
+public:
+    class const_iterator: public std::iterator<std::input_iterator_tag,
+            non_ref_type,
+            non_ref_type,
+            const non_ref_type*,
+            non_ref_type
+    > {
+    private:
+        size_t num;
+    public:
+        explicit const_iterator(unsigned long _num = 0) : num(_num) {}
+        const const_iterator& operator++() const {num = num + stepsize; return *this;}
+        const const_iterator operator++(int) const {const_iterator retval = *this; ++(*this); return retval;}
+        bool operator==(const_iterator other) const {return num == other.num;}
+        bool operator!=(const_iterator other) const {return !(*this == other);}
+        non_ref_type operator*() const {return functor(num);}
+    };
+    const const_iterator begin() const { return const_iterator(0); }
+    const const_iterator end() const { return const_iterator(inverse_functor(max)+1); }
 
-    template<class T>
-    struct is_duration : std::false_type {};
+    template<typename T>
+    constexpr std::optional<TValueType> convertValue(const T& value) const {
+        //TODO: round value up/down
+        if(value >= min && value <= max) {
+            return {inverse_functor(static_cast<non_ref_type>(value))};
+        } else {
+            std::cerr << "Duration not in Range!" << std::endl;
+            return std::nullopt;
+        }
+    }
 
-    template<class Rep, class Period>
-    struct is_duration<std::chrono::duration<Rep, Period>> : std::true_type {};
+    template<typename Rep, typename Period>
+    constexpr std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value) const {
+        //TODO: round value up/down
+        if(value >= min && value <= max) {
+            auto steps = std::chrono::duration_cast<non_ref_type>(value);
+            return inverse_functor(steps);
+        } else {
+            std::cerr << "Maximum: " << max.count() << ", Minimum: " << min.count() << ", Given: " << value.count() << std::endl;
+            std::cerr << "Duration not in Range!" << std::endl;
+            return std::nullopt;
+        }
+    }
 
-    template<class T>
-    struct is_volt : std::false_type {};
+    constexpr non_ref_type getActualValue(TValueType value) const {
+        return non_ref_type{functor(value)};
+    }
 
-    template<class Rep, class Period>
-    struct is_volt<CustomDataTypes::Electricity::Volt<Rep, Period>> : std::true_type {};
+
+    constexpr non_ref_type getMaxValue() const {
+        return max;
+    }
+
+    constexpr non_ref_type getMinValue() const {
+        return min;
+    }
 };
-
 
 

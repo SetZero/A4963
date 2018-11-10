@@ -1,9 +1,5 @@
-#include "SPIBridge.h"
+//
+// Created by keven on 07.10.18.
+//
 
-namespace spi {
-    inline namespace literals {
-        spi::SPIData operator ""_spi(unsigned long long element) {
-            return spi::SPIData(static_cast<int>(element));
-        }
-    }
-}
+#include "SPIBridge.h"

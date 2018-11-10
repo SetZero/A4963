@@ -12,7 +12,7 @@ namespace spi {
         device.get()->openDevice();
     }
 
-    void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction, gpio::GPIOPin pin) {
+    void ATmega32u4SPI::setGPIODirection(const gpio::gpioDirection &direction,const gpio::GPIOPin& pin) {
         if(direction == gpio::gpioDirection::in) {
             mDevice.get()->sendData(
                     {
@@ -30,7 +30,7 @@ namespace spi {
         }
     }
 
-    void ATmega32u4SPI::writeGPIO(const gpio::gpioState &state, gpio::GPIOPin pin) {
+    void ATmega32u4SPI::writeGPIO(const gpio::gpioState &state,const gpio::GPIOPin& pin) {
         if(state == gpio::gpioState::on) {
             mDevice.get()->sendData(
                     {
@@ -48,48 +48,54 @@ namespace spi {
         }
     }
 
-    gpio::gpioState ATmega32u4SPI::readGPIO(gpio::GPIOPin pin) const {
-        auto state = gpio::gpioState::off;
-        return state;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+    gpio::gpioState ATmega32u4SPI::readGPIO(const gpio::GPIOPin& pin) const {
+#pragma GCC diagnostic pop
+         //TODO: make this work
+        return gpio::gpioState::off;
     }
 
-    spi::SPIData ATmega32u4SPI::transfer(const spi::SPIData &spiData) const {
-        /*for(auto data : spiData.getData()) {
-            std::cout << "sent: " << static_cast<int >(data) << std::endl;
-        }*/
-        //TODO: Check if SPI data is less than 255 single data
-        //TODO: allow multi byte transfer for spiData!
-        auto size = static_cast<uint8_t >(spiData.getData().size());
-        std::vector<uint8_t> dataVector;
+    std::unique_ptr<Data> ATmega32u4SPI::transfer(const Data &spiData) {
+        std::vector<uint8_t> tmpData;
+        for(auto elem : spiData){
+            std::vector<uint8_t> dataVector;
+            dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
+            dataVector.push_back(1);
+            //TODO: maybe put in LibUsbDevice implentions
+            //dataVector.push_back((uint8_t) spiData);
+            dataVector.push_back(elem);
 
-        dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
-        dataVector.push_back(size);
-        dataVector.insert(std::end(dataVector), std::begin(spiData.getData()), std::end(spiData.getData()));
-
-        auto data = mDevice.get()->sendData(dataVector);
-        if(data.empty()) {
-            std::cout << "There was an error with the spi data!" << std::endl;
-        } else {
-            if (data[0] == static_cast<unsigned char>(SPIAnswerypes::SPIAnswerWaiting)) {
-                std::cout << "Failed to send data: device not ready yet..." << std::endl;
+            auto data = mDevice.get()->sendData(dataVector);
+            if(data.empty()) {
+                std::cout << "There was an error with the spi data!" << std::endl;
             } else {
-                data.erase(std::begin(data));
-                /*for(auto dat : data) {
-                    std::cout << static_cast<int>(dat) << std::endl;
-                }*/
+                if (data[0] == static_cast<unsigned char>(SPIAnswerypes::SPIAnswerWaiting)) {
+                    std::cout << "Failed to send data: device not ready yet..." << std::endl;
+                } else {
+                    data.erase(std::begin(data));
+                    try {
+                        tmpData.insert(std::begin(tmpData), std::begin(data), std::end(data));
+                    }
+                    catch(std::exception& e){
+                       std::cout << e.what() << std::endl;
+                    }
+                }
             }
         }
-        return data;
+        std::unique_ptr<Data> tmp = spiData.create();
+        tmp->fill(tmpData);
+        return tmp;
     }
 
-    void ATmega32u4SPI::slaveRegister(std::shared_ptr<SPIDevice> device, const gpio::GPIOPin &pin) {
+    void ATmega32u4SPI::slaveRegister(const std::shared_ptr<SPIDevice>& device, const gpio::GPIOPin &pin) {
         setGPIODirection(gpio::gpioDirection::out, pin);
-        mSlaves[device] = pin;
+        mSlaves[device.get()] = pin;
         slaveDeselect(device);
     }
 
-    void ATmega32u4SPI::slaveSelect(std::shared_ptr<SPIDevice> slave) {
-        auto value = mSlaves.find(slave);
+    void ATmega32u4SPI::slaveSelect(const std::shared_ptr<SPIDevice>& slave) {
+        auto value = mSlaves.find(slave.get());
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::off, value->second);
         } else {
@@ -97,13 +103,21 @@ namespace spi {
         }
     }
 
-    void ATmega32u4SPI::slaveDeselect(std::shared_ptr<SPIDevice> slave) {
-        auto value = mSlaves.find(slave);
+    void ATmega32u4SPI::slaveDeselect(const std::shared_ptr<SPIDevice>& slave) {
+        auto value = mSlaves.find(slave.get());
         if(value != std::end(mSlaves)) {
             writeGPIO(gpio::gpioState::on, value->second);
         } else {
             std::cout << "Error: No such slave found!" << std::endl;
         }
+    }
+
+    std::vector<std::unique_ptr<Data>> ATmega32u4SPI::transfer(const std::initializer_list<std::unique_ptr<Data>> &spiData) {
+        std::vector<std::unique_ptr<Data>> temp{};
+        for(const auto &elem : spiData){
+            temp.emplace_back(transfer(*elem));
+        }
+        return temp;
     }
 }
 
