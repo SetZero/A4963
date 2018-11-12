@@ -178,3 +178,9 @@ build/compile_commands\.json
 build/hid
 
 build/test_cases
+
+SPI\.cbp
+
+hid
+
+config\.json

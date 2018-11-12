@@ -8,7 +8,7 @@ namespace spi {
     const usb::DeviceID ATmega32u4SPI::deviceID{0x204f};
     const usb::VendorID ATmega32u4SPI::vendorID{0x03eb};
 
-    ATmega32u4SPI::ATmega32u4SPI(const std::shared_ptr<usb::LibUSBDevice> &device) : mDevice{device} {
+    ATmega32u4SPI::ATmega32u4SPI(const std::shared_ptr<usb::LibUSBDevice>& device) : mDevice{device} {
         device.get()->openDevice();
     }
 
@@ -62,13 +62,11 @@ namespace spi {
             std::vector<uint8_t> dataVector;
             dataVector.push_back(static_cast<uint8_t >(SPIRequestTypes::SendSPIData));
             dataVector.push_back(1);
-            //TODO: maybe put in LibUsbDevice implentions
-            //dataVector.push_back((uint8_t) spiData);
             dataVector.push_back(elem);
 
             auto data = mDevice.get()->sendData(dataVector);
             if(data.empty()) {
-                std::cout << "There was an error with the spi data!" << std::endl;
+                std::cout << "There was an error with the spi data! (empty input)" << std::endl;
             } else {
                 if (data[0] == static_cast<unsigned char>(SPIAnswerypes::SPIAnswerWaiting)) {
                     std::cout << "Failed to send data: device not ready yet..." << std::endl;

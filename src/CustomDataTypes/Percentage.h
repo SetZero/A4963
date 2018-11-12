@@ -15,6 +15,8 @@ namespace CustomDataTypes {
         static_assert(std::is_floating_point<accuracy>(), "wrong type: only floating point types allowed");
         accuracy mPercentage = 0;
     public:
+        static constexpr std::string_view abr_value = "%";
+        using value_type = accuracy;
         constexpr inline Percentage() = default;
         constexpr inline explicit Percentage(accuracy percent) : mPercentage(percent){};
         constexpr Percentage(Percentage&& other) noexcept : Percentage() { this->swap(other);};
@@ -23,6 +25,8 @@ namespace CustomDataTypes {
         constexpr explicit operator accuracy() const {
             return mPercentage;
         }
+
+
 
         template<typename T>
         constexpr explicit operator T() const {
@@ -43,9 +47,9 @@ namespace CustomDataTypes {
         constexpr Percentage& operator*=(const Skalar skalar){
             static_assert(std::is_arithmetic<Skalar>(), "cannot multiplicate from a non arithmetic type");
             if(skalar >= 0)
-                this->mPercentage = mPercentage/100 * skalar;
+                this->mPercentage = mPercentage * skalar;
             else
-                this->mPercentage = mPercentage/100 * -skalar;
+                this->mPercentage = mPercentage * -skalar;
             return *this;
         }
         constexpr Percentage& operator-=(const Percentage& other){
@@ -61,7 +65,7 @@ namespace CustomDataTypes {
         template<typename Skalar>
         constexpr Percentage& operator/=(const Skalar skalar){
             static_assert(std::is_arithmetic<Skalar>(), "cannot divide by a non arithmetic type");
-            this->mPercentage = mPercentage/100/skalar;
+            this->mPercentage /= skalar;
             return *this;
         }
 
@@ -79,6 +83,12 @@ namespace CustomDataTypes {
         }
         constexpr auto operator"" _perc(long double percent){
             return Percentage<double>(percent);
+        }
+        constexpr auto operator"" _perc(unsigned long long percent){
+            return Percentage<double>(percent);
+        }
+        constexpr auto operator"" _percLd(unsigned long long percent){
+            return Percentage<long double>(percent);
         }
     }
 
@@ -114,6 +124,11 @@ namespace CustomDataTypes {
     }
 
     template<typename accuracy>
+    constexpr bool operator!=(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
+        return !(lhs == rhs);
+    }
+
+    template<typename accuracy>
     constexpr bool operator<=(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
         return lhs.getPercent() < rhs.getPercent() || lhs == rhs;
     }
@@ -136,7 +151,7 @@ namespace CustomDataTypes {
     }
     template<typename Skalar, typename accuracy>
     constexpr Percentage<accuracy> operator/(const Skalar lhs, const Percentage<accuracy>& rhs){
-        Percentage<accuracy> temp{lhs};
+        Percentage<accuracy> temp{static_cast<accuracy>(lhs)};
         temp/=(accuracy) rhs;
         return temp;
     }
@@ -148,13 +163,13 @@ namespace CustomDataTypes {
     }
 
     template<typename accuracy>
-    constexpr void swap(const Percentage<accuracy>& lhs, const Percentage<accuracy>& rhs){
+    constexpr void swap(Percentage<accuracy>& lhs, Percentage<accuracy>& rhs){
         lhs.swap(rhs);
     }
 
     template<typename accuracy>
     constexpr std::ostream &operator<<(std::ostream &os, const Percentage<accuracy>& percentage) {
-        os << " Percentage: " << percentage.getPercent();
+        os << percentage.getPercent() << "%";
         return os;
     }
 }

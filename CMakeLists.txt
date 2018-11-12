@@ -2,20 +2,24 @@ cmake_minimum_required(VERSION 3.12)
 project(SPI)
 
 set(CMAKE_CXX_STANDARD 20)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -ludev -Ddebug")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -ludev -Da4963_debug")
 
 include_directories(.)
 include_directories(inc)
 include_directories(src)
 
 add_executable(test_cases tests/Test_SPIData.cpp tests/Test_utils_getFirstSetBitPos.cpp
-                tests/Test_src_scales_RangedUnit.cpp tests/UnitScale.cpp tests/Test_src_CustomDataTypes.cpp)
+                tests/Test_src_scales_RangedUnit.cpp tests/UnitScale.cpp tests/Test_src_CustomDataTypes.cpp tests/Test_Percentage.cpp)
 add_executable(hid main.cpp)
 
 
 ## FIND LibUSB ##
 find_library(LIBUSB_LIBRARY
         NAMES usb-1.0)
+
+find_library(LIBEVPP
+        NAMES libevpp.so)
+
 find_path(LIBUSB_INCLUDE_DIR
         NAMES libusb.h
         PATH_SUFFIXES "include" "libusb" "libusb-1.0")
@@ -86,6 +90,7 @@ add_subdirectory(src/Devices/A4963)
 include_directories(src/CustomDataTypes)
 add_subdirectory(src/CustomDataTypes)
 
+# LIBEVPP
 target_link_libraries(hid     src spi usbb inc  utils scales a4963 cdt  ${LIBUSB_LIBRARY})
 
 #add_executable(SPI

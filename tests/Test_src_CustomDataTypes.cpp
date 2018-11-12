@@ -86,3 +86,10 @@ TEST_CASE("Implicit Convertion", "[Implicit Convertion]") {
     REQUIRE((v1 - v2) == 1.5_V);
 }
 
+TEST_CASE("Voltage Floating Test", "[Volt Float]") {
+    using namespace CustomDataTypes::Electricity::literals;
+    auto v1 = 1.55_V;
+    auto v2 = 1550.0_mV;
+    REQUIRE(v1 - v2 == 0_V);
+}
+

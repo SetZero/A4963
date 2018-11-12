@@ -1,3 +1,4 @@
+#pragma GCC diagnostic push
 //
 // Created by sebastian on 23.09.18.
 //
@@ -11,8 +12,10 @@
 #include "../../CustomDataTypes/Volt.h"
 #include "../../CustomDataTypes/Hertz.h"
 #include "../../CustomDataTypes/Percentage.h"
+#include <map>
+#include <string_view>
 
-#ifdef debug
+#ifdef a4963_debug
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
@@ -90,7 +93,9 @@ namespace NS_A4963 {
             Brake                               = 0b0000000000000100,
             DirectionOfRotation                 = 0b0000000000000010,
             Run                                 = 0b0000000000000001,
+        };
 
+        enum class Masks : uint16_t {
             /* Mask Addresses*/
             PhaseCLowSideVDS = (1 << 0),
             PhaseCHighSideVDS = (1 << 1),
@@ -238,6 +243,13 @@ namespace NS_A4963 {
             Low = 0b10,
             Off = 0b11
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Auto", values::Auto},
+                {"High", values::High},
+                {"Low", values::Low},
+                {"Off", values::Off}
+        };
     };
 
     template<>
@@ -250,6 +262,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             DebounceTimer = 0,
             WindowTimer = 1
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Debounce Timer", values::DebounceTimer},
+                {"Window Timer", values::WindowTimer}
         };
     };
 
@@ -264,6 +281,11 @@ namespace NS_A4963 {
             NormalTrueLogic = 0,
             InverterLogic = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Normal True Logic", values::NormalTrueLogic},
+                {"Inverter Logic", values::InverterLogic}
+        };
     };
 
     template<>
@@ -276,6 +298,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             T12_5Percent = 0,
             T25Percent = 1
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"12,5%", values::T12_5Percent},
+                {"25%", values::T25Percent}
         };
     };
 
@@ -305,6 +332,13 @@ namespace NS_A4963 {
             T150Percent = 2,
             T200Percent = 3
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"100%", values::T100Percent},
+                {"125%", values::T125Percent},
+                {"150%", values::T150Percent},
+                {"200%", values::T200Percent}
+        };
     };
 
     template<>
@@ -317,6 +351,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             Off = 0,
             Active = 1
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Off", values::Off},
+                {"Active", values::Active}
         };
     };
 
@@ -341,7 +380,7 @@ namespace NS_A4963 {
         static constexpr auto min = 6.25_perc;
         static constexpr auto max = 100.0_perc;
         static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min).getPercent()-1); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min.getPercent())-1.0_perc); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "PWM Duty Cycle Hold Torque";
     };
@@ -380,7 +419,7 @@ namespace NS_A4963 {
         static constexpr auto min = 6.25_perc;
         static constexpr auto max = 100.0_perc;
         static constexpr auto functor = [](auto t1) { return (t1+1)*min; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min).getPercent()-1); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min.getPercent())-1.0_perc); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "PWM Duty Cycle Torque Startup";
     };
@@ -393,7 +432,7 @@ namespace NS_A4963 {
         static constexpr auto min = 2_Hz;
         static constexpr auto max = 32_Hz;
         static constexpr auto functor = [](auto t1) { return CustomDataTypes::Frequency::hertz(t1+1) * min; };
-        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min)-1_Hz); };
+        static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1/min)-1.0_Hz); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "Start Speed";
     };
@@ -422,6 +461,11 @@ namespace NS_A4963 {
             ElectricalFrequenzy = 0,
             CommutationFrequenzy = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Electrical Frequenzy", values::ElectricalFrequenzy},
+                {"Commutation Frequenzy", values::CommutationFrequenzy}
+        };
     };
 
     template<>
@@ -431,7 +475,7 @@ namespace NS_A4963 {
         static constexpr auto code = RegisterCodes::Config5;
         static constexpr auto min = 25.5_Hz;
         static constexpr auto max = 3.2767_kHz;
-        static constexpr auto functor = [](auto t1) { return (std::exp2(8+t1)-1)*0.1; };
+        static constexpr auto functor = [](auto t1) { return (std::exp2(8+t1)-1)*0.1_Hz; };
         static constexpr auto inverse_functor = [](auto t1) noexcept { return static_cast<ssize_t>(std::log2(static_cast<CustomDataTypes::Frequency::Hertz<long double>>(t1*10+1_Hz).count())-8 ); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "Maximum Speed Setting";
@@ -442,7 +486,7 @@ namespace NS_A4963 {
         static inline constexpr bool isRanged = true;
         static constexpr auto mask = RegisterMask::PhaseAdvance;
         static constexpr auto code = RegisterCodes::Config5;
-        static constexpr auto min = 0; //TODO: Phase
+        static constexpr auto min = 0.0;
         static constexpr auto max = 28.125;
         static constexpr auto functor = [](auto t1) { return t1*1.875; }; //TODO: 1.875 Phase
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>(t1 / 1.875); };
@@ -463,6 +507,13 @@ namespace NS_A4963 {
             ClosedLoopCurrent = 0b10,
             ClosedLoopSpeed = 0b11
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Indirect Speed", values::IndirectSpeed},
+                {"Direct Speed", values::DirectSpeed},
+                {"Closed Loop Current", values::ClosedLoopCurrent},
+                {"Closed Loop Speed", values::ClosedLoopSpeed}
+        };
     };
 
     template<>
@@ -475,6 +526,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             NoStopOnFail = 0,
             StopOnFail = 1,
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"No Stop On Fail", values::NoStopOnFail},
+                {"Stop On Fail", values::StopOnFail}
         };
     };
 
@@ -489,7 +545,7 @@ namespace NS_A4963 {
         static constexpr auto inverse_functor = [](auto t1) { return static_cast<ssize_t>((t1 -7.0_perc)/3.0); };
         static constexpr NewUnitScale<min, max, functor, inverse_functor> value{};
         static constexpr std::string_view name = "Duty Cycle Control";
-    };
+    }; //TODO: special case: when 0000 then off
 
     template<>
     struct RegisterValues<A4963RegisterNames::RestartControl> {
@@ -501,6 +557,11 @@ namespace NS_A4963 {
         enum class values : uint16_t {
             NoRestart = 0,
             RestartAfterLossOfSync = 1
+        };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"No Restart", values::NoRestart},
+                {"Restart After Loss Of Sync", values::RestartAfterLossOfSync}
         };
     };
 
@@ -515,6 +576,11 @@ namespace NS_A4963 {
             BrakeDisabled = 0,
             EnableIfPWMDisabled = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Brake Disabled", values::BrakeDisabled},
+                {"Enable If PWM Disabled", values::EnableIfPWMDisabled}
+        };
     };
 
     template<>
@@ -528,6 +594,12 @@ namespace NS_A4963 {
             Forward = 0,
             Reverse = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+                {"Forward", values::Forward},
+                {"Reverse", values::Reverse}
+        };
+
     };
 
     template<>
@@ -541,9 +613,15 @@ namespace NS_A4963 {
             DisableOutputCoastMotor = 0,
             StartAndRunMotor = 1
         };
+
+        static inline std::map<std::string_view,values> map = std::map<std::string_view,values>{
+            {"Disable Output Coast Motor", values::DisableOutputCoastMotor},
+            {"Start And Run Motor", values::StartAndRunMotor}
+        };
     };
 }
 
-#ifdef debug
+#ifdef a4963_debug
     #pragma GCC diagnostic pop
 #endif
+#pragma GCC diagnostic pop

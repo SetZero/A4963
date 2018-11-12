@@ -14,10 +14,14 @@ namespace NS_A4963 {
     }
 
     std::unique_ptr<spi::Data> A4963::send16bitRegister(size_type address) {
-         return mBridge->transfer(spi::SPIData<sizeof(size_type),spi::big_endian>{address});
+        if(mBridge != nullptr) {
+            return mBridge->transfer(spi::SPIData<sizeof(size_type), spi::big_endian>{address});
+        } else {
+            return {};
+        }
     }
 
-    A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge) : mBridge(std::move(mBridge)) {
+    A4963::A4963(std::shared_ptr<spi::SPIBridge> mBridge, bool debug_enabled) : mBridge(std::move(mBridge)) {
         //reload all register
         markRegisterForReload(detail::RegisterCodes::Config0);
         markRegisterForReload(detail::RegisterCodes::Config1);
@@ -25,8 +29,20 @@ namespace NS_A4963 {
         markRegisterForReload(detail::RegisterCodes::Config3);
         markRegisterForReload(detail::RegisterCodes::Config4);
         markRegisterForReload(detail::RegisterCodes::Config5);
-        markRegisterForReload(detail::RegisterCodes::Mask);
         markRegisterForReload(detail::RegisterCodes::Run);
+
+        markRegisterForReload(detail::RegisterCodes::Mask);
+        cacheRegister(detail::RegisterCodes::Mask, false);
+
+        if(debug_enabled) {
+            cacheRegister(detail::RegisterCodes::Config0, false);
+            cacheRegister(detail::RegisterCodes::Config1, false);
+            cacheRegister(detail::RegisterCodes::Config2, false);
+            cacheRegister(detail::RegisterCodes::Config3, false);
+            cacheRegister(detail::RegisterCodes::Config4, false);
+            cacheRegister(detail::RegisterCodes::Config5, false);
+            cacheRegister(detail::RegisterCodes::Run, false);
+        }
     }
 
     void A4963::writeRegisterEntry(const detail::RegisterCodes &reg, const detail::RegisterMask &mask, size_type data) {
@@ -36,14 +52,27 @@ namespace NS_A4963 {
         mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), detail::RegisterMask::RegisterAddress);
         mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Write), detail::RegisterMask::WriteAddress);
         mRegisterData[reg].data |= createRegisterEntry(data, detail::RegisterMask::GeneralData);
-        mRegisterData[reg].dirty = true;
+
+        if(mRegisterData[reg].cache != DirtyCache::DontCache) {
+            mRegisterData[reg].cache = DirtyCache::Dirty;
+        }
     }
 
     void A4963::markRegisterForReload(const detail::RegisterCodes &reg) {
         clearRegister(reg);
         mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(reg), detail::RegisterMask::RegisterAddress);
         mRegisterData[reg].data |= createRegisterEntry(static_cast<size_type>(WriteBit::Read), detail::RegisterMask::WriteAddress);
-        mRegisterData[reg].dirty = true;
+        if(mRegisterData[reg].cache != DirtyCache::DontCache) {
+            mRegisterData[reg].cache = DirtyCache::Dirty;
+        }
+    }
+
+    void A4963::cacheRegister(const RegisterCodes &reg, bool doCache ) {
+        if(doCache) {
+            mRegisterData[reg].cache = DirtyCache::Dirty;
+        } else {
+            mRegisterData[reg].cache = DirtyCache::DontCache;
+        }
     }
 
     A4963::size_type A4963::createRegisterEntry(size_type data, const detail::RegisterMask &mask) {
@@ -69,7 +98,12 @@ namespace NS_A4963 {
     }
 
     void A4963::commit(const detail::RegisterCodes &registerCodes) {
-        if (mRegisterData[registerCodes].dirty) {
+        if(!mBridge)
+            return;
+
+        if (mRegisterData[registerCodes].cache == DirtyCache::Dirty ||
+            mRegisterData[registerCodes].cache == DirtyCache::DontCache ) {
+
             mBridge->slaveSelect(shared_from_this());
             if (getRegisterEntry(registerCodes, detail::RegisterMask::WriteAddress) ==
                 static_cast<A4963::size_type>(WriteBit::Read))
@@ -82,7 +116,10 @@ namespace NS_A4963 {
                 mRegisterData[registerCodes].data &= ~(1 << utils::getFirstSetBitPos(static_cast<size_type>(detail::RegisterMask::WriteAddress)));
             }
             mBridge->slaveDeselect(shared_from_this());
-            mRegisterData[registerCodes].dirty = false;
+
+            if(mRegisterData[registerCodes].cache != DirtyCache::DontCache) {
+                mRegisterData[registerCodes].cache = DirtyCache::Clean;
+            }
         }
     }
 
@@ -91,12 +128,22 @@ namespace NS_A4963 {
     void A4963::show_register() {
         for (auto registerData : mRegisterData) {
             std::bitset<16> bitset{readRegister(registerData.first)};
-            std::cout << static_cast<A4963::size_type>(registerData.first) << ": " << bitset << std::endl;
+            std::cout << static_cast<A4963::size_type>(registerData.first) << ": " << bitset;
+            if(registerData.second.cache == DirtyCache::DontCache && mBridge) {
+                std::cout << "(Don't Cache Register)" << std::endl;
+            } else if(registerData.second.cache == DirtyCache::Dirty && mBridge) {
+                std::cout << "(Dirty Register)" << std::endl;
+            } else if(mBridge){
+                std::cout << "(Clean Register)" << std::endl;
+            } else if(!mBridge) {
+                std::cout << "(Theoretical Value)" << std::endl;
+            }
         }
     }
 
     A4963::size_type A4963::readRegister(const detail::RegisterCodes &registerCodes, bool forceNoReload) {
-        if (!forceNoReload && mRegisterData[registerCodes].dirty) {
+        if (!forceNoReload && (mRegisterData[registerCodes].cache == DirtyCache::Dirty ||
+                               mRegisterData[registerCodes].cache == DirtyCache::DontCache)) {
             commit(registerCodes);
         }
         return mRegisterData[registerCodes].data;
@@ -112,12 +159,10 @@ namespace NS_A4963 {
         return static_cast<size_type>(registerValue & static_cast<size_type>(registerMask)) >> utils::getFirstSetBitPos(static_cast<size_type>(registerMask));
     }
 
-    void A4963::configDiagnostic(const RegisterMask & mask,bool activate) {
-        auto val  = createRegisterEntry(static_cast<size_type>(activate),mask);
-        writeRegisterEntry(RegisterCodes::Mask,mask,val);
+    void A4963::configDiagnostic(const Masks& mask,bool activate) {
+        auto val  = createRegisterEntry(static_cast<size_type>(activate),static_cast<RegisterMask>(mask));
+        writeRegisterEntry(RegisterCodes::Mask,static_cast<RegisterMask>(mask),val);
     }
-
-
 
     std::vector<Diagnostic> A4963::readDiagnostic() {
         std::bitset<16> tmp{readRegister(RegisterCodes::Diagnostic)};
@@ -129,9 +174,5 @@ namespace NS_A4963 {
             }
         }
         return ret;
-    }
-
-    bool A4963::testDiagnostic() {
-        return readRegister(RegisterCodes::Diagnostic) != 0;
     }
 }

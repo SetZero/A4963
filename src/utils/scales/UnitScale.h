@@ -40,28 +40,31 @@ public:
         non_ref_type operator*() const {return functor(num);}
     };
     const const_iterator begin() const { return const_iterator(0); }
-    const const_iterator end() const { return const_iterator(inverse_functor(max)+1); }
+    const const_iterator end() const { return const_iterator(inverse_functor(max)+stepsize); }
 
     template<typename T>
     constexpr std::optional<TValueType> convertValue(const T& value) const {
+        using namespace utils::printable;
         //TODO: round value up/down
-        if(value >= min && value <= max) {
-            return {inverse_functor(static_cast<non_ref_type>(value))};
+        if(utils::approximately_greater_or_equal(value, min) &&
+            utils::approximately_less_or_equal(value, max))
+        {
+            auto converted_value = inverse_functor(static_cast<non_ref_type>(value));
+            auto actual_value = functor(converted_value);
+            if(!utils::approximately_same(actual_value, value)) {
+                auto next_possible_value = functor(converted_value + 1);
+                if(utils::approximately_less_or_equal(next_possible_value, max) && utils::approximately_same(next_possible_value, value)) {
+                    converted_value = converted_value + 1;
+                } else {
+                    std::cerr << "Warning! Converted value not equal to actual value ("
+                              << static_cast<non_ref_type>(actual_value)
+                              << " vs. " << static_cast<non_ref_type>(value) << "), next possible upper bound value: "
+                              << next_possible_value << std::endl;
+                }
+            }
+            return {converted_value};
         } else {
-            std::cerr << "Duration not in Range!" << std::endl;
-            return std::nullopt;
-        }
-    }
-
-    template<typename Rep, typename Period>
-    constexpr std::optional<TValueType> convertValue(const std::chrono::duration<Rep, Period>& value) const {
-        //TODO: round value up/down
-        if(value >= min && value <= max) {
-            auto steps = std::chrono::duration_cast<non_ref_type>(value);
-            return inverse_functor(steps);
-        } else {
-            std::cerr << "Maximum: " << max.count() << ", Minimum: " << min.count() << ", Given: " << value.count() << std::endl;
-            std::cerr << "Duration not in Range!" << std::endl;
+            std::cerr << "Maximum: " << max << ", Minimum: " << min << ", Given: " << value << std::endl;
             return std::nullopt;
         }
     }

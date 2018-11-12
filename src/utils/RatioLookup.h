@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <string_view>
+#include <stdexcept>
 
 namespace utils {
     template<typename T>
@@ -112,4 +113,43 @@ namespace utils {
         static constexpr char abr_value = 'E';
         static constexpr std::string_view value = "exa";
     };
+
+    constexpr std::pair<std::intmax_t, std::intmax_t> getRatio(const char prefix) {
+        switch (prefix) {
+            case 'a':
+                return {1, 1000000000000000000};
+            case 'f':
+                return {1, 1000000000000000};
+            case 'p':
+                return {1, 1000000000000};
+            case 'n':
+                return {1, 1000000000};
+            case 'u':
+                return {1, 1000000};
+            case 'm':
+                return {1, 1000};
+            case 'c':
+                return {1, 100};
+            case 'd':
+                return {1, 10};
+            case '\0':
+                return {1, 1};
+            case 'D':
+                return {10, 1};
+            case 'H':
+                return {100, 1};
+            case 'k':
+                return {1000, 1};
+            case 'M':
+                return {1000000, 1};
+            case 'G':
+                return {1000000000, 1};
+            case 'T':
+                return {1000000000000, 1};
+            case 'E':
+                return {1000000000000000, 1};
+            default:
+                throw std::runtime_error("Unknown Type!");
+        }
+    }
 }
