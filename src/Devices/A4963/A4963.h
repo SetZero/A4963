@@ -149,7 +149,8 @@ namespace NS_A4963 {
 
     template<>
     inline uint16_t A4963::getRuntime<A4963RegisterNames::Run>(A4963RegisterNames name){
-            return A4963::getRegisterEntry(RegisterValues<A4963RegisterNames::Run>::code,RegisterValues<A4963RegisterNames::Run>::mask);
+        if(static_cast<uint16_t >(name) > 0){};
+        return A4963::getRegisterEntry(RegisterValues<A4963RegisterNames::Run>::code,RegisterValues<A4963RegisterNames::Run>::mask);
     }
 
     template< A4963RegisterNames toSet>
