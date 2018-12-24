@@ -52,7 +52,7 @@ void MCP2210::setGPIODirection(const gpio::gpioDirection &direction, const gpio:
 }
 
 void MCP2210::slaveSelect(const std::shared_ptr<SPIDevice>& slave) {
-    auto& pin = slave->getSlavePin();
+    auto pin = slave->getSlavePin();
     if((bool)pin)
         writeGPIO(gpio::gpioState::off, pin);
     else {

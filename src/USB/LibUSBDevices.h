@@ -20,7 +20,7 @@ namespace usb {
         virtual ~LibUSBDeviceList();
 
         size_t size();
-        const std::optional<std::shared_ptr<LibUSBDevice>> findDevice(const VendorID& vendorID, const DeviceID& deviceID);
+        [[nodiscard]] const std::optional<std::shared_ptr<LibUSBDevice>> findDevice(const VendorID& vendorID, const DeviceID& deviceID) noexcept;
 
     private:
         libusb_context *context = nullptr;

@@ -20,10 +20,6 @@ namespace usb {
 
     VendorID::VendorID(uint16_t vendorID) noexcept : vendorID(vendorID) {}
 
-    uint16_t VendorID::getVendorID() const {
-        return vendorID;
-    }
-
     bool VendorID::operator==(const VendorID &rhs) const {
         return vendorID == rhs.vendorID;
     }

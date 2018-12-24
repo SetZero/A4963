@@ -4,10 +4,3 @@
 
 #include "SPIDevice.h"
 
-const gpio::GPIOPin &SPIDevice::getSlavePin() const{
-    return slavePin;
-}
-
-void SPIDevice::selectPin(const gpio::GPIOPin &pin){
-    slavePin = pin;
-}
