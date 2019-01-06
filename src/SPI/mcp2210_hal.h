@@ -11,7 +11,7 @@
 #include <libudev.h>
 #include "../../inc/spdlog/spdlog.h"
 #include "../../inc/spdlog/sinks/basic_file_sink.h"
-//#include "USB/LibUSBDevices.h"
+
 
 struct MCPIOException : public std::exception {
     const char *what() const noexcept override {
@@ -35,6 +35,7 @@ public:
         mode2 = 2, //clock polarity = 1 clock phase = 0
         mode3 = 3  //clock polarity = 1 clock phase = 1
     };
+
     struct spiSettings {
         spiMode mode = spiMode::mode0;
         uint16_t speed = 20000,  //bits per second
@@ -46,7 +47,7 @@ public:
                 data2csdly = 0;       // last data byte to chip select delay
     };
 private:
-    const char *npath = nullptr;
+
     std::shared_ptr<spdlog::logger> logger;
     struct udev *udev;
     struct udev_enumerate *enumerate;
@@ -58,7 +59,7 @@ private:
     std::array<unsigned char, SPI_BUF_LEN> txdata{}, rxdata{};
     int fd = -1;
 
-    int32_t send(const uint16_t dataCount);
+    [[nodiscard]] int32_t send(const uint16_t dataCount) noexcept;
 
 
 public:
@@ -68,13 +69,13 @@ public:
             pin4 = gpio::GPIOPin(1 << 4), pin5 = gpio::GPIOPin(1 << 6), pin6 = gpio::GPIOPin(
             1 << 6), pin7 = gpio::GPIOPin(1 << 7);
 
-    spiSettings getSettings() const;
+    [[nodiscard]] spiSettings getSettings() const;
 
-    void setSettings(const spiSettings &settings);
+    void setSettings(const spiSettings &settings) noexcept;
 
     explicit MCP2210();
 
-    ~MCP2210() override;
+    ~MCP2210();
 
     std::unique_ptr<spi::Data> transfer(const spi::Data &input) override;
 
@@ -85,7 +86,7 @@ public:
 
     void writeGPIO(const gpio::gpioState &state, const gpio::GPIOPin &pin) override;
 
-    gpio::gpioState readGPIO(const gpio::GPIOPin &pin) const override;
+    [[nodiscard]] gpio::gpioState readGPIO(const gpio::GPIOPin &pin) const override;
 
     void slaveSelect(const std::shared_ptr<SPIDevice> &slave) override;
 
@@ -93,9 +94,9 @@ public:
 
     void slaveRegister(const std::shared_ptr<SPIDevice> &device, const gpio::GPIOPin &pin) override;
 
-    void exceptionHandling(int32_t errorCode) const;
+    void exceptionHandling(int32_t errorCode) const noexcept;
 
-    operator bool();
+    [[nodiscard]] operator bool() noexcept;
 
     void connect();
 };

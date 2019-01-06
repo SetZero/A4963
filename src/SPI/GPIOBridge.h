@@ -43,7 +43,7 @@ namespace gpio {
         virtual ~GPIOBridge() = default;
         virtual void setGPIODirection(const gpioDirection& direction,const GPIOPin& pin) = 0;
         virtual void writeGPIO(const gpioState& state,const GPIOPin& pin) = 0;
-        virtual gpioState readGPIO(const GPIOPin& pin) const = 0;
+        [[nodiscard]] virtual gpioState readGPIO(const GPIOPin& pin) const = 0;
     };
 
 }
