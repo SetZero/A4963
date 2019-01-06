@@ -114,7 +114,7 @@ namespace utils {
         static constexpr std::string_view value = "exa";
     };
 
-    constexpr std::pair<std::intmax_t, std::intmax_t> getRatio(const char prefix) {
+    [[nodiscard]] constexpr std::pair<std::intmax_t, std::intmax_t> getRatio(const char prefix) {
         switch (prefix) {
             case 'a':
                 return {1, 1000000000000000000};

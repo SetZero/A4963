@@ -13,7 +13,7 @@
 namespace utils {
 
     template<typename T>
-	constexpr typename std::make_unsigned<T>::type getFirstSetBitPos(T n) {
+	[[nodiscard]] constexpr typename std::make_unsigned<T>::type getFirstSetBitPos(T n) noexcept {
         static_assert(std::numeric_limits<T>::is_integer);
         return std::log2(n&-n);
 	}
@@ -247,7 +247,7 @@ namespace utils {
 	};
 
 	template<typename first,typename ...T>
-	constexpr bool sameTypes() {
+	[[nodiscard]] constexpr bool sameTypes() noexcept {
 		if constexpr(sizeof...(T) == 0) 
 			return true;
 		else {
@@ -301,7 +301,7 @@ namespace utils {
     struct is_template_same<T<Rep, Period>, T<oRep, oPeriod>> : std::true_type {};
 
     template <typename T, typename U>
-    inline constexpr bool is_template_same_v = is_template_same<T, U>::value;
+    constexpr bool is_template_same_v = is_template_same<T, U>::value;
 
 	template<typename T>
 	struct periodic_printable;
@@ -321,19 +321,19 @@ namespace utils {
         typedef std::remove_cv_t<std::remove_reference_t<T>> type;
     };
 
-    constexpr bool approximately_same(long a, long b)
+	[[nodiscard]] constexpr auto approximately_same(long a, long b) noexcept
     {
         return a == b;
     }
 
     template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
-	bool approximately_same(T a, T b)
+	[[nodiscard]] constexpr bool approximately_same(T a, T b) noexcept
 	{
         return std::fabs(a - b) <= 1E-13;
 	}
 
 	template<template <typename, typename> typename T, typename Rep, typename U, typename V>
-    bool approximately_same(T<Rep, U> a, T<Rep, V> b) {
+	[[nodiscard]] constexpr auto approximately_same(T<Rep, U> a, T<Rep, V> b) noexcept {
             if(std::ratio_less_v<U, V>) {
                 auto tmp_b = static_cast<T<Rep, U>>(b);
                 return approximately_same(a.count(), tmp_b.count());
@@ -344,12 +344,12 @@ namespace utils {
     }
 
     template<template <typename> typename T, typename Rep>
-    bool approximately_same(T<Rep> a, T<Rep> b) {
+	[[nodiscard]] constexpr auto approximately_same(T<Rep> a, T<Rep> b) {
         return a == b;
     }
 
     template<typename Rep, typename U, typename V>
-    bool approximately_same(std::chrono::duration<Rep, U> a, std::chrono::duration<Rep, V> b) {
+	[[nodiscard]] constexpr auto approximately_same(std::chrono::duration<Rep, U> a, std::chrono::duration<Rep, V> b) noexcept {
         if(std::ratio_less_v<U, V>) {
             auto tmp_b = std::chrono::duration_cast<std::chrono::duration<Rep, U>>(b);
             return approximately_same(a.count(), tmp_b.count());
@@ -360,37 +360,37 @@ namespace utils {
     }
 
     template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
-    bool approximately_greater_or_equal(T a, T b)
+	[[nodiscard]] constexpr auto approximately_greater_or_equal(T a, T b) noexcept
     {
         return (a > b || approximately_same(a, b));
     }
 
     template<typename Rep>
-    bool approximately_greater_or_equal(CustomDataTypes::Percentage<Rep> a, CustomDataTypes::Percentage<Rep>  b)
+	[[nodiscard]] constexpr auto approximately_greater_or_equal(CustomDataTypes::Percentage<Rep> a, CustomDataTypes::Percentage<Rep>  b) noexcept
     {
         return (a.getPercent() > b.getPercent() || approximately_same(a, b));
     }
 
     template<template <typename, typename> typename T, typename Rep, typename U, typename V>
-    bool approximately_greater_or_equal(T<Rep, U> a, T<Rep, V> b)
+	[[nodiscard]] constexpr auto approximately_greater_or_equal(T<Rep, U> a, T<Rep, V> b) noexcept
     {
         return (a > b || approximately_same(a, b));
     }
 
     template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
-    bool approximately_less_or_equal(T a, T b)
+	[[nodiscard]] constexpr auto approximately_less_or_equal(T a, T b) noexcept
     {
         return (a < b || approximately_same(a, b));
     }
 
     template<template <typename, typename> typename T, typename Rep, typename U, typename V>
-    bool approximately_less_or_equal(T<Rep, U> a, T<Rep, V> b)
+	[[nodiscard]] constexpr auto approximately_less_or_equal(T<Rep, U> a, T<Rep, V> b) noexcept
     {
         return (a < b || approximately_same(a, b));
     }
 
     template<typename Rep>
-    bool approximately_less_or_equal(CustomDataTypes::Percentage<Rep> a, CustomDataTypes::Percentage<Rep>  b)
+    [[nodiscard]] constexpr auto approximately_less_or_equal(CustomDataTypes::Percentage<Rep> a, CustomDataTypes::Percentage<Rep>  b) noexcept
     {
         return (a.getPercent() < b.getPercent() || approximately_same(a, b));
     }

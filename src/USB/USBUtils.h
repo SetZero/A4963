@@ -26,9 +26,12 @@ namespace usb {
     class VendorID {
     public:
         explicit VendorID(uint16_t vendorID) noexcept;
-        uint16_t getVendorID() const;
         bool operator==(const VendorID &rhs) const;
         bool operator!=(const VendorID &rhs) const;
+
+        [[nodiscard]] constexpr uint16_t getVendorID() const noexcept {
+            return vendorID;
+        }
 
     private:
         uint16_t vendorID;

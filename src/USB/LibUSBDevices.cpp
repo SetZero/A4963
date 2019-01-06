@@ -44,8 +44,8 @@ namespace usb {
         return mDevices;
     }*/
 
-    const std::optional<std::shared_ptr<LibUSBDevice>>
-    LibUSBDeviceList::findDevice(const VendorID& vendorID, const DeviceID& deviceID) {
+    [[nodiscard]] const std::optional<std::shared_ptr<LibUSBDevice>>
+    LibUSBDeviceList::findDevice(const VendorID& vendorID, const DeviceID& deviceID) noexcept {
         for (std::pair<const size_t, std::shared_ptr<LibUSBDevice>> &device : mDevices) {
             if (device.second->getDeviceID() == deviceID && device.second->getVendorID() == vendorID) {
                 return device.second;

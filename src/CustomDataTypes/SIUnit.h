@@ -40,7 +40,7 @@ namespace CustomDataTypes {
             return derived_this();
         }
 
-        constexpr Rep count() const { return internalRepresentation; }
+        [[nodiscard]] constexpr Rep count() const noexcept { return internalRepresentation; }
 
         constexpr Derived operator+() const {
             return derived_this();

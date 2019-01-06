@@ -43,7 +43,7 @@ public:
     const const_iterator end() const { return const_iterator(inverse_functor(max)+stepsize); }
 
     template<typename T>
-    constexpr std::optional<TValueType> convertValue(const T& value) const {
+    [[nodiscard]] constexpr std::optional<TValueType> convertValue(const T& value) const noexcept {
         using namespace utils::printable;
         //TODO: round value up/down
         if(utils::approximately_greater_or_equal(value, min) &&
@@ -69,16 +69,16 @@ public:
         }
     }
 
-    constexpr non_ref_type getActualValue(TValueType value) const {
+    [[nodiscard]] constexpr non_ref_type getActualValue(TValueType value) const noexcept {
         return non_ref_type{functor(value)};
     }
 
 
-    constexpr non_ref_type getMaxValue() const {
+    [[nodiscard]] constexpr non_ref_type getMaxValue() const noexcept {
         return max;
     }
 
-    constexpr non_ref_type getMinValue() const {
+    [[nodiscard]] constexpr non_ref_type getMinValue() const noexcept {
         return min;
     }
 };

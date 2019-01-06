@@ -11,7 +11,11 @@ class SPIDevice : public std::enable_shared_from_this<SPIDevice> {
 private:
     gpio::GPIOPin slavePin;
 public:
-    void selectPin(const gpio::GPIOPin& pin);
-    const gpio::GPIOPin& getSlavePin() const;
+    constexpr void selectPin(const gpio::GPIOPin& pin) noexcept {
+        slavePin = pin;
+    }
+    [[nodiscard]] constexpr  gpio::GPIOPin getSlavePin() const noexcept {
+        return slavePin;
+    }
 
 };
