@@ -198,7 +198,7 @@ int consoleInterface(const std::string& spiDevice, const std::string& config){
         while(!*dev){
             std::cout << " device not connected, try again?: y/n" << std::endl;
             std::string str;
-            std::cin >> str;
+            std::getline(std::cin,str);
             if(str == "y")
                 dev->connect();
             else break;
