@@ -18,7 +18,7 @@ namespace CustomDataTypes::Frequency {
         using parent_type = SIUnit<Hertz<Rep, Period>, Rep, Period>;
     public:
         static constexpr std::string_view abr_value = "Hz";
-        constexpr explicit Hertz(Rep input) : parent_type{input} {}
+        constexpr explicit Hertz(Rep input) noexcept : parent_type{input} {}
     };
 
     using nanohertz  = Hertz<std::intmax_t, std::nano>;
@@ -33,51 +33,51 @@ namespace CustomDataTypes::Frequency {
     using exahertz  = Hertz<std::intmax_t, std::exa>;
 
     namespace literals {
-        constexpr nanohertz operator ""_nHz(unsigned long long element) {
+        constexpr nanohertz operator ""_nHz(unsigned long long element) noexcept {
             return nanohertz(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Hertz<long double, std::nano> operator ""_nHz(long double element) {
+        constexpr Hertz<long double, std::nano> operator ""_nHz(long double element) noexcept {
             return Hertz<long double, std::nano>(element);
         }
 
-        constexpr microhertz operator ""_uHz(unsigned long long element) {
+        constexpr microhertz operator ""_uHz(unsigned long long element) noexcept {
             return microhertz(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Hertz<long double, std::micro> operator ""_uHz(long double element) {
+        constexpr Hertz<long double, std::micro> operator ""_uHz(long double element) noexcept {
             return Hertz<long double, std::micro>(element);
         }
 
-        constexpr millihertz operator ""_mHz(unsigned long long element) {
+        constexpr millihertz operator ""_mHz(unsigned long long element) noexcept {
             return millihertz(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Hertz<long double, std::milli> operator ""_mHz(long double element) {
+        constexpr Hertz<long double, std::milli> operator ""_mHz(long double element) noexcept {
             return Hertz<long double, std::milli>(element);
         }
 
-        constexpr hertz operator ""_Hz(unsigned long long element) {
+        constexpr hertz operator ""_Hz(unsigned long long element) noexcept {
             return hertz(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Hertz<long double> operator ""_Hz(long double element) {
+        constexpr Hertz<long double> operator ""_Hz(long double element) noexcept {
             return Hertz<long double>(element);
         }
 
-        constexpr kilohertz operator ""_kHz(unsigned long long element) {
+        constexpr kilohertz operator ""_kHz(unsigned long long element) noexcept {
             return kilohertz(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Hertz<long double, std::kilo> operator ""_kHz(long double element) {
+        constexpr Hertz<long double, std::kilo> operator ""_kHz(long double element) noexcept {
             return Hertz<long double, std::kilo>(element);
         }
 
-        constexpr megahertz operator ""_MHz(unsigned long long element) {
+        constexpr megahertz operator ""_MHz(unsigned long long element) noexcept {
             return megahertz(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Hertz<long double, std::mega> operator ""_MHz(long double element) {
+        constexpr Hertz<long double, std::mega> operator ""_MHz(long double element) noexcept {
             return Hertz<long double, std::mega>(element);
         }
     }

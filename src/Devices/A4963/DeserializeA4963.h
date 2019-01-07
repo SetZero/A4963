@@ -101,9 +101,9 @@ namespace NS_A4963 {
     getType(const char prefix, const std::string &unit, Rep value) {
         auto prefixRatio = utils::getRatio(prefix);
         auto newValue = (value * prefixRatio.first * Period::den) / (prefixRatio.second * Period::num);
-        if (unit == "V") {
+        if (unit == CustomDataTypes::Frequency::Hertz<Rep, Period>::abr_value) {
             return CustomDataTypes::Electricity::Volt<Rep, Period>{newValue};
-        } else if (unit == "Hz") {
+        } else if (unit == CustomDataTypes::Frequency::Hertz<Rep, Period>::abr_value) {
             return CustomDataTypes::Frequency::Hertz<Rep, Period>{newValue};
         } else if (unit == "s") {
             return std::chrono::duration<Rep, Period>{newValue};
@@ -177,7 +177,7 @@ namespace NS_A4963 {
                         if constexpr (std::is_arithmetic_v<type>) {
                             if (!unit.empty()) {
                                 std::cerr << "This register (" << RegisterValues<N>::name
-                                          << ") doesn't expect an unit. This might be an error!" << std::endl;
+                                          << ") doesn't expect a unit. This might be an error!" << std::endl;
                             }
                         } else {
                             if(unit != type::abr_value) {

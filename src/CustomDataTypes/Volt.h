@@ -18,7 +18,7 @@ namespace CustomDataTypes::Electricity {
         using parent_type = SIUnit<Volt<Rep, Period>, Rep, Period>;
     public:
         static constexpr std::string_view abr_value = "V";
-        constexpr explicit Volt(Rep input) : parent_type{input} {}
+        constexpr explicit Volt(Rep input) noexcept : parent_type{input} {}
     };
 
     using nanovolt  = Volt<std::intmax_t, std::nano>;
@@ -29,51 +29,51 @@ namespace CustomDataTypes::Electricity {
     using megavolt  = Volt<std::intmax_t, std::mega>;
 
     namespace literals {
-        constexpr nanovolt operator ""_nV(unsigned long long element) {
+        constexpr nanovolt operator ""_nV(unsigned long long element) noexcept {
             return nanovolt(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Volt<long double, std::nano> operator ""_nV(long double element) {
+        constexpr Volt<long double, std::nano> operator ""_nV(long double element) noexcept {
             return Volt<long double, std::nano>(element);
         }
 
-        constexpr microvolt operator ""_uV(unsigned long long element) {
+        constexpr microvolt operator ""_uV(unsigned long long element) noexcept {
             return microvolt(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Volt<long double, std::micro> operator ""_uV(long double element) {
+        constexpr Volt<long double, std::micro> operator ""_uV(long double element) noexcept {
             return Volt<long double, std::micro>(element);
         }
 
-        constexpr millivolt operator ""_mV(unsigned long long element) {
+        constexpr millivolt operator ""_mV(unsigned long long element) noexcept {
             return millivolt(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Volt<long double, std::milli> operator ""_mV(long double element) {
+        constexpr Volt<long double, std::milli> operator ""_mV(long double element) noexcept {
             return Volt<long double, std::milli>(element);
         }
 
-        constexpr volt operator ""_V(unsigned long long element) {
+        constexpr volt operator ""_V(unsigned long long element) noexcept {
             return volt(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Volt<long double> operator ""_V(long double element) {
+        constexpr Volt<long double> operator ""_V(long double element) noexcept {
             return Volt<long double>(element);
         }
 
-        constexpr kilovolt operator ""_kV(unsigned long long element) {
+        constexpr kilovolt operator ""_kV(unsigned long long element) noexcept {
             return kilovolt(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Volt<long double, std::kilo> operator ""_kV(long double element) {
+        constexpr Volt<long double, std::kilo> operator ""_kV(long double element) noexcept {
             return Volt<long double, std::kilo>(element);
         }
 
-        constexpr megavolt operator ""_MV(unsigned long long element) {
+        constexpr megavolt operator ""_MV(unsigned long long element) noexcept {
             return megavolt(static_cast<std::intmax_t>(element));
         }
 
-        constexpr Volt<long double, std::mega> operator ""_MV(long double element) {
+        constexpr Volt<long double, std::mega> operator ""_MV(long double element) noexcept {
             return Volt<long double, std::mega>(element);
         }
     }
