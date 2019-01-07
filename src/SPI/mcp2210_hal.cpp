@@ -10,7 +10,6 @@ MCP2210::MCP2210() {
 }
 
 MCP2210::~MCP2210() {
-    delete npath;
     close_device(fd);
 }
 
@@ -68,7 +67,7 @@ void MCP2210::slaveRegister(const std::shared_ptr<SPIDevice> &device, const gpio
     device->selectPin(pin);
 }
 
-gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
+[[nodiscard]] gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
     int val = 0;
     exceptionHandling(gpio_read(fd, &val, static_cast<uint8_t>(pin)));
     auto erg = val == static_cast<uint8_t>(pin) ? gpio::gpioState::on
@@ -76,7 +75,7 @@ gpio::gpioState MCP2210::readGPIO(const gpio::GPIOPin &pin) const {
     return erg;
 }
 
-int32_t MCP2210::send(const uint16_t byteCount) {
+[[nodiscard]] int32_t MCP2210::send(const uint16_t byteCount) noexcept {
     return spi_data_xfer(fd, txdata.data(), rxdata.data(), byteCount,
                          static_cast<uint16_t>(settings.mode), settings.speed, settings.actcsval, settings.idlecsval,
                          settings.gpcsmask,
@@ -113,7 +112,7 @@ void MCP2210::connect() {
         if (!udev) {
             std::cerr << "Can't create udev\n" << std::endl;
             logger->log(spdlog::level::err, "udev creation failed");
-            exit(1);
+            throw MCPIOException();
         }
 
         /* Create a list of the devices in the 'hidraw' subsystem. */
@@ -123,8 +122,8 @@ void MCP2210::connect() {
         devices = udev_enumerate_get_list_entry(enumerate);
 
         udev_list_entry_foreach(dev_list_entry, devices) {
-            const char *path;
-
+            const char *path = nullptr;
+            const char *npath = nullptr;
             path = udev_list_entry_get_name(dev_list_entry);
             dev = udev_device_new_from_syspath(udev, path);
 
@@ -135,7 +134,9 @@ void MCP2210::connect() {
                     "usb",
                     "usb_device");
             if (!dev) {
-                exit(1);
+                std::cerr << "device error" << std::endl;
+                logger->log(spdlog::level::err, "device error");
+                throw MCPIOException();
             }
 
             if (std::string(udev_device_get_sysattr_value(dev, "idVendor")) ==
@@ -143,15 +144,18 @@ void MCP2210::connect() {
                 std::string(udev_device_get_sysattr_value(dev, "idProduct")) ==
                 std::string(deviceinformations::device_ID)) {
                 fd = open_device(npath);
-                std::cout << "device found: " << std::endl;
-                printf("  VID/PID: %s %s\n",
-                       udev_device_get_sysattr_value(dev, "idVendor"),
-                       udev_device_get_sysattr_value(dev, "idProduct"));
-                printf("  %s\n  %s\n",
-                       udev_device_get_sysattr_value(dev, "manufacturer"),
-                       udev_device_get_sysattr_value(dev, "product"));
-                printf("  serial: %s\n",
-                       udev_device_get_sysattr_value(dev, "serial"));
+                if(fd > 0) {
+                    std::cout << "device found: " << std::endl;
+                    printf("  VID/PID: %s %s\n",
+                           udev_device_get_sysattr_value(dev, "idVendor"),
+                           udev_device_get_sysattr_value(dev, "idProduct"));
+                    printf("  %s\n  %s\n",
+                           udev_device_get_sysattr_value(dev, "manufacturer"),
+                           udev_device_get_sysattr_value(dev, "product"));
+                    printf("  serial: %s\n",
+                           udev_device_get_sysattr_value(dev, "serial"));
+                    break;
+                }
             }
 
             udev_device_unref(dev);
@@ -172,11 +176,11 @@ void MCP2210::connect() {
 
 }
 
-MCP2210::operator bool() {
+[[nodiscard]] MCP2210::operator bool() noexcept {
     return *connection;
 }
 
-void MCP2210::exceptionHandling(int32_t errorCode) const {
+void MCP2210::exceptionHandling(int32_t errorCode) const noexcept {
     switch (-errorCode) {
         case (ERR_NOERR) :
             return;
@@ -258,6 +262,6 @@ MCP2210::spiSettings MCP2210::getSettings() const {
     return settings;
 }
 
-void MCP2210::setSettings(const MCP2210::spiSettings &settings) {
+void MCP2210::setSettings(const MCP2210::spiSettings &settings) noexcept {
     MCP2210::settings = settings;
 }

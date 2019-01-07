@@ -22,7 +22,7 @@
 #include "src/Devices/A4963/DeserializeA4963.h"
 #include "src/utils/scales/UnitScale.h"
 
-int consoleInterface(const std::string& spiDevice);
+int consoleInterface(const std::string& spiDevice,const std::string& config);
 void flashJSON(const std::string& spiDevice, const std::string& filename, bool enable_debug = false);
 int simpleInput(int min, int max);
 int serverInterface(const char* spiDevice);
@@ -94,7 +94,11 @@ void parseArguments(int argc, char** argv) {
 
     if(result.count("client") > 0 && result.count("interface") > 0) {
         auto interface = result["interface"].as<std::string>();
-        consoleInterface(interface);
+        if(result.count("json") > 0)
+            consoleInterface(interface,result["json"].as<std::string>());
+        else{
+            consoleInterface(interface,"config.json");
+        }
         return;
     } else if(result.count("client") > 0 && result.count("interface") <= 0) {
         std::cout << "Missing Parameter: --interface!" << std::endl;
@@ -174,7 +178,7 @@ void flashJSON(const std::string& spiDevice, const std::string& filename, bool e
     loadFromFile(device, filename, enable_debug);
 }
 
-int consoleInterface(const std::string& spiDevice){
+int consoleInterface(const std::string& spiDevice, const std::string& config){
     std::shared_ptr<NS_A4963::A4963> device;
     std::shared_ptr<spi::SPIBridge> spi;
     usb::LibUSBDeviceList deviceList;
@@ -194,7 +198,7 @@ int consoleInterface(const std::string& spiDevice){
         while(!*dev){
             std::cout << " device not connected, try again?: y/n" << std::endl;
             std::string str;
-            std::cin >> str;
+            std::getline(std::cin,str);
             if(str == "y")
                 dev->connect();
             else break;
@@ -210,7 +214,7 @@ int consoleInterface(const std::string& spiDevice){
         int choice = simpleInput(1, nrOfOptions);
         switch (choice) {
             case 1: {
-                loadFromFile(device, "config.json");
+                loadFromFile(device, config);
                 break;
             }
             case 2: {

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include "../utils/utils.h"
 #include <vector>
 #include <string>
@@ -26,8 +26,7 @@ namespace spi {
             return bswap_16(value);
         else if constexpr (utils::isEqual<t, uint32_t>::value || utils::isEqual<t, int32_t>::value)
             return bswap_32(value);
-        else return bswap_64(
-                    value);
+        else return bswap_64(value);
     }
 
     class SPI_Exception : public std::exception {
@@ -108,7 +107,7 @@ namespace spi {
         big_endian
     };
 
-    template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian, bool optimized = true>
+    template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian, bool optimized = false>
     class SPIData : public Data {
         std::shared_ptr<spdlog::logger> logger;
         static_assert((numberOfBytes & (numberOfBytes - 1)) == 0, " the number of bytes have to be a pow of 2");
@@ -144,7 +143,10 @@ namespace spi {
             static_assert(sizeof(T) <= numberOfBytes, "too much bytes for this data type");
             static_assert(std::is_integral<T>::value, "the data type have to be a integral type");
             if constexpr(!optimized)
-                if (vec.size() * sizeof(T) > numberOfBytes) throw SPI_Exception{"too much data for this data type"};
+                if (vec.size() * sizeof(T) > numberOfBytes) {
+                    logger->log(spdlog::level::err, " too much data in fill method, max: "+std::to_string(numberOfBytes)+" was: "+std::to_string(vec.size()));
+                    throw SPI_Exception{"too much data for this data type"};
+                }
             for (auto elem : vec) {
                 if constexpr(endian == big_endian)
                     for (uint8_t i = sizeof(T); i > 0; i--)
@@ -156,7 +158,7 @@ namespace spi {
         }
 
         explicit SPIData(const Data &other) : SPIData() {
-            mData.insert(std::end(mData), std::begin(other), std::end(other));
+            mData.insert(std::end(mData), other.begin(), other.begin());
         }
 
         void fill(const std::vector<uint8_t> &vec) override {
@@ -179,17 +181,21 @@ namespace spi {
 
         explicit operator uint8_t() const override {
             if constexpr(!optimized) {
-                logger->log(spdlog::level::err, " data was too much to convert to uint8_t: "+std::to_string(mData.size()));
-                if (mData.size() > 1) throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
+                if (mData.size() > 1) {
+                    logger->log(spdlog::level::err, " data was too much to convert to uint8_t: "+std::to_string(mData.size()));
+                    throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
+                }
             }
             return mData[0];
         }
 
         explicit operator uint16_t() const override {
             if constexpr(!optimized) {
-                logger->log(spdlog::level::err,
-                            " data was too much to convert to uint16_t: " + std::to_string(mData.size()));
-                if (mData.size() > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
+                if (mData.size() > 2) {
+                    logger->log(spdlog::level::err,
+                                " data was too much to convert to uint16_t: " + std::to_string(mData.size()));
+                    throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
+                }
             }
             uint16_t erg = (mData[1] << 8) | mData[0];
             return erg;
@@ -197,9 +203,11 @@ namespace spi {
 
         explicit operator uint32_t() const override {
             if constexpr(!optimized) {
-                logger->log(spdlog::level::err,
-                            " data was too much to convert to uint32_t: " + std::to_string(mData.size()));
-                if (mData.size() > 4) throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
+                if (mData.size() > 4) {
+                    logger->log(spdlog::level::err,
+                                " data was too much to convert to uint32_t: " + std::to_string(mData.size()));
+                    throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
+                }
             }
             uint32_t erg = (mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8) | mData[0];
             return erg;
@@ -207,9 +215,11 @@ namespace spi {
 
         explicit operator uint64_t() const override {
             if constexpr(!optimized) {
-                logger->log(spdlog::level::err,
-                            " data was too much to convert to uint64_t: " + std::to_string(mData.size()));
-                if (mData.size() > 8) throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
+                if (mData.size() > 8) {
+                    logger->log(spdlog::level::err,
+                                " data was too much to convert to uint64_t: " + std::to_string(mData.size()));
+                    throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
+                }
             }
             uint64_t erg =
                     ((uint64_t) (mData[7]) << 56) | ((uint64_t) (mData[6]) << 48) | ((uint64_t) (mData[5]) << 40) |
