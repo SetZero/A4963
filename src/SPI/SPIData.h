@@ -109,15 +109,17 @@ namespace spi {
 
     template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian, bool optimized = false>
     class SPIData : public Data {
-        std::shared_ptr<spdlog::logger> logger;
+        static inline std::shared_ptr<spdlog::logger> logger = nullptr;
         static_assert((numberOfBytes & (numberOfBytes - 1)) == 0, " the number of bytes have to be a pow of 2");
         static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");
     public:
 
         SPIData() noexcept(optimized) {
             mData.reserve(numberOfBytes);
-            if constexpr(!optimized)
-                logger = spdlog::basic_logger_mt("spidata"+std::to_string(numberOfBytes),"spidatalog.txt");
+            if constexpr(!optimized) {
+                if (logger == nullptr)
+                    logger = spdlog::basic_logger_mt("spidata" + std::to_string(numberOfBytes), "spidatalog.txt");
+            }
         };
 
         template<typename T, typename ... args>
