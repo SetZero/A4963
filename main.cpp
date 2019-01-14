@@ -13,6 +13,7 @@
 #include "src/SPI/ATmega32U4SPI.h"
 #include "src/SPI/SPIBridge.h"
 #include "inc/json.h"
+
 #ifdef __linux__
     #include "mcp2210_api.h"
     #include "src/SPI/mcp2210_hal.h"
@@ -165,8 +166,8 @@ void flashJSON(const std::string& spiDevice, const std::string& filename, bool e
             return;
         }
     } else if(spiDevice == "mcp") {
-        spi = std::make_shared<MCP2210>();
-        pin = MCP2210::pin0;
+        spi = std::make_shared<MCP2210<>>();
+        pin = MCP2210<>::pin0;
     } else if(spiDevice.empty()) {
         spi = nullptr;
     }
@@ -194,7 +195,7 @@ int consoleInterface(const std::string& spiDevice, const std::string& config){
             return 0;
         }
     } else {
-        std::shared_ptr<MCP2210> dev = std::make_shared<MCP2210>();
+        std::shared_ptr<MCP2210<>> dev = std::make_shared<MCP2210<>>();
         while(!*dev){
             std::cout << " device not connected, try again?: y/n" << std::endl;
             std::string str;
@@ -204,7 +205,7 @@ int consoleInterface(const std::string& spiDevice, const std::string& config){
             else break;
         }
         spi = dev;
-        pin = MCP2210::pin0;
+        pin = MCP2210<>::pin0;
     }
     device = std::make_shared<NS_A4963::A4963>(spi);
     spi->slaveRegister(device, pin);
