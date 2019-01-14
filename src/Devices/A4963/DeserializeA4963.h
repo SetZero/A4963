@@ -123,6 +123,7 @@ namespace NS_A4963 {
 
     template<typename T, A4963RegisterNames N>
     static auto setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
+        static_assert(utils::is_periodic<T>::value);
         using Rep = typename utils::periodic_info<T>::rep;
         using Period = typename utils::periodic_info<T>::period;
         try {
