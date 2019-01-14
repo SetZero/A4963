@@ -101,7 +101,7 @@ namespace NS_A4963 {
     getType(const char prefix, const std::string &unit, Rep value) {
         auto prefixRatio = utils::getRatio(prefix);
         auto newValue = (value * prefixRatio.first * Period::den) / (prefixRatio.second * Period::num);
-        if (unit == CustomDataTypes::Frequency::Hertz<Rep, Period>::abr_value) {
+        if (unit == CustomDataTypes::Electricity::Volt<Rep, Period>::abr_value) {
             return CustomDataTypes::Electricity::Volt<Rep, Period>{newValue};
         } else if (unit == CustomDataTypes::Frequency::Hertz<Rep, Period>::abr_value) {
             return CustomDataTypes::Frequency::Hertz<Rep, Period>{newValue};
@@ -134,7 +134,7 @@ namespace NS_A4963 {
             }
             return return_value;
         }
-        catch(std::exception& e){
+        catch(std::runtime_error& e){
             std::cerr << "Invalid Unit \"" << prefix << unit << "\" in register \"" << RegisterValues<N>::name <<
                         "\", did you mean \"" << utils::ratio_lookup<Period>::abr_value << utils::periodic_printable<T>::name << "\" ?" << std::endl;
             return std::optional<const T>{};

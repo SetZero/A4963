@@ -19,7 +19,7 @@ namespace usb {
                                                                                                             mUsbID(usbID){}
 
 
-    LibUSBDevice::~LibUSBDevice() {
+    LibUSBDevice::~LibUSBDevice() noexcept {
         _closeDevice();
     }
 
@@ -60,7 +60,7 @@ namespace usb {
         _closeDevice();
     }
 
-    void LibUSBDevice::_closeDevice() {
+    void LibUSBDevice::_closeDevice() noexcept {
         if (isOpen.exchange(false)) {
             libusb_attach_kernel_driver(handle, 0);
             libusb_release_interface(handle, 0);
