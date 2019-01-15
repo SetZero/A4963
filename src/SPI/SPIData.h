@@ -107,7 +107,7 @@ namespace spi {
         big_endian
     };
 
-    template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian, bool optimized = false>
+    template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian, bool optimized = true>
     class SPIData : public Data {
         static inline std::shared_ptr<spdlog::logger> logger = nullptr;
         static_assert((numberOfBytes & (numberOfBytes - 1)) == 0, " the number of bytes have to be a pow of 2");
