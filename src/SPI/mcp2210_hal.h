@@ -72,6 +72,84 @@ private:
                 settings.cs2datadly, settings.data2datadly, settings.data2csdly);
     }
 
+    void exceptionHandling(int32_t errorCode) const noexcept {
+        switch (-errorCode) {
+            case (ERR_NOERR) :
+                return;
+            case (ERR_WRERR): {
+                std::cerr << " Write Error " << std::endl;
+                logger->log(spdlog::level::err, (" Write Error "));
+                break;
+            }
+            case (ERR_RDERR): {
+                std::cerr << " Read Error " << std::endl;
+                logger->log(spdlog::level::err, (" Read Error "));
+                break;
+            }
+            case (ERR_HWERR): {
+                std::cerr << " Hardware Error " << std::endl;
+                logger->log(spdlog::level::err, (" Hardware Error "));
+                break;
+            }
+            case (ERR_GETCHIPSTATUS): {
+                std::cerr << " Chip Status Error " << std::endl;
+                logger->log(spdlog::level::err, (" Chip Status Error "));
+                break;
+            }
+            case (ERR_GETSETTINGS): {
+                std::cerr << " Get Settings Error " << std::endl;
+                logger->log(spdlog::level::err, (" Get Settings Error "));
+                break;
+            }
+            case (ERR_SETSETTINGS): {
+                std::cerr << " set Settings Error " << std::endl;
+                logger->log(spdlog::level::err, ("set Settings Error"));
+                break;
+            }
+            case (ERR_GETSPISETTINGS): {
+                std::cerr << " Get SPI Settings Error " << std::endl;
+                logger->log(spdlog::level::err, (" Get SPI Settings Error "));
+                break;
+            }
+            case (ERR_SETSPISETTINGS): {
+                std::cerr << " set SPI Settings Error " << std::endl;
+                logger->log(spdlog::level::err, (" set SPI Settings Error "));
+                break;
+            }
+            case (ERR_ADDROUTOFRANGE): {
+                std::cerr << " Address out of range Error " << std::endl;
+                logger->log(spdlog::level::err, (" Address out of range Error "));
+                break;
+            }
+            case (ERR_BLOCKEDACCESS): {
+                std::cerr << " Blocked Access Error " << std::endl;
+                logger->log(spdlog::level::err, (" Blocked Access Error "));
+                break;
+            }
+            case (ERR_WRITEGPIO): {
+                std::cerr << " Write GPIO Error " << std::endl;
+                logger->log(spdlog::level::err, (" Write GPIO Error "));
+                break;
+            }
+            case (ERR_READGPIO): {
+                std::cerr << " Read GPIO Error " << std::endl;
+                logger->log(spdlog::level::err, (" Read GPIO Error "));
+                break;
+            }
+            case (ERR_SETGPIODIR): {
+                std::cerr << " set GPIO direction Error " << std::endl;
+                logger->log(spdlog::level::err, (" set GPIO direction Error "));
+                break;
+            }
+            default: {
+                return;
+            }
+        }
+        *connection = false;
+        close_device(fd);
+        std::cerr << "device disconnected" << std::endl;
+    }
+
 public:
     static constexpr gpio::GPIOPin
             pin0 = gpio::GPIOPin(1 << 0), pin1 = gpio::GPIOPin(1 << 1), pin2 = gpio::GPIOPin(
@@ -182,84 +260,6 @@ public:
 
     void slaveRegister(const std::shared_ptr<SPIDevice> &device, const gpio::GPIOPin &pin) override {
         device->selectPin(pin);
-    }
-
-    void exceptionHandling(int32_t errorCode) const noexcept {
-        switch (-errorCode) {
-            case (ERR_NOERR) :
-                return;
-            case (ERR_WRERR): {
-                std::cerr << " Write Error " << std::endl;
-                logger->log(spdlog::level::err, (" Write Error "));
-                break;
-            }
-            case (ERR_RDERR): {
-                std::cout << " Read Error " << std::endl;
-                logger->log(spdlog::level::err, (" Read Error "));
-                break;
-            }
-            case (ERR_HWERR): {
-                std::cout << " Hardware Error " << std::endl;
-                logger->log(spdlog::level::err, (" Hardware Error "));
-                break;
-            }
-            case (ERR_GETCHIPSTATUS): {
-                std::cout << " Chip Status Error " << std::endl;
-                logger->log(spdlog::level::err, (" Chip Status Error "));
-                break;
-            }
-            case (ERR_GETSETTINGS): {
-                std::cout << " Get Settings Error " << std::endl;
-                logger->log(spdlog::level::err, (" Get Settings Error "));
-                break;
-            }
-            case (ERR_SETSETTINGS): {
-                std::cout << " set Settings Error " << std::endl;
-                logger->log(spdlog::level::err, ("set Settings Error"));
-                break;
-            }
-            case (ERR_GETSPISETTINGS): {
-                std::cout << " Get SPI Settings Error " << std::endl;
-                logger->log(spdlog::level::err, (" Get SPI Settings Error "));
-                break;
-            }
-            case (ERR_SETSPISETTINGS): {
-                std::cout << " set SPI Settings Error " << std::endl;
-                logger->log(spdlog::level::err, (" set SPI Settings Error "));
-                break;
-            }
-            case (ERR_ADDROUTOFRANGE): {
-                std::cout << " Address out of range Error " << std::endl;
-                logger->log(spdlog::level::err, (" Address out of range Error "));
-                break;
-            }
-            case (ERR_BLOCKEDACCESS): {
-                std::cout << " Blocked Access Error " << std::endl;
-                logger->log(spdlog::level::err, (" Blocked Access Error "));
-                break;
-            }
-            case (ERR_WRITEGPIO): {
-                std::cout << " Write GPIO Error " << std::endl;
-                logger->log(spdlog::level::err, (" Write GPIO Error "));
-                break;
-            }
-            case (ERR_READGPIO): {
-                std::cout << " Read GPIO Error " << std::endl;
-                logger->log(spdlog::level::err, (" Read GPIO Error "));
-                break;
-            }
-            case (ERR_SETGPIODIR): {
-                std::cout << " set GPIO direction Error " << std::endl;
-                logger->log(spdlog::level::err, (" set GPIO direction Error "));
-                break;
-            }
-            default: {
-                return;
-            }
-        }
-        *connection = false;
-        close_device(fd);
-        std::cerr << "device disconnected" << std::endl;
     }
 
     [[nodiscard]] operator bool() noexcept {

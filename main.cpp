@@ -32,7 +32,8 @@ void parseArguments(int argc, char** argv);
 static inline constexpr int nrOfOptions = 5;
 
 void clearInput();
-void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename, bool enable_debug = false);
+void flashFileFromDevice(std::shared_ptr<NS_A4963::A4963> &device, const std::string &filename,
+                         bool enable_debug = false);
 void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device);
 void showRegisterVal(std::shared_ptr<NS_A4963::A4963>& device);
 bool generateDefault(bool force = false, const std::string& filename = "config.json");
@@ -176,7 +177,7 @@ void flashJSON(const std::string& spiDevice, const std::string& filename, bool e
     if(spi)
         spi->slaveRegister(device, pin);
 
-    loadFromFile(device, filename, enable_debug);
+    flashFileFromDevice(device, filename, enable_debug);
 }
 
 int consoleInterface(const std::string& spiDevice, const std::string& config){
@@ -215,7 +216,7 @@ int consoleInterface(const std::string& spiDevice, const std::string& config){
         int choice = simpleInput(1, nrOfOptions);
         switch (choice) {
             case 1: {
-                loadFromFile(device, config);
+                flashFileFromDevice(device, config);
                 break;
             }
             case 2: {
@@ -302,7 +303,7 @@ void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     }
 }
 
-void loadFromFile(std::shared_ptr<NS_A4963::A4963>& device, const std::string& filename, bool enable_debug){
+void flashFileFromDevice(std::shared_ptr<NS_A4963::A4963> &device, const std::string &filename, bool enable_debug){
     using namespace nlohmann;
     using namespace NS_A4963;
 
