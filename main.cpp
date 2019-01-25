@@ -279,7 +279,7 @@ bool generateDefault(bool force, const std::string& filename){
 void setRegisterVal(std::shared_ptr<NS_A4963::A4963>& device){
     std::cout << "Enter the name of the register you want to set, or \"exit\" to cancel" << std::endl;
     std::string str;
-    NS_A4963::A4963RegisterNames mask;
+    NS_A4963::A4963RegisterNames mask{};
     while(true) {
         std::getline(std::cin,str);
         if (str == "exit") break;
