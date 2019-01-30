@@ -5,7 +5,7 @@
 #include <thread>
 #include "HIDevice.h"
 
-std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) {
+std::vector<uint8_t> usb::HIDevice::sendData(const std::vector<uint8_t>& data) noexcept {
     if (!isOpen)
         return {};
 

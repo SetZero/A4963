@@ -15,7 +15,7 @@ namespace usb {
     class LibUSBDevice {
     public:
         LibUSBDevice(const VendorID& vendorID, const DeviceID& deviceID, libusb_device *device, size_t usbID);
-        virtual ~LibUSBDevice();
+        virtual ~LibUSBDevice() noexcept;
         //There should always only be one device with a given device handle (and it should be managed by the device list)!
         LibUSBDevice(const LibUSBDevice &other) = delete;
         LibUSBDevice &operator=(const LibUSBDevice &other) = delete;
@@ -28,7 +28,7 @@ namespace usb {
         virtual std::vector<uint8_t> sendData(const std::vector<uint8_t>& data);
 
     protected:
-        void _closeDevice();
+        void _closeDevice() noexcept;
 
         VendorID vendorID;
         DeviceID deviceID;

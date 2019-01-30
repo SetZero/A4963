@@ -84,10 +84,10 @@ namespace NS_A4963 {
         json j;
     public:
         struct UnitInfo {
-            long double data;
-            char prefix;
-            std::string unit;
-            bool succsess;
+            long double data{};
+            char prefix{};
+            std::string unit{};
+            bool succsess{};
         };
 
         static UnitInfo parseData(const std::string& str);
@@ -101,9 +101,9 @@ namespace NS_A4963 {
     getType(const char prefix, const std::string &unit, Rep value) {
         auto prefixRatio = utils::getRatio(prefix);
         auto newValue = (value * prefixRatio.first * Period::den) / (prefixRatio.second * Period::num);
-        if (unit == "V") {
+        if (unit == CustomDataTypes::Electricity::Volt<Rep, Period>::abr_value) {
             return CustomDataTypes::Electricity::Volt<Rep, Period>{newValue};
-        } else if (unit == "Hz") {
+        } else if (unit == CustomDataTypes::Frequency::Hertz<Rep, Period>::abr_value) {
             return CustomDataTypes::Frequency::Hertz<Rep, Period>{newValue};
         } else if (unit == "s") {
             return std::chrono::duration<Rep, Period>{newValue};
@@ -122,7 +122,8 @@ namespace NS_A4963 {
     }
 
     template<typename T, A4963RegisterNames N>
-    static auto setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) {
+    static auto setIfPeriodic(A4963 &device, double data, const char prefix, const std::string &unit) -> std::optional<const T> {
+        static_assert(utils::is_periodic<T>::value);
         using Rep = typename utils::periodic_info<T>::rep;
         using Period = typename utils::periodic_info<T>::period;
         try {
@@ -134,10 +135,10 @@ namespace NS_A4963 {
             }
             return return_value;
         }
-        catch(std::exception& e){
+        catch(std::runtime_error& e){
             std::cerr << "Invalid Unit \"" << prefix << unit << "\" in register \"" << RegisterValues<N>::name <<
                         "\", did you mean \"" << utils::ratio_lookup<Period>::abr_value << utils::periodic_printable<T>::name << "\" ?" << std::endl;
-            return std::optional<const T>{};
+            return std::nullopt;//std::optional<const T>{};
         }
     }
 
@@ -153,7 +154,7 @@ namespace NS_A4963 {
     }
 
     template<A4963RegisterNames N = static_cast<A4963RegisterNames>(0)>
-    void setRuntime(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
+    void setRuntime(A4963 &device, [[maybe_unused]]  A4963RegisterNames toSet, const std::string& registerData) {
         using namespace utils::printable;
         if (toSet == N) {
             if constexpr(RegisterValues<N>::isRanged) {
@@ -177,7 +178,7 @@ namespace NS_A4963 {
                         if constexpr (std::is_arithmetic_v<type>) {
                             if (!unit.empty()) {
                                 std::cerr << "This register (" << RegisterValues<N>::name
-                                          << ") doesn't expect an unit. This might be an error!" << std::endl;
+                                          << ") doesn't expect a unit. This might be an error!" << std::endl;
                             }
                         } else {
                             if(unit != type::abr_value) {
@@ -213,17 +214,12 @@ namespace NS_A4963 {
         }
     }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
     template<>
-    inline void setRuntime<A4963RegisterNames::Run>(A4963 &device, A4963RegisterNames toSet, const std::string& registerData) {
+    inline void setRuntime<A4963RegisterNames::Run>(A4963 &device, [[maybe_unused]] A4963RegisterNames toSet, const std::string& registerData) {
         std::cout << "Set the register " << RegisterValues<A4963RegisterNames::Run>::name << " to " << registerData << std::endl;
         auto d = static_cast<typename RegisterValues<A4963RegisterNames::Run>::values>(std::atof(registerData.data()));
         device.set<A4963RegisterNames::Run>(d);
     }
-
-#pragma GCC diagnostic pop
 
     class RegisterStrings {
     private:

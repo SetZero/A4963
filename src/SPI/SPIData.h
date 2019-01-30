@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include "../utils/utils.h"
 #include <vector>
 #include <string>
@@ -26,8 +26,7 @@ namespace spi {
             return bswap_16(value);
         else if constexpr (utils::isEqual<t, uint32_t>::value || utils::isEqual<t, int32_t>::value)
             return bswap_32(value);
-        else return bswap_64(
-                    value);
+        else return bswap_64(value);
     }
 
     class SPI_Exception : public std::exception {
@@ -47,27 +46,27 @@ namespace spi {
         std::vector<uint8_t> mData = std::vector<uint8_t>();
     public:
 
-        Data() = default;
+        Data() noexcept = default;
 
         Data(const Data &) = default;
 
-        const std::vector<uint8_t> &data() { return mData; };
+        const std::vector<uint8_t> &data() noexcept { return mData; };
 
-        virtual void swap(Data &other) { std::swap(mData, other.mData); };
+        virtual void swap(Data &other) noexcept { std::swap(mData, other.mData); };
 
-        inline uint8_t operator[](const uint8_t &index) const {
+        inline uint8_t operator[](const uint8_t &index) const noexcept {
             return mData[index];
         }
 
-        inline uint8_t &operator[](const uint8_t &index) {
+        inline uint8_t &operator[](const uint8_t &index) noexcept {
             return mData[index];
         }
 
-        auto begin() const {
+        auto begin() const noexcept {
             return mData.begin();
         }
 
-        auto end() const {
+        auto end() const noexcept {
             return mData.end();
         }
 
@@ -100,7 +99,7 @@ namespace spi {
 
         inline uint8_t bytesUsed() const { return static_cast<uint8_t>(mData.size()); };
 
-        virtual ~Data() = default;
+        virtual ~Data() noexcept = default;
     };
 
     enum EndianMode {
@@ -110,19 +109,21 @@ namespace spi {
 
     template<unsigned char numberOfBytes = 1, EndianMode endian = little_endian, bool optimized = true>
     class SPIData : public Data {
-        std::shared_ptr<spdlog::logger> logger;
+        static inline std::shared_ptr<spdlog::logger> logger = nullptr;
         static_assert((numberOfBytes & (numberOfBytes - 1)) == 0, " the number of bytes have to be a pow of 2");
         static_assert(numberOfBytes != 0, " 0 means no data, so this is not possible");
     public:
 
-        SPIData() {
+        SPIData() noexcept(optimized) {
             mData.reserve(numberOfBytes);
-            if constexpr(!optimized)
-                logger = spdlog::basic_logger_mt("spidata"+std::to_string(numberOfBytes),"spidatalog.txt");
+            if constexpr(!optimized) {
+                if (logger == nullptr)
+                    logger = spdlog::basic_logger_mt("spidata" + std::to_string(numberOfBytes), "spidatalog.txt");
+            }
         };
 
         template<typename T, typename ... args>
-        explicit SPIData(T first, args ... ss) : SPIData() {
+        explicit SPIData(T first, args ... ss) noexcept(optimized) : SPIData() {
             static constexpr uint8_t bytesSum = (sizeof...(args) + 1) * sizeof(T);
             static_assert(utils::sameTypes<T, args...>(),
                           "there are different types in the constructor, this is not allowed");
@@ -140,11 +141,14 @@ namespace spi {
         }
 
         template<typename T>
-        explicit SPIData(const std::vector<T> &vec) : SPIData() {
+        explicit SPIData(const std::vector<T> &vec) noexcept(optimized) : SPIData() {
             static_assert(sizeof(T) <= numberOfBytes, "too much bytes for this data type");
             static_assert(std::is_integral<T>::value, "the data type have to be a integral type");
             if constexpr(!optimized)
-                if (vec.size() * sizeof(T) > numberOfBytes) throw SPI_Exception{"too much data for this data type"};
+                if (vec.size() * sizeof(T) > numberOfBytes) {
+                    logger->log(spdlog::level::err, " too much data in fill method, max: "+std::to_string(numberOfBytes)+" was: "+std::to_string(vec.size()));
+                    throw SPI_Exception{"too much data for this data type"};
+                }
             for (auto elem : vec) {
                 if constexpr(endian == big_endian)
                     for (uint8_t i = sizeof(T); i > 0; i--)
@@ -155,11 +159,11 @@ namespace spi {
             }
         }
 
-        explicit SPIData(const Data &other) : SPIData() {
-            mData.insert(std::end(mData), std::begin(other), std::end(other));
+        explicit SPIData(const Data &other) noexcept(optimized) : SPIData() {
+            mData.insert(std::end(mData), other.begin(), other.begin());
         }
 
-        void fill(const std::vector<uint8_t> &vec) override {
+        void fill(const std::vector<uint8_t> &vec) noexcept(optimized) override {
             if constexpr(!optimized) {
                 if (vec.size() > numberOfBytes) {
                     logger->log(spdlog::level::err, " too much data in fill method, max: "+std::to_string(numberOfBytes)+" was: "+std::to_string(vec.size()));
@@ -169,47 +173,55 @@ namespace spi {
             mData.assign(vec.begin(), vec.end());
         }
 
-        inline void swap(Data &other) override {
+        inline void swap(Data &other) noexcept override {
             other.swap(*this);
         }
 
-        std::unique_ptr<Data> create() const override {
+        std::unique_ptr<Data> create() const noexcept(optimized) override {
             return std::make_unique<SPIData>();
         }
 
-        explicit operator uint8_t() const override {
+        explicit operator uint8_t() const noexcept(optimized) override {
             if constexpr(!optimized) {
-                logger->log(spdlog::level::err, " data was too much to convert to uint8_t: "+std::to_string(mData.size()));
-                if (mData.size() > 1) throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
+                if (mData.size() > 1) {
+                    logger->log(spdlog::level::err, " data was too much to convert to uint8_t: "+std::to_string(mData.size()));
+                    throw SPI_Exception{"SPIData did not fit into a uint8_t type"};
+                }
             }
             return mData[0];
         }
 
-        explicit operator uint16_t() const override {
+        explicit operator uint16_t() const noexcept(optimized) override {
             if constexpr(!optimized) {
-                logger->log(spdlog::level::err,
-                            " data was too much to convert to uint16_t: " + std::to_string(mData.size()));
-                if (mData.size() > 2) throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
+                if (mData.size() > 2) {
+                    logger->log(spdlog::level::err,
+                                " data was too much to convert to uint16_t: " + std::to_string(mData.size()));
+                    throw SPI_Exception{"SPIData did not fit into a uint16_t type"};
+                }
             }
             uint16_t erg = (mData[1] << 8) | mData[0];
             return erg;
         }
 
-        explicit operator uint32_t() const override {
+        explicit operator uint32_t() const noexcept(optimized) override {
             if constexpr(!optimized) {
-                logger->log(spdlog::level::err,
-                            " data was too much to convert to uint32_t: " + std::to_string(mData.size()));
-                if (mData.size() > 4) throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
+                if (mData.size() > 4) {
+                    logger->log(spdlog::level::err,
+                                " data was too much to convert to uint32_t: " + std::to_string(mData.size()));
+                    throw SPI_Exception{"SPIData did not fit into a uint32_t type"};
+                }
             }
             uint32_t erg = (mData[3] << 24) | (mData[2] << 16) | (mData[1] << 8) | mData[0];
             return erg;
         }
 
-        explicit operator uint64_t() const override {
+        explicit operator uint64_t() const noexcept(optimized) override {
             if constexpr(!optimized) {
-                logger->log(spdlog::level::err,
-                            " data was too much to convert to uint64_t: " + std::to_string(mData.size()));
-                if (mData.size() > 8) throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
+                if (mData.size() > 8) {
+                    logger->log(spdlog::level::err,
+                                " data was too much to convert to uint64_t: " + std::to_string(mData.size()));
+                    throw SPI_Exception{"SPIData did not fit into a uint64_t type"};
+                }
             }
             uint64_t erg =
                     ((uint64_t) (mData[7]) << 56) | ((uint64_t) (mData[6]) << 48) | ((uint64_t) (mData[5]) << 40) |
@@ -218,10 +230,10 @@ namespace spi {
             return erg;
         }
 
-        ~SPIData() override = default;
+        ~SPIData() noexcept override = default;
     };
 
-    inline std::ostream &operator<<(std::ostream &os, const Data &data) {
+    [[nodiscard]] inline std::ostream &operator<<(std::ostream &os, const Data &data) noexcept {
         uint32_t i = 0;
         for (auto &elem: data) {
             os << "data " << i << ": " << std::to_string(elem) << " ";
@@ -231,41 +243,41 @@ namespace spi {
         return os;
     }
 
-    inline void swap(Data &lhs, Data &rhs) {
+    inline void swap(Data &lhs, Data &rhs) noexcept {
         lhs.swap(rhs);
     }
 
     inline namespace literals {
 
-        inline std::unique_ptr<Data> operator ""_spi8(unsigned long long element) {
+        [[nodiscard]] inline std::unique_ptr<Data> operator ""_spi8(unsigned long long element) {
             return std::make_unique<SPIData<>>(static_cast<uint8_t>(element));
         }
 
-        inline std::unique_ptr<Data> operator ""_spi16(unsigned long long element) {
+        [[nodiscard]] inline std::unique_ptr<Data> operator ""_spi16(unsigned long long element) {
             return std::make_unique<SPIData<2>>(static_cast<uint16_t>(element));
         }
 
-        inline std::unique_ptr<Data> operator ""_spi32(unsigned long long element) {
+        [[nodiscard]] inline std::unique_ptr<Data> operator ""_spi32(unsigned long long element) {
             return std::make_unique<SPIData<4>>(static_cast<uint32_t>(element));
         }
 
-        inline std::unique_ptr<Data> operator ""_spi64(unsigned long long element) {
+        [[nodiscard]] inline std::unique_ptr<Data> operator ""_spi64(unsigned long long element) {
             return std::make_unique<SPIData<8>>(static_cast<uint64_t>(element));
         }
 
-        inline std::unique_ptr<Data> operator ""_spi8_big(unsigned long long element) {
+        [[nodiscard]] inline std::unique_ptr<Data> operator ""_spi8_big(unsigned long long element) {
             return std::make_unique<SPIData<1, big_endian>>(static_cast<uint8_t>(element));
         }
 
-        inline std::unique_ptr<Data> operator ""_spi16_big(unsigned long long element) {
+        [[nodiscard]] inline std::unique_ptr<Data> operator ""_spi16_big(unsigned long long element) {
             return std::make_unique<SPIData<2, big_endian>>(static_cast<uint16_t>(element));
         }
 
-        inline std::unique_ptr<Data> operator ""_spi32_big(unsigned long long element) {
+        [[nodiscard]] inline std::unique_ptr<Data> operator ""_spi32_big(unsigned long long element) {
             return std::make_unique<SPIData<4, big_endian>>(static_cast<uint32_t>(element));
         }
 
-        inline std::unique_ptr<Data> operator ""_spi64_big(unsigned long long element) {
+        [[nodiscard]] inline std::unique_ptr<Data> operator ""_spi64_big(unsigned long long element) {
             return std::make_unique<SPIData<8, big_endian>>(static_cast<uint64_t>(element));
         }
     }

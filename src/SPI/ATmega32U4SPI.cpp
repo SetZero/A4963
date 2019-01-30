@@ -48,10 +48,7 @@ namespace spi {
         }
     }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-    gpio::gpioState ATmega32u4SPI::readGPIO(const gpio::GPIOPin& pin) const {
-#pragma GCC diagnostic pop
+    gpio::gpioState ATmega32u4SPI::readGPIO([[maybe_unused]] const gpio::GPIOPin& pin) const {
          //TODO: make this work
         return gpio::gpioState::off;
     }
