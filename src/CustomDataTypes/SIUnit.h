@@ -40,7 +40,7 @@ namespace CustomDataTypes {
             return derived_this();
         }
 
-        [[nodiscard]] constexpr Rep count() const noexcept { return internalRepresentation; }
+        [[nodiscard]] constexpr Rep count() const& noexcept { return internalRepresentation; }
 
         constexpr Derived operator+() const {
             return derived_this();
@@ -58,7 +58,7 @@ namespace CustomDataTypes {
         }
 
         template<typename Number, typename = std::enable_if_t<std::is_arithmetic<Number>::value>>
-        constexpr explicit operator Number() const {
+        constexpr explicit operator Number() const& {
             if (internalRepresentation < std::numeric_limits<Number>::max()) {
                 return count();
             } else {
@@ -67,12 +67,12 @@ namespace CustomDataTypes {
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr bool operator==(const D<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+        constexpr bool operator==(const D<oRep, std::ratio<oNum, oDenom>> &rhs) const& noexcept {
             return internalRepresentation == convert_value(rhs);
         }
 
         template<typename oRep, std::intmax_t oNum, std::intmax_t oDenom>
-        constexpr bool operator<(const D<oRep, std::ratio<oNum, oDenom>> &rhs) const {
+        constexpr bool operator<(const D<oRep, std::ratio<oNum, oDenom>> &rhs) const& noexcept {
             return internalRepresentation < convert_value(rhs);
         }
 

@@ -22,8 +22,10 @@ namespace usb {
         LibUSBDeviceList();
         virtual ~LibUSBDeviceList();
 
-        size_t size();
-        [[nodiscard]] const std::optional<std::shared_ptr<LibUSBDevice>> findDevice(const VendorID& vendorID, const DeviceID& deviceID) noexcept;
+        [[nodiscard]] size_t size() const& noexcept {
+            return mDevices.size();
+        }
+        [[nodiscard]] const std::optional<std::shared_ptr<LibUSBDevice>> findDevice(const VendorID& vendorID, const DeviceID& deviceID) const& noexcept;
 
 
         const const_iterator begin() const { return mDevices.begin(); }
