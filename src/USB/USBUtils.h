@@ -14,7 +14,7 @@ namespace usb {
 
     class DeviceID {
     public:
-        explicit DeviceID(uint16_t deviceID);
+        explicit DeviceID(uint16_t deviceID) noexcept;
         uint16_t getDeviceID() const;
         bool operator==(const DeviceID &rhs) const;
         bool operator!=(const DeviceID &rhs) const;
@@ -25,10 +25,13 @@ namespace usb {
 
     class VendorID {
     public:
-        explicit VendorID(uint16_t vendorID);
-        uint16_t getVendorID() const;
+        explicit VendorID(uint16_t vendorID) noexcept;
         bool operator==(const VendorID &rhs) const;
         bool operator!=(const VendorID &rhs) const;
+
+        [[nodiscard]] constexpr uint16_t getVendorID() const noexcept {
+            return vendorID;
+        }
 
     private:
         uint16_t vendorID;

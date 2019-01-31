@@ -4,7 +4,7 @@
 #include "USBUtils.h"
 
 namespace usb {
-    DeviceID::DeviceID(uint16_t deviceID) : deviceID(deviceID) {}
+    DeviceID::DeviceID(uint16_t deviceID) noexcept : deviceID(deviceID) {}
 
     uint16_t DeviceID::getDeviceID() const {
         return deviceID;
@@ -18,11 +18,7 @@ namespace usb {
         return !(rhs == *this);
     }
 
-    VendorID::VendorID(uint16_t vendorID) : vendorID(vendorID) {}
-
-    uint16_t VendorID::getVendorID() const {
-        return vendorID;
-    }
+    VendorID::VendorID(uint16_t vendorID) noexcept : vendorID(vendorID) {}
 
     bool VendorID::operator==(const VendorID &rhs) const {
         return vendorID == rhs.vendorID;

@@ -26,9 +26,9 @@ int open_device(const char *device)
     /*use udev or other similar mechanisms to get the system path "/dev/hidraw1" */
     fd = open(device, O_RDWR);
 
-    if (fd < 0) {
-        perror("\n\tUnable to open device");
-    }
+    //if (fd < 0) {
+      //  perror("\n\tUnable to open device");
+    //}
     return fd;
 }
 

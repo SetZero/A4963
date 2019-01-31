@@ -1,6 +1,6 @@
-SET(LIBNAME usb)
+SET(LIBNAME usbb)
 
 file(GLOB SOURCE_FILES *.cpp)
 file(GLOB HEADER_FILES *.h)
 
-add_library(${LIBNAME} STATIC ${SOURCE_FILES} ${HEADER_FILES} USBUtils.h USBUtils.cpp DevicesList.cpp)
+add_library(${LIBNAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
